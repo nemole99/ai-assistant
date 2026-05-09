@@ -7,19 +7,25 @@
       "packages/*"
     ],
     "catalog": {
-      "dotenv": "^17.2.2",
-      "zod": "^4.1.13",
-      "typescript": "^6",
+      "dotenv": "^17.4.2",
+      "zod": "^4.4.3",
+      "typescript": "^6.0.3",
       "@types/bun": "^1.3.4",
       "hono": "^4.8.2",
-      "@orpc/server": "^1.13.14",
-      "@orpc/openapi": "^1.13.14",
-      "@orpc/zod": "^1.13.14",
+      "@orpc/server": "^1.14.2",
+      "@orpc/openapi": "^1.14.2",
+      "@orpc/zod": "^1.14.2",
       "better-auth": "1.6.9",
       "ai": "^6.0.3",
       "next-themes": "^0.4.6",
-      "@orpc/client": "^1.13.14",
-      "@types/react-dom": "^19.2.3"
+      "@orpc/client": "^1.14.2",
+      "@types/react-dom": "^19.2.3",
+      "lucide-react": "^1.14.0",
+      "react": "^19.2.6",
+      "react-dom": "^19.2.6",
+      "sonner": "^2.0.7",
+      "@types/react": "^19.2.14",
+      "tailwindcss": "^4.3.0"
     }
   },
   "type": "module",
@@ -48,8 +54,8 @@
     "@types/bun": "catalog:",
     "@workspace/config": "workspace:*",
     "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0",
-    "turbo": "^2.8.12",
+    "oxlint": "^1.63.0",
+    "turbo": "^2.9.12",
     "typescript": "catalog:"
   },
   "packageManager": "bun@1.3.13"
