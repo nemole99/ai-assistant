@@ -1,5 +1,13 @@
 import { db } from "@workspace/db";
 import { department, employee, user } from "@workspace/db/schema/auth";
+import {
+  insertDepartmentSchema,
+  updateDepartmentSchema,
+  selectDepartmentSchema,
+  insertEmployeeSchema,
+  updateEmployeeSchema,
+  selectEmployeeSchema,
+} from "@workspace/db/schema/validation";
 import { env } from "@workspace/env/server";
 import { auth } from "@workspace/auth";
 import { eq } from "drizzle-orm";
@@ -10,35 +18,28 @@ import { adminProcedure, managerProcedure } from "../index";
 // --- Department ---
 
 export const departmentRouter = {
-  list: managerProcedure.handler(async () => {
-    return db.select().from(department);
-  }),
+  list: managerProcedure
+    .output(z.array(selectDepartmentSchema))
+    .handler(async () => {
+      return db.select().from(department);
+    }),
 
   create: adminProcedure
-    .input(
-      z.object({
-        name: z.string().min(1),
-        description: z.string().optional(),
-      }),
-    )
+    .input(insertDepartmentSchema)
+    .output(selectDepartmentSchema)
     .handler(async ({ input }) => {
       const id = crypto.randomUUID();
       const [created] = await db
         .insert(department)
-        .values({ id, name: input.name, description: input.description ?? null })
+        .values({ id, ...input })
         .returning();
+      if (!created) throw new Error("Failed to create department");
       return created;
     }),
 
   update: adminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().min(1).optional(),
-        description: z.string().nullable().optional(),
-        managerId: z.string().nullable().optional(),
-      }),
-    )
+    .input(updateDepartmentSchema.extend({ id: z.string() }))
+    .output(selectDepartmentSchema)
     .handler(async ({ input }) => {
       const { id, ...data } = input;
       const [updated] = await db
@@ -46,6 +47,7 @@ export const departmentRouter = {
         .set(data)
         .where(eq(department.id, id))
         .returning();
+      if (!updated) throw new Error("Department not found");
       return updated;
     }),
 };
@@ -53,52 +55,28 @@ export const departmentRouter = {
 // --- Employee ---
 
 export const employeeRouter = {
-  list: managerProcedure.handler(async () => {
-    return db.select().from(employee);
-  }),
+  list: managerProcedure
+    .output(z.array(selectEmployeeSchema))
+    .handler(async () => {
+      return db.select().from(employee);
+    }),
 
   create: adminProcedure
-    .input(
-      z.object({
-        employeeCode: z.string().min(1),
-        fullName: z.string().min(1),
-        email: z.string().email(),
-        phone: z.string().optional(),
-        position: z.string().min(1),
-        departmentId: z.string(),
-        joinDate: z.string(), // ISO date string YYYY-MM-DD
-      }),
-    )
+    .input(insertEmployeeSchema)
+    .output(selectEmployeeSchema)
     .handler(async ({ input }) => {
       const id = crypto.randomUUID();
       const [created] = await db
         .insert(employee)
-        .values({
-          id,
-          employeeCode: input.employeeCode,
-          fullName: input.fullName,
-          email: input.email,
-          phone: input.phone ?? null,
-          position: input.position,
-          departmentId: input.departmentId,
-          joinDate: input.joinDate,
-          status: "ACTIVE",
-        })
+        .values({ id, status: "ACTIVE", ...input })
         .returning();
+      if (!created) throw new Error("Failed to create employee");
       return created;
     }),
 
   update: adminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        fullName: z.string().min(1).optional(),
-        phone: z.string().nullable().optional(),
-        position: z.string().min(1).optional(),
-        departmentId: z.string().optional(),
-        status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
-      }),
-    )
+    .input(updateEmployeeSchema.extend({ id: z.string() }))
+    .output(selectEmployeeSchema)
     .handler(async ({ input }) => {
       const { id, ...data } = input;
       const [updated] = await db
@@ -106,12 +84,13 @@ export const employeeRouter = {
         .set(data)
         .where(eq(employee.id, id))
         .returning();
+      if (!updated) throw new Error("Employee not found");
       return updated;
     }),
 
-  // Create a User account for an existing Employee
   createAccount: adminProcedure
     .input(z.object({ employeeId: z.string() }))
+    .output(z.object({ userId: z.string() }))
     .handler(async ({ input }) => {
       const [emp] = await db
         .select()
@@ -132,13 +111,11 @@ export const employeeRouter = {
 
       if (!result?.user?.id) throw new Error("Failed to create user account");
 
-      // Set role to EMPLOYEE and mustChangePassword
       await db
         .update(user)
         .set({ role: "EMPLOYEE", mustChangePassword: true })
         .where(eq(user.id, result.user.id));
 
-      // Link employee to user
       await db
         .update(employee)
         .set({ userId: result.user.id })
@@ -147,3 +124,4 @@ export const employeeRouter = {
       return { userId: result.user.id };
     }),
 };
+
