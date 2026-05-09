@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, pgEnum, date, index } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,6 +7,10 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  role: text("role", { enum: ["ADMIN", "MANAGER", "EMPLOYEE"] })
+    .default("EMPLOYEE")
+    .notNull(),
+  mustChangePassword: boolean("must_change_password").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -73,9 +77,13 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
+  employee: one(employee, {
+    fields: [user.id],
+    references: [employee.userId],
+  }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -89,5 +97,73 @@ export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id],
+  }),
+}));
+
+// --- Organization ---
+
+export const employeeStatusEnum = pgEnum("employee_status", ["ACTIVE", "INACTIVE"]);
+
+export const department = pgTable("department", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  managerId: text("manager_id"), // FK to employee — circular ref resolved via relations
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const employee = pgTable(
+  "employee",
+  {
+    id: text("id").primaryKey(),
+    employeeCode: text("employee_code").notNull().unique(),
+    fullName: text("full_name").notNull(),
+    email: text("email").notNull().unique(),
+    phone: text("phone"),
+    position: text("position").notNull(),
+    departmentId: text("department_id")
+      .notNull()
+      .references(() => department.id),
+    userId: text("user_id")
+      .unique()
+      .references(() => user.id, { onDelete: "set null" }),
+    joinDate: date("join_date").notNull(),
+    status: employeeStatusEnum("status").default("ACTIVE").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("employee_departmentId_idx").on(table.departmentId),
+    index("employee_userId_idx").on(table.userId),
+  ],
+);
+
+export const departmentRelations = relations(department, ({ many, one }) => ({
+  employees: many(employee),
+  manager: one(employee, {
+    fields: [department.managerId],
+    references: [employee.id],
+    relationName: "department_manager",
+  }),
+}));
+
+export const employeeRelations = relations(employee, ({ one, many }) => ({
+  department: one(department, {
+    fields: [employee.departmentId],
+    references: [department.id],
+  }),
+  user: one(user, {
+    fields: [employee.userId],
+    references: [user.id],
+  }),
+  managedDepartments: many(department, {
+    relationName: "department_manager",
   }),
 }));

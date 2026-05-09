@@ -26,6 +26,22 @@ export function createAuth() {
         httpOnly: true,
       },
     },
+    user: {
+      additionalFields: {
+        role: {
+          type: "string",
+          required: true,
+          defaultValue: "EMPLOYEE",
+          input: false, // not settable by user during sign-up
+        },
+        mustChangePassword: {
+          type: "boolean",
+          required: true,
+          defaultValue: false,
+          input: false,
+        },
+      },
+    },
     plugins: [],
   });
 }
