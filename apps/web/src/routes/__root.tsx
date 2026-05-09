@@ -10,13 +10,11 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { AppRouterClient } from "@workspace/api/routers/index";
 import { Toaster } from "@workspace/ui/components/sonner";
-import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { useState } from "react";
 
-import Header from "@/components/header";
-import { ThemeProvider } from "@/components/theme-provider";
 import { link, orpc } from "@/utils/orpc";
 
+import { NavigationProgress } from "@/components/navigation-progress";
 import "../index.css";
 
 export interface RouterAppContext {
@@ -52,20 +50,9 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        disableTransitionOnChange
-        storageKey="vite-ui-theme"
-      >
-        <TooltipProvider>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            <Outlet />
-          </div>
-          <Toaster richColors />
-        </TooltipProvider>
-      </ThemeProvider>
+      <NavigationProgress />
+        <Outlet />
+        <Toaster richColors />
       <TanStackRouterDevtools position="bottom-left" />
       <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
     </>
