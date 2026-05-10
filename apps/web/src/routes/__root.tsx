@@ -12,7 +12,7 @@ import type { AppRouterClient } from "@workspace/api/routers/index";
 import { Toaster } from "@workspace/ui/components/sonner";
 import { useState } from "react";
 
-import { link, orpc } from "@/utils/orpc";
+import { link, orpc } from "@/lib/orpc";
 
 import { NavigationProgress } from "@/components/navigation-progress";
 import "../index.css";

@@ -1,3 +1,4 @@
+import { sleep } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -7,7 +8,7 @@ import {
   FieldLabel,
 } from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
-import { cn, sleep } from '@workspace/ui/lib/utils'
+import { cn } from '@workspace/ui/lib/utils'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'

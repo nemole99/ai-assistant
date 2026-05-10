@@ -8,7 +8,7 @@ import Loader from "./components/loader";
 import { DirectionProvider } from "./context/direction-provider";
 import { ThemeProvider } from "./context/theme-provider";
 import { routeTree } from "./routeTree.gen";
-import { orpc, queryClient } from "./utils/orpc";
+import { orpc, queryClient } from "./lib/orpc";
 
 const router = createRouter({
   routeTree,

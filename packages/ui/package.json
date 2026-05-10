@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@fontsource-variable/noto-sans": "^5.2.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -39,6 +40,7 @@
     "@types/react-dom": "^19.2.3",
     "@workspace/config": "workspace:*",
     "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.11"
   }
 }
