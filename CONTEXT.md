@@ -27,6 +27,8 @@ _Avoid_: Permission, Access Level
 - Một **Employee** thuộc đúng một **Department** (qua `departmentId`)
 - Một **Department** có tối đa một **Manager** (Employee, qua `managerId`, nullable)
 - **Admin** là User với role `ADMIN`, không nhất thiết phải có Employee record
+- Một **User** có thể có nhiều **AIProvider** (tối đa 1 per provider type)
+- Một **AIModelAssignment** liên kết với đúng một **User** và một **AIProvider** (tối đa 1 per ModelPurpose)
 
 ## Example dialogue
 
@@ -36,6 +38,27 @@ _Avoid_: Permission, Access Level
 > **Dev:** "Manager của department có phải có role MANAGER không?"
 > **Domain expert:** "Không nhất thiết — `managerId` chỉ trỏ vào Employee. Role kiểm soát quyền trong app, còn ai là manager của department là dữ liệu tổ chức."
 
+**AIProvider**:
+Credential của một User với một AI service bên ngoài (GitHub Copilot, OpenAI, Google, Anthropic). Lưu encrypted token/API key. Mỗi User có tối đa một AIProvider per provider type.
+_Avoid_: Integration, Connection, Account
+
+**AIModelAssignment**:
+Mapping từ một mục đích AI (`chat`, `embedding`, `vision`) tới một model cụ thể và AIProvider của User đó. Mỗi User có tối đa một AIModelAssignment per purpose.
+_Avoid_: ModelConfig, ModelPreference
+
+**ModelPurpose**:
+Mục đích sử dụng model AI. Có 3 giá trị: `chat`, `embedding`, `vision`.
+_Avoid_: ModelType, ModelRole
+
+## Relationships
+
+- Một **User** có thể có nhiều **AIProvider** (tối đa 1 per provider type)
+- Một **AIProvider** liên kết với đúng một **User**
+- Một **AIModelAssignment** liên kết với đúng một **User** và một **AIProvider**
+- Một **User** có tối đa một **AIModelAssignment** per **ModelPurpose**
+
 ## Flagged ambiguities
 
 - "Account" được dùng lẫn lộn với User và Employee — đã resolve: dùng **User** cho tài khoản đăng nhập, **Employee** cho hồ sơ nhân sự.
+- "Connect GitHub" — không phải đăng nhập bằng GitHub (không thay OAuth login). Là liên kết GitHub account để lấy Copilot API access. Dùng **GitHub Device Flow**, không phải OAuth redirect.
+- "Active provider" — không có khái niệm 1 provider active toàn cục. Thay vào đó là **AIModelAssignment**: mỗi purpose (chat/embedding/vision) chỉ ra provider + model đang được dùng.

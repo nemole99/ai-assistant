@@ -1,5 +1,15 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, pgEnum, date, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  pgEnum,
+  date,
+  index,
+  jsonb,
+  unique,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -84,6 +94,7 @@ export const userRelations = relations(user, ({ many, one }) => ({
     fields: [user.id],
     references: [employee.userId],
   }),
+  aiProviders: many(aiProvider),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -102,7 +113,10 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 // --- Organization ---
 
-export const employeeStatusEnum = pgEnum("employee_status", ["ACTIVE", "INACTIVE"]);
+export const employeeStatusEnum = pgEnum("employee_status", [
+  "ACTIVE",
+  "INACTIVE",
+]);
 
 export const department = pgTable("department", {
   id: text("id").primaryKey(),
@@ -167,3 +181,95 @@ export const employeeRelations = relations(employee, ({ one, many }) => ({
     relationName: "department_manager",
   }),
 }));
+
+// --- AI Providers ---
+
+export const aiProviderTypeEnum = pgEnum("ai_provider_type", [
+  "github_copilot",
+  "openai",
+  "google",
+  "anthropic",
+]);
+
+export const modelPurposeEnum = pgEnum("model_purpose", [
+  "chat",
+  "embedding",
+  "vision",
+]);
+
+export const aiProvider = pgTable(
+  "ai_provider",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    provider: aiProviderTypeEnum("provider").notNull(),
+    encryptedToken: text("encrypted_token").notNull(),
+    metadata: jsonb("metadata").$type<{
+      username?: string;
+      avatarUrl?: string;
+    }>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique("ai_provider_userId_provider_unique").on(
+      table.userId,
+      table.provider,
+    ),
+    index("ai_provider_userId_idx").on(table.userId),
+  ],
+);
+
+export const aiModelAssignment = pgTable(
+  "ai_model_assignment",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    providerId: text("provider_id")
+      .notNull()
+      .references(() => aiProvider.id, { onDelete: "cascade" }),
+    purpose: modelPurposeEnum("purpose").notNull(),
+    model: text("model").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique("ai_model_assignment_userId_purpose_unique").on(
+      table.userId,
+      table.purpose,
+    ),
+    index("ai_model_assignment_userId_idx").on(table.userId),
+  ],
+);
+
+export const aiProviderRelations = relations(aiProvider, ({ one, many }) => ({
+  user: one(user, {
+    fields: [aiProvider.userId],
+    references: [user.id],
+  }),
+  modelAssignments: many(aiModelAssignment),
+}));
+
+export const aiModelAssignmentRelations = relations(
+  aiModelAssignment,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [aiModelAssignment.userId],
+      references: [user.id],
+    }),
+    provider: one(aiProvider, {
+      fields: [aiModelAssignment.providerId],
+      references: [aiProvider.id],
+    }),
+  }),
+);

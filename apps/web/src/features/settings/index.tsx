@@ -1,7 +1,7 @@
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Outlet } from "@tanstack/react-router";
 import { Separator } from "@workspace/ui/components/separator";
-import { Bell, UserCog, Wrench } from "lucide-react";
+import { Bot, UserCog } from "lucide-react";
 import { SidebarNav } from "./components/sidebar-nav";
 
 const sidebarNavItems = [
@@ -11,14 +11,9 @@ const sidebarNavItems = [
     icon: <UserCog size={18} />,
   },
   {
-    title: "Account",
-    href: "/settings/account",
-    icon: <Wrench size={18} />,
-  },
-  {
-    title: "Notifications",
-    href: "/settings/notifications",
-    icon: <Bell size={18} />,
+    title: "AI Providers",
+    href: "/settings/ai-providers",
+    icon: <Bot size={18} />,
   },
 ];
 
@@ -26,9 +21,11 @@ export function Settings() {
   return (
     <ContentLayout>
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+          Settings
+        </h1>
         <p className="text-muted-foreground">
-          Manage your account settings and set e-mail preferences.
+          Manage your profile and AI provider connections.
         </p>
       </div>
       <Separator className="my-4 lg:my-6" />

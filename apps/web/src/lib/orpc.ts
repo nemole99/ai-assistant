@@ -7,6 +7,11 @@ import { env } from "@workspace/env/web";
 import { toast } from "sonner";
 
 export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+    },
+  },
   queryCache: new QueryCache({
     onError: (error, query) => {
       toast.error(`Error: ${error.message}`, {
