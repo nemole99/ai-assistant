@@ -1,14 +1,3 @@
-import { z } from "zod";
+import type { AppRouterClient } from "@workspace/api/routers/index";
 
-const departmentSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  managerId: z.string().nullable(),
-  managerName: z.string().nullable(),
-  employeeCount: z.number(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-});
-
-export type Department = z.infer<typeof departmentSchema>;
+export type Department = Awaited<ReturnType<AppRouterClient["department"]["list"]>>[number];

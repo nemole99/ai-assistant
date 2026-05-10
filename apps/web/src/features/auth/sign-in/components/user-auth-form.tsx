@@ -5,12 +5,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-  FieldGroup,
-} from "@workspace/ui/components/field";
+import { Field, FieldLabel, FieldError, FieldGroup } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 
@@ -28,11 +23,7 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
   redirectTo?: string;
 }
 
-export function UserAuthForm({
-  className,
-  redirectTo,
-  ...props
-}: UserAuthFormProps) {
+export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormProps) {
   const navigate = useNavigate();
 
   const form = useForm({
@@ -78,8 +69,7 @@ export function UserAuthForm({
         <form.Field
           name="email"
           children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
@@ -101,8 +91,7 @@ export function UserAuthForm({
         <form.Field
           name="password"
           children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field className="relative" data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>

@@ -23,8 +23,7 @@ vi.mock("@/lib/auth-client", () => ({
 }));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@tanstack/react-router")>();
+  const actual = await importOriginal<typeof import("@tanstack/react-router")>();
   return {
     ...actual,
     useNavigate: () => navigate,
@@ -60,12 +59,8 @@ describe("UserAuthForm", () => {
     it("shows validation messages when submitting empty form", async () => {
       await userEvent.click(signInButton);
 
-      await expect
-        .element(screen.getByText(FORM_MESSAGES.emailEmpty))
-        .toBeInTheDocument();
-      await expect
-        .element(screen.getByText(FORM_MESSAGES.passwordEmpty))
-        .toBeInTheDocument();
+      await expect.element(screen.getByText(FORM_MESSAGES.emailEmpty)).toBeInTheDocument();
+      await expect.element(screen.getByText(FORM_MESSAGES.passwordEmpty)).toBeInTheDocument();
     });
 
     it("authenticates and navigates to default route on success", async () => {
@@ -75,18 +70,14 @@ describe("UserAuthForm", () => {
       await userEvent.click(signInButton);
 
       await vi.waitFor(() => expect(signInEmail).toHaveBeenCalledOnce());
-      await vi.waitFor(() =>
-        expect(navigate).toHaveBeenCalledWith({ to: "/", replace: true }),
-      );
+      await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: "/", replace: true }));
     });
   });
 
   it("navigates to redirectTo when provided", async () => {
     vi.clearAllMocks();
 
-    const { getByRole, getByLabelText } = await render(
-      <UserAuthForm redirectTo="/settings" />,
-    );
+    const { getByRole, getByLabelText } = await render(<UserAuthForm redirectTo="/settings" />);
 
     await userEvent.fill(getByRole("textbox", { name: /Email/i }), "a@b.com");
     await userEvent.fill(getByLabelText("Password"), "1234567");

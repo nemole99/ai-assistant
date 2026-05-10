@@ -18,8 +18,8 @@ export function SignIn() {
         <CardHeader>
           <CardTitle className="text-lg tracking-tight">Sign in</CardTitle>
           <CardDescription>
-            Enter your email and password below to log into{" "}
-            <br className="max-sm:hidden" /> your account.
+            Enter your email and password below to log into <br className="max-sm:hidden" /> your
+            account.
           </CardDescription>
         </CardHeader>
         <CardContent>

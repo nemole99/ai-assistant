@@ -11,6 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@workspace/ui/lib/utils";
 import { type NavigateFn, useTableUrlState } from "@/hooks/use-table-url-state";
 import {
@@ -22,7 +23,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
-import { departmentOptions } from "../data/data";
+import { orpc } from "@/lib/orpc";
 import { type Employee } from "../data/schema";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { employeesColumns as columns } from "./employees-columns";
@@ -37,6 +38,8 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const { data: departments = [] } = useQuery(orpc.department.list.queryOptions());
 
   const {
     columnFilters,
@@ -86,12 +89,7 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
   }, [table, ensurePageInRange]);
 
   return (
-    <div
-      className={cn(
-        'max-sm:has-[div[role="toolbar"]]:mb-16',
-        "flex flex-1 flex-col gap-4",
-      )}
-    >
+    <div className={cn('max-sm:has-[div[role="toolbar"]]:mb-16', "flex flex-1 flex-col gap-4")}>
       <DataTableToolbar
         table={table}
         searchPlaceholder="Filter employees..."
@@ -108,9 +106,9 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
           {
             columnId: "departmentName",
             title: "Department",
-            options: departmentOptions.map(({ label, value }) => ({
-              label,
-              value,
+            options: departments.map(({ id, name }) => ({
+              label: name,
+              value: id,
             })),
           },
         ]}
@@ -133,10 +131,7 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
                     >
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
                 })}
@@ -160,20 +155,14 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
                         cell.column.columnDef.meta?.tdClassName,
                       )}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>

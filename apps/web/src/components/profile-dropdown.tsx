@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import useDialogState from "@/hooks/use-dialog-state";
 import { authClient } from "@/lib/auth-client";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -42,11 +38,7 @@ export function ProfileDropdown() {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger
           render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="relative size-8! rounded-full"
-            />
+            <Button variant="ghost" size="icon-sm" className="relative size-8! rounded-full" />
           }
         >
           <Avatar className="h-8 w-8">
@@ -59,9 +51,7 @@ export function ProfileDropdown() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1.5">
                 <p className="text-sm leading-none font-medium">{user.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user.email}
-                </p>
+                <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
               </div>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
@@ -75,9 +65,7 @@ export function ProfileDropdown() {
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={() => setOpen(true)}>
             Sign out
-            <DropdownMenuShortcut className="text-current">
-              ⇧⌘Q
-            </DropdownMenuShortcut>
+            <DropdownMenuShortcut className="text-current">⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

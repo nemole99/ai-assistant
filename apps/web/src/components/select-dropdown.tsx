@@ -1,4 +1,3 @@
-import { Loader } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import {
   Select,
@@ -7,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
 
 type SelectDropdownProps = {
   onValueChange?: (value: string) => void;
@@ -38,7 +38,7 @@ export function SelectDropdown({
     ? { value: defaultValue, onValueChange: handleValueChange }
     : { defaultValue, onValueChange: handleValueChange };
   return (
-    <Select {...defaultState}>
+    <Select items={items} {...defaultState}>
       <SelectTrigger disabled={disabled} className={cn(className)}>
         <SelectValue placeholder={placeholder ?? "Select"} />
       </SelectTrigger>
@@ -46,7 +46,7 @@ export function SelectDropdown({
         {isPending ? (
           <SelectItem disabled value="loading" className="h-14">
             <div className="flex items-center justify-center gap-2">
-              <Loader className="h-5 w-5 animate-spin" />
+              <Spinner className="h-5 w-5 animate-spin" />
               {"  "}
               Loading...
             </div>

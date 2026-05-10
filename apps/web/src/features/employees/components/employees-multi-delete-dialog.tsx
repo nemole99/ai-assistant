@@ -3,33 +3,45 @@
 import { useState } from "react";
 import { type Table } from "@tanstack/react-table";
 import { AlertTriangle } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
+import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { sleep } from "@/lib/utils";
+import { orpc } from "@/lib/orpc";
+import { type Employee } from "../data/schema";
 
-type EmployeesMultiDeleteDialogProps<TData> = {
+type EmployeesMultiDeleteDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  table: Table<TData>;
+  table: Table<Employee>;
 };
 
 const CONFIRM_WORD = "DELETE";
 
-export function EmployeesMultiDeleteDialog<TData>({
+export function EmployeesMultiDeleteDialog({
   open,
   onOpenChange,
   table,
-}: EmployeesMultiDeleteDialogProps<TData>) {
+}: EmployeesMultiDeleteDialogProps) {
   const [value, setValue] = useState("");
+  const queryClient = useQueryClient();
 
   const selectedRows = table.getFilteredSelectedRowModel().rows;
+
+  const bulkDeleteMutation = useMutation(
+    orpc.employee.bulkDelete.mutationOptions({
+      onSuccess: ({ count }) => {
+        queryClient.invalidateQueries(orpc.employee.list.queryOptions());
+        toast.success(`Deleted ${count} ${count === 1 ? "employee" : "employees"} successfully.`);
+        setValue("");
+        table.resetRowSelection();
+        onOpenChange(false);
+      },
+      onError: (err) => toast.error(err.message),
+    }),
+  );
 
   const handleDelete = () => {
     if (value.trim() !== CONFIRM_WORD) {
@@ -37,17 +49,8 @@ export function EmployeesMultiDeleteDialog<TData>({
       return;
     }
 
-    onOpenChange(false);
-
-    toast.promise(sleep(2000), {
-      loading: "Deleting employees...",
-      success: () => {
-        setValue("");
-        table.resetRowSelection();
-        return `Deleted ${selectedRows.length} ${selectedRows.length > 1 ? "employees" : "employee"}`;
-      },
-      error: "Error",
-    });
+    const ids = selectedRows.map((row) => row.original.id);
+    bulkDeleteMutation.mutate({ ids });
   };
 
   return (
@@ -55,15 +58,11 @@ export function EmployeesMultiDeleteDialog<TData>({
       open={open}
       onOpenChange={onOpenChange}
       form="employees-multi-delete-form"
-      disabled={value.trim() !== CONFIRM_WORD}
+      disabled={value.trim() !== CONFIRM_WORD || bulkDeleteMutation.isPending}
       title={
         <span className="text-destructive">
-          <AlertTriangle
-            className="me-1 inline-block stroke-destructive"
-            size={18}
-          />{" "}
-          Delete {selectedRows.length}{" "}
-          {selectedRows.length > 1 ? "employees" : "employee"}
+          <AlertTriangle className="me-1 inline-block stroke-destructive" size={18} /> Delete{" "}
+          {selectedRows.length} {selectedRows.length > 1 ? "employees" : "employee"}
         </span>
       }
       desc={

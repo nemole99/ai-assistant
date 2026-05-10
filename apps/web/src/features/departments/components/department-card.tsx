@@ -35,9 +35,7 @@ export function DepartmentCard({ department }: DepartmentCardProps) {
       </CardHeader>
       <CardContent className="flex-1">
         {department.description && (
-          <p className="text-muted-foreground text-sm">
-            {department.description}
-          </p>
+          <p className="text-muted-foreground text-sm">{department.description}</p>
         )}
       </CardContent>
       <CardFooter className="gap-2">

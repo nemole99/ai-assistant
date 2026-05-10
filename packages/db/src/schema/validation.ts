@@ -20,13 +20,18 @@ export const updateDepartmentSchema = insertDepartmentSchema.partial();
 // --- Employee ---
 
 export const selectEmployeeSchema = createSelectSchema(employee);
-export const insertEmployeeSchema = createInsertSchema(employee).omit({
-  id: true,
-  userId: true,
-  status: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const insertEmployeeSchema = createInsertSchema(employee)
+  .omit({
+    id: true,
+    userId: true,
+    status: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    employeeCode: createInsertSchema(employee).shape.employeeCode.optional(),
+    joinDate: createInsertSchema(employee).shape.joinDate.optional(),
+  });
 export const updateEmployeeSchema = insertEmployeeSchema
   .omit({ employeeCode: true })
   .partial()

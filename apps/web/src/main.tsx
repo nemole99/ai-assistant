@@ -1,14 +1,13 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import ReactDOM from "react-dom/client";
-
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { StrictMode } from "react";
-import Loader from "./components/loader";
+import ReactDOM from "react-dom/client";
+import { Loader } from "./components/loader";
 import { DirectionProvider } from "./context/direction-provider";
 import { ThemeProvider } from "./context/theme-provider";
-import { routeTree } from "./routeTree.gen";
 import { orpc, queryClient } from "./lib/orpc";
+import { routeTree } from "./routeTree.gen";
 
 const router = createRouter({
   routeTree,

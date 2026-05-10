@@ -1,23 +1,17 @@
-import { useState } from "react";
-import { type Table } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
 import { DataTableBulkActions as BulkActionsToolbar } from "@/components/data-table";
-import { type Employee } from "../data/schema";
+import { type Table } from "@tanstack/react-table";
+import { Button } from "@workspace/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
 import { EmployeesMultiDeleteDialog } from "./employees-multi-delete-dialog";
+import { type Employee } from "../data/schema";
 
-type DataTableBulkActionsProps<TData> = {
-  table: Table<TData>;
+type DataTableBulkActionsProps = {
+  table: Table<Employee>;
 };
 
-export function DataTableBulkActions<TData>({
-  table,
-}: DataTableBulkActionsProps<TData>) {
+export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const _selectedRows = table.getFilteredSelectedRowModel().rows;
 
