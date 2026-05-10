@@ -1,9 +1,7 @@
-import * as React from 'react'
-import { Check, PlusCircle } from 'lucide-react'
 import { type Column } from '@tanstack/react-table'
-import { cn } from '@workspace/ui/lib/utils'
 import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
+import { Checkbox } from '@workspace/ui/components/checkbox'
 import {
   Command,
   CommandEmpty,
@@ -18,7 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@workspace/ui/components/popover'
-import { Separator } from '@workspace/ui/components/separator'
+import { PlusCircle } from 'lucide-react'
+import * as React from 'react'
 
 type DataTableFacetedFilterProps<TData, TValue> = {
   column?: Column<TData, TValue>
@@ -49,7 +48,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         {title}
         {selectedValues?.size > 0 && (
           <>
-            <Separator orientation='vertical' className='mx-2 h-4' />
+            <div className='mx-0.5 h-4 w-px shrink-0 self-center bg-border' />
             <Badge
               variant='secondary'
               className='rounded-sm px-1 font-normal lg:hidden'
@@ -92,6 +91,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                 return (
                   <CommandItem
                     key={option.value}
+                    className='[&>svg:last-child]:hidden'
                     onSelect={() => {
                       if (isSelected) {
                         selectedValues.delete(option.value)
@@ -104,25 +104,21 @@ export function DataTableFacetedFilter<TData, TValue>({
                       )
                     }}
                   >
-                    <div
-                      className={cn(
-                        'flex size-4 items-center justify-center rounded-sm border border-primary',
-                        isSelected
-                          ? 'bg-primary text-primary-foreground'
-                          : 'opacity-50 [&_svg]:invisible'
-                      )}
-                    >
-                      <Check className={cn('h-4 w-4 text-background')} />
-                    </div>
+                    <Checkbox
+                      checked={isSelected}
+                      tabIndex={-1}
+                    />
                     {option.icon && (
                       <option.icon className='size-4 text-muted-foreground' />
                     )}
-                    <span>{option.label}</span>
-                    {facets?.get(option.value) && (
-                      <span className='ms-auto flex h-4 w-4 items-center justify-center font-mono text-xs'>
-                        {facets.get(option.value)}
-                      </span>
-                    )}
+                    <span className='flex flex-1 items-center justify-between'>
+                      <span>{option.label}</span>
+                      {facets?.get(option.value) && (
+                        <span className='font-mono text-xs text-muted-foreground'>
+                          {facets.get(option.value)}
+                        </span>
+                      )}
+                    </span>
                   </CommandItem>
                 )
               })}

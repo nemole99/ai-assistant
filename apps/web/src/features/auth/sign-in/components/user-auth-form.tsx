@@ -110,7 +110,7 @@ export function UserAuthForm({
           <FieldError errors={[errors.password]} />
           <Link
             to='/forgot-password'
-            className='absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75'
+            className='absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75 text-end'
           >
             Forgot password?
           </Link>

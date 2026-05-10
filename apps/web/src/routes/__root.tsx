@@ -16,6 +16,8 @@ import { link, orpc } from "@/utils/orpc";
 
 import { NavigationProgress } from "@/components/navigation-progress";
 import "../index.css";
+import { GeneralError } from "@/features/errors/general-error";
+import { NotFoundError } from "@/features/errors/not-found-error";
 
 export interface RouterAppContext {
   orpc: typeof orpc;
@@ -41,6 +43,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       },
     ],
   }),
+  notFoundComponent: NotFoundError,
+  errorComponent: GeneralError,
 });
 
 function RootComponent() {
@@ -51,8 +55,8 @@ function RootComponent() {
     <>
       <HeadContent />
       <NavigationProgress />
-        <Outlet />
-        <Toaster richColors />
+      <Outlet />
+      <Toaster richColors />
       <TanStackRouterDevtools position="bottom-left" />
       <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
     </>

@@ -6,7 +6,6 @@ import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { StrictMode } from "react";
 import Loader from "./components/loader";
 import { DirectionProvider } from "./context/direction-provider";
-import { FontProvider } from "./context/font-provider";
 import { ThemeProvider } from "./context/theme-provider";
 import { routeTree } from "./routeTree.gen";
 import { orpc, queryClient } from "./utils/orpc";
@@ -41,13 +40,11 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <ThemeProvider>
-        <FontProvider>
           <TooltipProvider>
             <DirectionProvider>
               <RouterProvider router={router} />
             </DirectionProvider>
           </TooltipProvider>
-        </FontProvider>
       </ThemeProvider>
     </StrictMode>,
   );

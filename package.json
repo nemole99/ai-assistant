@@ -47,6 +47,7 @@
     "check": "oxlint && oxfmt --write"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans": "^5.2.10",
     "@workspace/env": "workspace:*",
     "dotenv": "catalog:",
     "zod": "catalog:"

@@ -1,28 +1,21 @@
 import {
-  Construction,
-  LayoutDashboard,
-  Monitor,
-  Bug,
-  ListTodo,
-  FileX,
-  HelpCircle,
-  Lock,
+  AudioWaveform,
   Bell,
-  Package,
-  Palette,
+  Bug,
+  Command,
+  Construction,
+  FileX,
+  GalleryVerticalEnd,
+  LayoutDashboard,
+  Lock,
   ServerOff,
   Settings,
-  Wrench,
+  ShieldCheck,
   UserCog,
   UserX,
   Users,
-  MessagesSquare,
-  ShieldCheck,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
+  Wrench
 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -58,43 +51,9 @@ export const sidebarData: SidebarData = {
           icon: LayoutDashboard,
         },
         {
-          title: 'Tasks',
-          url: '/tasks',
-          icon: ListTodo,
-        },
-        {
-          title: 'Apps',
-          url: '/apps',
-          icon: Package,
-        },
-        {
-          title: 'Chats',
-          url: '/chats',
-          badge: '3',
-          icon: MessagesSquare,
-        },
-        {
           title: 'Users',
           url: '/users',
           icon: Users,
-        },
-        {
-          title: 'Secured by Clerk',
-          icon: ClerkLogo,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/clerk/sign-in',
-            },
-            {
-              title: 'Sign Up',
-              url: '/clerk/sign-up',
-            },
-            {
-              title: 'User Management',
-              url: '/clerk/user-management',
-            },
-          ],
         },
       ],
     },
@@ -178,26 +137,11 @@ export const sidebarData: SidebarData = {
               icon: Wrench,
             },
             {
-              title: 'Appearance',
-              url: '/settings/appearance',
-              icon: Palette,
-            },
-            {
               title: 'Notifications',
               url: '/settings/notifications',
               icon: Bell,
             },
-            {
-              title: 'Display',
-              url: '/settings/display',
-              icon: Monitor,
-            },
           ],
-        },
-        {
-          title: 'Help Center',
-          url: '/help-center',
-          icon: HelpCircle,
         },
       ],
     },

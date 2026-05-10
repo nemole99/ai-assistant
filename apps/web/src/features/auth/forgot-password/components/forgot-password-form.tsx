@@ -1,21 +1,18 @@
-import { useState } from 'react'
-import { z } from 'zod'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from '@tanstack/react-router'
-import { ArrowRight, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { sleep, cn } from '@/lib/utils'
 import { Button } from '@workspace/ui/components/button'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@workspace/ui/components/form'
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
+import { cn, sleep } from '@workspace/ui/lib/utils'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 const formSchema = z.object({
   email: z.email({
@@ -27,7 +24,6 @@ export function ForgotPasswordForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLFormElement>) {
-  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,7 +39,6 @@ export function ForgotPasswordForm({
       success: () => {
         setIsLoading(false)
         form.reset()
-        navigate({ to: '/otp' })
         return `Email sent to ${data.email}`
       },
       error: 'Error',
@@ -51,30 +46,35 @@ export function ForgotPasswordForm({
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-2', className)}
-        {...props}
-      >
-        <FormField
-          control={form.control}
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className={cn('grid gap-2', className)}
+      {...props}
+    >
+      <FieldGroup>
+        <Controller
           name='email'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder='name@example.com' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor='forgot-password-email'>Email</FieldLabel>
+              <Input
+                {...field}
+                id='forgot-password-email'
+                aria-invalid={fieldState.invalid}
+                placeholder='name@example.com'
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
           )}
         />
-        <Button className='mt-2' disabled={isLoading}>
-          Continue
-          {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
-        </Button>
-      </form>
-    </Form>
+      </FieldGroup>
+      <Button className='mt-2' disabled={isLoading}>
+        Continue
+        {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
+      </Button>
+    </form>
   )
 }
