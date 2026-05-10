@@ -48,7 +48,6 @@ export function ConfigDrawer() {
             size="icon"
             variant="ghost"
             aria-label="Open theme settings"
-            className="rounded-full"
           />
         }
       >
@@ -163,7 +162,11 @@ function RadioGroupItem({
           aria-hidden="true"
         />
       </div>
-      <div className="mt-1 text-xs" id={`${item.value}-description`} aria-live="polite">
+      <div
+        className="mt-1 text-xs"
+        id={`${item.value}-description`}
+        aria-live="polite"
+      >
         {item.label}
       </div>
     </Item>
@@ -337,12 +340,16 @@ function DirConfig() {
           {
             value: "ltr",
             label: "Left to Right",
-            icon: (props: SVGProps<SVGSVGElement>) => <IconDir dir="ltr" {...props} />,
+            icon: (props: SVGProps<SVGSVGElement>) => (
+              <IconDir dir="ltr" {...props} />
+            ),
           },
           {
             value: "rtl",
             label: "Right to Left",
-            icon: (props: SVGProps<SVGSVGElement>) => <IconDir dir="rtl" {...props} />,
+            icon: (props: SVGProps<SVGSVGElement>) => (
+              <IconDir dir="rtl" {...props} />
+            ),
           },
         ].map((item) => (
           <RadioGroupItem key={item.value} item={item} />

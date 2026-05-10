@@ -16,7 +16,7 @@ export function ContentLayout({ children }: ContentLayoutProps) {
   return (
     <>
       <Header fixed>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-3">
           <ThemeSwitch />
           <ConfigDrawer />
           <ProfileDropdown />

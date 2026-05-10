@@ -1,12 +1,16 @@
 import { useForm } from "@tanstack/react-form";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Loader2, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { IconFacebook, IconGithub } from "@/assets/brand-icons";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@workspace/ui/components/button";
-import { Field, FieldLabel, FieldError, FieldGroup } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldGroup,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 
@@ -24,7 +28,11 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
   redirectTo?: string;
 }
 
-export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormProps) {
+export function UserAuthForm({
+  className,
+  redirectTo,
+  ...props
+}: UserAuthFormProps) {
   const navigate = useNavigate();
 
   const form = useForm({
@@ -70,7 +78,8 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
         <form.Field
           name="email"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
@@ -92,7 +101,8 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
         <form.Field
           name="password"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field className="relative" data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>
@@ -106,12 +116,6 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
                   placeholder="********"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                <Link
-                  to="/forgot-password"
-                  className="absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75 text-end"
-                >
-                  Forgot password?
-                </Link>
               </Field>
             );
           }}
@@ -119,7 +123,10 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
       </FieldGroup>
 
       <form.Subscribe
-        selector={(state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting })}
+        selector={(state) => ({
+          canSubmit: state.canSubmit,
+          isSubmitting: state.isSubmitting,
+        })}
         children={({ canSubmit, isSubmitting }) => (
           <>
             <Button
@@ -131,24 +138,6 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
               {isSubmitting ? <Loader2 className="animate-spin" /> : <LogIn />}
               Sign in
             </Button>
-
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" type="button" disabled={isSubmitting}>
-                <IconGithub className="h-4 w-4" /> GitHub
-              </Button>
-              <Button variant="outline" type="button" disabled={isSubmitting}>
-                <IconFacebook className="h-4 w-4" /> Facebook
-              </Button>
-            </div>
           </>
         )}
       />
