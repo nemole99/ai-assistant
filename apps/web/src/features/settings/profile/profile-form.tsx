@@ -1,9 +1,10 @@
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { toast } from "sonner";
 import { z } from "zod";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "@tanstack/react-router";
-import { showSubmittedData } from "@/lib/show-submitted-data";
-import { cn } from "@workspace/ui/lib/utils";
+import { DatePicker } from "@/components/date-picker";
+import { orpc } from "@/lib/orpc";
 import { Button } from "@workspace/ui/components/button";
 import {
   Field,
@@ -13,153 +14,194 @@ import {
   FieldLabel,
 } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
-import { Textarea } from "@workspace/ui/components/textarea";
 
 const profileFormSchema = z.object({
-  username: z
-    .string("Please enter your username.")
-    .min(2, "Username must be at least 2 characters.")
-    .max(30, "Username must not be longer than 30 characters."),
-  email: z.email({
-    error: (iss) => (iss.input === undefined ? "Please select an email to display." : undefined),
-  }),
-  bio: z.string().max(160).min(4),
-  urls: z
-    .array(
-      z.object({
-        value: z.url("Please enter a valid URL."),
-      }),
-    )
-    .optional(),
+  fullName: z.string().min(2, "Full name must be at least 2 characters."),
+  position: z.string().min(1, "Position is required."),
+  phone: z.string(),
+  joinDate: z.string(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: "I own a computer.",
-  urls: [{ value: "https://shadcn.com" }, { value: "http://twitter.com/shadcn" }],
-};
-
 export function ProfileForm() {
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues,
-    mode: "onChange",
+  const queryClient = useQueryClient();
+
+  const { data: employee, isPending } = useQuery(
+    orpc.employee.getSelf.queryOptions(),
+  );
+
+  const mutation = useMutation(
+    orpc.employee.updateSelf.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(orpc.employee.getSelf.queryOptions());
+        toast.success("Profile updated successfully.");
+      },
+      onError: (err) => toast.error(err.message),
+    }),
+  );
+
+  const form = useForm({
+    defaultValues: {
+      fullName: employee?.fullName ?? "",
+      position: employee?.position ?? "",
+      phone: employee?.phone ?? "",
+      joinDate: employee?.joinDate ?? "",
+    } satisfies ProfileFormValues,
+    validators: { onSubmit: profileFormSchema },
+    onSubmit: async ({ value }) => {
+      mutation.mutate({
+        fullName: value.fullName,
+        position: value.position,
+        phone: value.phone || null,
+        joinDate: value.joinDate || undefined,
+      });
+    },
   });
 
-  const { fields, append } = useFieldArray({
-    name: "urls",
-    control: form.control,
-  });
+  if (isPending) {
+    return <div className="text-muted-foreground text-sm">Loading...</div>;
+  }
+
+  if (!employee) {
+    return (
+      <div className="text-muted-foreground text-sm">
+        You don't have an employee record linked to your account.
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={form.handleSubmit((data) => showSubmittedData(data))} className="space-y-8">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className="space-y-8"
+    >
       <FieldGroup>
-        <Controller
-          name="username"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="profile-username">Username</FieldLabel>
-              <Input
-                {...field}
-                id="profile-username"
-                aria-invalid={fieldState.invalid}
-                placeholder="shadcn"
-              />
-              <FieldDescription>
-                This is your public display name. It can be your real name or a pseudonym. You can
-                only change this once every 30 days.
-              </FieldDescription>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+        <form.Field
+          name="fullName"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                <Input
+                  id={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="Your full name"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
         />
-        <Controller
-          name="email"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Email</FieldLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a verified email to display" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
-              <FieldDescription>
-                You can manage verified email addresses in your <Link to="/">email settings</Link>.
-              </FieldDescription>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+
+        <Field>
+          <FieldLabel>Email</FieldLabel>
+          <Input value={employee.email} disabled aria-disabled="true" />
+          <FieldDescription>
+            Email can only be changed by an administrator.
+          </FieldDescription>
+        </Field>
+
+        <form.Field
+          name="position"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Position</FieldLabel>
+                <Input
+                  id={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="Your position"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
         />
-        <Controller
-          name="bio"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="profile-bio">Bio</FieldLabel>
-              <Textarea
-                {...field}
-                id="profile-bio"
-                aria-invalid={fieldState.invalid}
-                placeholder="Tell us a little bit about yourself"
-                className="resize-none"
-              />
-              <FieldDescription>
-                You can <span>@mention</span> other users and organizations to link to them.
-              </FieldDescription>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+
+        <Field>
+          <FieldLabel>Department</FieldLabel>
+          <Input
+            value={employee.departmentName ?? ""}
+            disabled
+            aria-disabled="true"
+          />
+        </Field>
+
+        <form.Field
+          name="phone"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Phone</FieldLabel>
+                <Input
+                  id={field.name}
+                  value={field.state.value ?? ""}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="+84 xxx xxx xxx"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
         />
-        <div>
-          {fields.map((arrayField, index) => (
-            <Controller
-              key={arrayField.id}
-              name={`urls.${index}.value`}
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel className={cn(index !== 0 && "sr-only")}>URLs</FieldLabel>
-                  <FieldDescription className={cn(index !== 0 && "sr-only")}>
-                    Add links to your website, blog, or social media profiles.
-                  </FieldDescription>
-                  <Input
-                    {...field}
-                    className={cn(index !== 0 && "mt-1.5")}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-          ))}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => append({ value: "" })}
-          >
-            Add URL
-          </Button>
-        </div>
+
+        <form.Field
+          name="joinDate"
+          children={(field) => {
+            const dateValue = field.state.value
+              ? new Date(field.state.value + "T00:00:00")
+              : undefined;
+            return (
+              <Field>
+                <FieldLabel>Join Date</FieldLabel>
+                <DatePicker
+                  selected={dateValue}
+                  onSelect={(date) =>
+                    field.handleChange(date ? format(date, "yyyy-MM-dd") : "")
+                  }
+                  placeholder="Pick a date"
+                />
+              </Field>
+            );
+          }}
+        />
       </FieldGroup>
-      <Button type="submit">Update profile</Button>
+
+      <form.Subscribe
+        selector={(state) => ({
+          canSubmit: state.canSubmit,
+          isSubmitting: state.isSubmitting,
+        })}
+        children={({ canSubmit, isSubmitting }) => (
+          <Button
+            type="submit"
+            disabled={!canSubmit || isSubmitting || mutation.isPending}
+          >
+            {isSubmitting || mutation.isPending
+              ? "Saving..."
+              : "Update profile"}
+          </Button>
+        )}
+      />
     </form>
   );
 }

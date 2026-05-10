@@ -12,8 +12,9 @@ import { env } from "@workspace/env/server";
 import { auth } from "@workspace/auth";
 import { eq, count, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { ORPCError } from "@orpc/server";
 
-import { adminProcedure, managerProcedure } from "../index";
+import { adminProcedure, managerProcedure, protectedProcedure } from "../index";
 
 // --- Department ---
 
@@ -23,25 +24,27 @@ const departmentWithStatsSchema = selectDepartmentSchema.extend({
 });
 
 export const departmentRouter = {
-  list: managerProcedure.output(z.array(departmentWithStatsSchema)).handler(async () => {
-    const rows = await db
-      .select({
-        id: department.id,
-        name: department.name,
-        description: department.description,
-        managerId: department.managerId,
-        createdAt: department.createdAt,
-        updatedAt: department.updatedAt,
-        employeeCount: count(employee.id),
-        managerName: sql<string | null>`(
+  list: managerProcedure
+    .output(z.array(departmentWithStatsSchema))
+    .handler(async () => {
+      const rows = await db
+        .select({
+          id: department.id,
+          name: department.name,
+          description: department.description,
+          managerId: department.managerId,
+          createdAt: department.createdAt,
+          updatedAt: department.updatedAt,
+          employeeCount: count(employee.id),
+          managerName: sql<string | null>`(
             SELECT full_name FROM employee WHERE id = ${department.managerId}
           )`,
-      })
-      .from(department)
-      .leftJoin(employee, eq(employee.departmentId, department.id))
-      .groupBy(department.id);
-    return rows;
-  }),
+        })
+        .from(department)
+        .leftJoin(employee, eq(employee.departmentId, department.id))
+        .groupBy(department.id);
+      return rows;
+    }),
 
   create: adminProcedure
     .input(insertDepartmentSchema)
@@ -96,29 +99,31 @@ const employeeWithDepartmentSchema = selectEmployeeSchema.extend({
 });
 
 export const employeeRouter = {
-  list: managerProcedure.output(z.array(employeeWithDepartmentSchema)).handler(async () => {
-    const rows = await db
-      .select({
-        id: employee.id,
-        employeeCode: employee.employeeCode,
-        fullName: employee.fullName,
-        email: employee.email,
-        phone: employee.phone,
-        position: employee.position,
-        departmentId: employee.departmentId,
-        departmentName: department.name,
-        userId: employee.userId,
-        userRole: user.role,
-        joinDate: employee.joinDate,
-        status: employee.status,
-        createdAt: employee.createdAt,
-        updatedAt: employee.updatedAt,
-      })
-      .from(employee)
-      .innerJoin(department, eq(department.id, employee.departmentId))
-      .leftJoin(user, eq(user.id, employee.userId));
-    return rows;
-  }),
+  list: managerProcedure
+    .output(z.array(employeeWithDepartmentSchema))
+    .handler(async () => {
+      const rows = await db
+        .select({
+          id: employee.id,
+          employeeCode: employee.employeeCode,
+          fullName: employee.fullName,
+          email: employee.email,
+          phone: employee.phone,
+          position: employee.position,
+          departmentId: employee.departmentId,
+          departmentName: department.name,
+          userId: employee.userId,
+          userRole: user.role,
+          joinDate: employee.joinDate,
+          status: employee.status,
+          createdAt: employee.createdAt,
+          updatedAt: employee.updatedAt,
+        })
+        .from(employee)
+        .innerJoin(department, eq(department.id, employee.departmentId))
+        .leftJoin(user, eq(user.id, employee.userId));
+      return rows;
+    }),
 
   create: adminProcedure
     .input(insertEmployeeSchema)
@@ -134,7 +139,9 @@ export const employeeRouter = {
           .from(employee)
           .orderBy(sql`employee_code DESC`)
           .limit(1);
-        const nextNum = last ? parseInt(last.code.replace(/\D/g, ""), 10) + 1 : 1;
+        const nextNum = last
+          ? parseInt(last.code.replace(/\D/g, ""), 10) + 1
+          : 1;
         employeeCode = `EMP-${String(nextNum).padStart(4, "0")}`;
       }
 
@@ -177,7 +184,11 @@ export const employeeRouter = {
     .output(selectEmployeeSchema)
     .handler(async ({ input }) => {
       const { id, ...data } = input;
-      const [updated] = await db.update(employee).set(data).where(eq(employee.id, id)).returning();
+      const [updated] = await db
+        .update(employee)
+        .set(data)
+        .where(eq(employee.id, id))
+        .returning();
       if (!updated) throw new Error("Employee not found");
       return updated;
     }),
@@ -235,5 +246,73 @@ export const employeeRouter = {
         .where(eq(employee.id, input.employeeId));
 
       return { userId: result.user.id };
+    }),
+
+  getSelf: protectedProcedure
+    .output(
+      selectEmployeeSchema.extend({ departmentName: z.string() }).nullable(),
+    )
+    .handler(async ({ context }) => {
+      const userId = context.session.user.id;
+      const [row] = await db
+        .select({
+          id: employee.id,
+          employeeCode: employee.employeeCode,
+          fullName: employee.fullName,
+          email: employee.email,
+          phone: employee.phone,
+          position: employee.position,
+          departmentId: employee.departmentId,
+          departmentName: department.name,
+          userId: employee.userId,
+          joinDate: employee.joinDate,
+          status: employee.status,
+          createdAt: employee.createdAt,
+          updatedAt: employee.updatedAt,
+        })
+        .from(employee)
+        .innerJoin(department, eq(department.id, employee.departmentId))
+        .where(eq(employee.userId, userId))
+        .limit(1);
+      return row ?? null;
+    }),
+
+  updateSelf: protectedProcedure
+    .input(
+      z.object({
+        fullName: z.string().min(2, "Full name must be at least 2 characters."),
+        position: z.string().min(1, "Position is required."),
+        phone: z.string().nullable().optional(),
+        joinDate: z.string().optional(),
+      }),
+    )
+    .output(selectEmployeeSchema)
+    .handler(async ({ input, context }) => {
+      const userId = context.session.user.id;
+      const [existing] = await db
+        .select({ id: employee.id })
+        .from(employee)
+        .where(eq(employee.userId, userId))
+        .limit(1);
+      if (!existing)
+        throw new ORPCError("NOT_FOUND", {
+          message: "Employee record not found",
+        });
+
+      const [updated] = await db
+        .update(employee)
+        .set(input)
+        .where(eq(employee.id, existing.id))
+        .returning();
+      if (!updated)
+        throw new ORPCError("NOT_FOUND", { message: "Employee not found" });
+
+      // Sync name to user table
+      await db
+        .update(user)
+        .set({ name: input.fullName })
+        .where(eq(user.id, userId));
+
+      return updated;
     }),
 };
