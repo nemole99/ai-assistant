@@ -39,6 +39,7 @@ Xây dựng nền tảng internal tooling với một hệ thống xác thực v
 **Department is flat.** No parent-child department hierarchy. A `managerId` (nullable FK → Employee) records who leads each department. This is organizational data, independent of the user's Role.
 
 **Permission middleware layering.**
+
 - `publicProcedure` — no auth required
 - `protectedProcedure` — requires valid session
 - `managerProcedure` — requires ADMIN or MANAGER role

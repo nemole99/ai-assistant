@@ -18,11 +18,9 @@ import { adminProcedure, managerProcedure } from "../index";
 // --- Department ---
 
 export const departmentRouter = {
-  list: managerProcedure
-    .output(z.array(selectDepartmentSchema))
-    .handler(async () => {
-      return db.select().from(department);
-    }),
+  list: managerProcedure.output(z.array(selectDepartmentSchema)).handler(async () => {
+    return db.select().from(department);
+  }),
 
   create: adminProcedure
     .input(insertDepartmentSchema)
@@ -55,11 +53,9 @@ export const departmentRouter = {
 // --- Employee ---
 
 export const employeeRouter = {
-  list: managerProcedure
-    .output(z.array(selectEmployeeSchema))
-    .handler(async () => {
-      return db.select().from(employee);
-    }),
+  list: managerProcedure.output(z.array(selectEmployeeSchema)).handler(async () => {
+    return db.select().from(employee);
+  }),
 
   create: adminProcedure
     .input(insertEmployeeSchema)
@@ -79,11 +75,7 @@ export const employeeRouter = {
     .output(selectEmployeeSchema)
     .handler(async ({ input }) => {
       const { id, ...data } = input;
-      const [updated] = await db
-        .update(employee)
-        .set(data)
-        .where(eq(employee.id, id))
-        .returning();
+      const [updated] = await db.update(employee).set(data).where(eq(employee.id, id)).returning();
       if (!updated) throw new Error("Employee not found");
       return updated;
     }),
@@ -124,4 +116,3 @@ export const employeeRouter = {
       return { userId: result.user.id };
     }),
 };
-

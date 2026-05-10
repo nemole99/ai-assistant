@@ -21,11 +21,7 @@ import {
   FieldLabel,
 } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@workspace/ui/components/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
 import { DatePicker } from "@/components/date-picker";
 
 const languages = [
@@ -83,8 +79,7 @@ export function AccountForm() {
                 placeholder="Your name"
               />
               <FieldDescription>
-                This is the name that will be displayed on your profile and in
-                emails.
+                This is the name that will be displayed on your profile and in emails.
               </FieldDescription>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -97,9 +92,7 @@ export function AccountForm() {
             <Field data-invalid={fieldState.invalid} className="flex flex-col">
               <FieldLabel>Date of birth</FieldLabel>
               <DatePicker selected={field.value} onSelect={field.onChange} />
-              <FieldDescription>
-                Your date of birth is used to calculate your age.
-              </FieldDescription>
+              <FieldDescription>Your date of birth is used to calculate your age.</FieldDescription>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -124,9 +117,7 @@ export function AccountForm() {
                   }
                 >
                   {field.value
-                    ? languages.find(
-                        (language) => language.value === field.value,
-                      )?.label
+                    ? languages.find((language) => language.value === field.value)?.label
                     : "Select language"}
                   <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                 </PopoverTrigger>
@@ -147,9 +138,7 @@ export function AccountForm() {
                             <Check
                               className={cn(
                                 "size-4",
-                                language.value === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0",
+                                language.value === field.value ? "opacity-100" : "opacity-0",
                               )}
                             />
                             {language.label}

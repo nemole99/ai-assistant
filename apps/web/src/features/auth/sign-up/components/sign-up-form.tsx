@@ -5,12 +5,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 import { IconFacebook, IconGithub } from "@/assets/brand-icons";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 import { authClient } from "@/lib/auth-client";
@@ -18,8 +13,7 @@ import { authClient } from "@/lib/auth-client";
 const formSchema = z
   .object({
     email: z.email({
-      error: (iss) =>
-        iss.input === "" ? "Please enter your email." : undefined,
+      error: (iss) => (iss.input === "" ? "Please enter your email." : undefined),
     }),
     password: z
       .string()
@@ -32,10 +26,7 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLFormElement>) {
+export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFormElement>) {
   const navigate = useNavigate();
 
   const form = useForm({
@@ -164,27 +155,15 @@ export function SignUpForm({
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                type="button"
-                disabled={isSubmitting}
-              >
+              <Button variant="outline" className="w-full" type="button" disabled={isSubmitting}>
                 <IconGithub className="h-4 w-4" /> GitHub
               </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                type="button"
-                disabled={isSubmitting}
-              >
+              <Button variant="outline" className="w-full" type="button" disabled={isSubmitting}>
                 <IconFacebook className="h-4 w-4" /> Facebook
               </Button>
             </div>

@@ -3,11 +3,7 @@ import { type Table } from "@tanstack/react-table";
 import { Trash2, UserX, UserCheck, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 import { DataTableBulkActions as BulkActionsToolbar } from "@/components/data-table";
 import { type User } from "../data/schema";
 import { UsersMultiDeleteDialog } from "./users-multi-delete-dialog";
@@ -17,9 +13,7 @@ type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
 };
 
-export function DataTableBulkActions<TData>({
-  table,
-}: DataTableBulkActionsProps<TData>) {
+export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps<TData>) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 

@@ -1,4 +1,4 @@
-import { removeCookie } from '@/lib/cookies'
+import { removeCookie } from "@/lib/cookies";
 
 /**
  * Remove cookies visible on `document.cookie` for test isolation.
@@ -8,21 +8,21 @@ import { removeCookie } from '@/lib/cookies'
  * - `RegExp`: remove only names where `filter.test(name)` is true.
  */
 export function clearCookies(filter?: string | RegExp): void {
-  if (typeof document === 'undefined') return
+  if (typeof document === "undefined") return;
 
-  for (const part of document.cookie.split(';')) {
-    const name = part.split('=')[0]?.trim()
-    if (!name) continue
+  for (const part of document.cookie.split(";")) {
+    const name = part.split("=")[0]?.trim();
+    if (!name) continue;
 
     const shouldRemove =
       filter === undefined
         ? true
-        : typeof filter === 'string'
+        : typeof filter === "string"
           ? name.startsWith(filter)
-          : filter.test(name)
+          : filter.test(name);
 
     if (shouldRemove) {
-      removeCookie(name)
+      removeCookie(name);
     }
   }
 }

@@ -5,11 +5,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
@@ -74,8 +70,7 @@ export function DataTableBulkActions<TData>({
       }
       case "ArrowLeft": {
         event.preventDefault();
-        const prevIndex =
-          currentIndex === 0 ? buttons.length - 1 : currentIndex - 1;
+        const prevIndex = currentIndex === 0 ? buttons.length - 1 : currentIndex - 1;
         buttons[prevIndex]?.focus();
         break;
       }
@@ -96,8 +91,7 @@ export function DataTableBulkActions<TData>({
         // Check if the event target or currently focused element is a dropdown trigger
         const isFromDropdownTrigger =
           target?.getAttribute("data-slot") === "dropdown-menu-trigger" ||
-          activeElement?.getAttribute("data-slot") ===
-            "dropdown-menu-trigger" ||
+          activeElement?.getAttribute("data-slot") === "dropdown-menu-trigger" ||
           target?.closest('[data-slot="dropdown-menu-trigger"]') ||
           activeElement?.closest('[data-slot="dropdown-menu-trigger"]');
 
@@ -126,12 +120,7 @@ export function DataTableBulkActions<TData>({
   return (
     <>
       {/* Live region for screen reader announcements */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-        role="status"
-      >
+      <div aria-live="polite" aria-atomic="true" className="sr-only" role="status">
         {announcement}
       </div>
 
@@ -177,16 +166,9 @@ export function DataTableBulkActions<TData>({
             </TooltipContent>
           </Tooltip>
 
-          <Separator
-            className="h-5"
-            orientation="vertical"
-            aria-hidden="true"
-          />
+          <Separator className="h-5" orientation="vertical" aria-hidden="true" />
 
-          <div
-            className="flex items-center gap-x-1 text-sm"
-            id="bulk-actions-description"
-          >
+          <div className="flex items-center gap-x-1 text-sm" id="bulk-actions-description">
             <Badge
               variant="default"
               className="min-w-8 rounded-lg"
@@ -201,11 +183,7 @@ export function DataTableBulkActions<TData>({
             selected
           </div>
 
-          <Separator
-            className="h-5"
-            orientation="vertical"
-            aria-hidden="true"
-          />
+          <Separator className="h-5" orientation="vertical" aria-hidden="true" />
 
           {children}
         </div>

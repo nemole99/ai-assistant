@@ -44,7 +44,9 @@
     "db:watch": "turbo -F @workspace/db db:watch",
     "db:stop": "turbo -F @workspace/db db:stop",
     "db:down": "turbo -F @workspace/db db:down",
-    "check": "oxlint && oxfmt --write"
+    "check": "oxlint && oxfmt --write",
+    "lint": "oxlint",
+    "format": "oxfmt --write"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans": "^5.2.10",

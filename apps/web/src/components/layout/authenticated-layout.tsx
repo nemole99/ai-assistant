@@ -3,10 +3,7 @@ import { SkipToMain } from "@/components/skip-to-main";
 import { LayoutProvider } from "@/context/layout-provider";
 import { getCookie } from "@/lib/cookies";
 import { Outlet } from "@tanstack/react-router";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@workspace/ui/components/sidebar";
+import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
 
 type AuthenticatedLayoutProps = {

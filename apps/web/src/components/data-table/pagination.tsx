@@ -9,22 +9,14 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 type DataTablePaginationProps<TData> = {
   table: Table<TData>;
   className?: string;
 };
 
-export function DataTablePagination<TData>({
-  table,
-  className,
-}: DataTablePaginationProps<TData>) {
+export function DataTablePagination<TData>({ table, className }: DataTablePaginationProps<TData>) {
   const currentPage = table.getState().pagination.pageIndex + 1;
   const totalPages = table.getPageCount();
   const pageNumbers = getPageNumbers(currentPage, totalPages);
