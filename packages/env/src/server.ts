@@ -8,15 +8,11 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: z.string().min(32),
     BETTER_AUTH_URL: z.url(),
     CORS_ORIGIN: z.url(),
-    NODE_ENV: z
-      .enum(["development", "production", "test"])
-      .default("development"),
+    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     ADMIN_EMAIL: z.string().email(),
     ADMIN_PASSWORD: z.string().min(8),
     DEFAULT_USER_PASSWORD: z.string().min(6),
-    ENCRYPTION_KEY: z
-      .string()
-      .length(64, "ENCRYPTION_KEY must be a 64-character hex string"),
+    ENCRYPTION_KEY: z.string().length(64, "ENCRYPTION_KEY must be a 64-character hex string"),
     GITHUB_COPILOT_CLIENT_ID: z.string().default("Iv1.b507a08c87ecfe98"),
   },
   runtimeEnv: process.env,

@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 import { protectedProcedure } from "../index";
+import { getCopilotSession } from "../copilot-session-cache";
 
 const DEVICE_CODE_URL = "https://github.com/login/device/code";
 const ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
@@ -51,10 +52,7 @@ export const startDeviceFlow = protectedProcedure
 
     if (!res.ok || data.error || !data.device_code) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message:
-          data.error_description ??
-          data.error ??
-          "Failed to start GitHub device flow",
+        message: data.error_description ?? data.error ?? "Failed to start GitHub device flow",
       });
     }
 
@@ -198,6 +196,7 @@ export const disconnect = protectedProcedure
 // --- List ---
 
 const aiProviderPublicSchema = z.object({
+  id: z.string(),
   provider: z.enum(["github_copilot", "openai", "google", "anthropic"]),
   username: z.string().nullable(),
   avatarUrl: z.string().nullable(),
@@ -213,6 +212,7 @@ export const list = protectedProcedure
       .where(eq(aiProvider.userId, context.session.user.id));
 
     return rows.map((row) => ({
+      id: row.id,
       provider: row.provider,
       username: row.metadata?.username ?? null,
       avatarUrl: row.metadata?.avatarUrl ?? null,
@@ -226,21 +226,73 @@ export async function getGitHubToken(userId: string): Promise<string | null> {
   const rows = await db
     .select({ encryptedToken: aiProvider.encryptedToken })
     .from(aiProvider)
-    .where(
-      and(
-        eq(aiProvider.userId, userId),
-        eq(aiProvider.provider, "github_copilot"),
-      ),
-    )
+    .where(and(eq(aiProvider.userId, userId), eq(aiProvider.provider, "github_copilot")))
     .limit(1);
 
   if (!rows[0]) return null;
   return decrypt(rows[0].encryptedToken);
 }
 
+// --- List Copilot Models ---
+
+const copilotModelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  vendor: z.string(),
+});
+
+export const listCopilotModels = protectedProcedure
+  .output(z.array(copilotModelSchema))
+  .handler(async ({ context }) => {
+    const userId = context.session.user.id;
+
+    let session: Awaited<ReturnType<typeof getCopilotSession>>;
+    try {
+      session = await getCopilotSession(userId);
+    } catch {
+      throw new ORPCError("FORBIDDEN", {
+        message: "GitHub Copilot is not connected",
+      });
+    }
+
+    const res = await fetch(`${session.endpoint}/models`, {
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        "Copilot-Integration-Id": "vscode-chat",
+        Accept: "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch Copilot models",
+      });
+    }
+
+    const data = (await res.json()) as {
+      data?: {
+        id?: string;
+        name?: string;
+        vendor?: string;
+        capabilities?: { type?: string };
+      }[];
+    };
+
+    const models = (data.data ?? [])
+      .filter((m) => m.capabilities?.type === "chat" && m.id)
+      .map((m) => ({
+        id: m.id!,
+        name: m.name ?? m.id!,
+        vendor: m.vendor ?? "",
+      }));
+
+    return models;
+  });
+
 export const aiProviderRouter = {
   startDeviceFlow,
   pollDeviceFlow,
   disconnect,
   list,
+  listCopilotModels,
 };

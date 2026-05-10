@@ -27,9 +27,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function ProfileForm() {
   const queryClient = useQueryClient();
 
-  const { data: employee, isPending } = useQuery(
-    orpc.employee.getSelf.queryOptions(),
-  );
+  const { data: employee, isPending } = useQuery(orpc.employee.getSelf.queryOptions());
 
   const mutation = useMutation(
     orpc.employee.updateSelf.mutationOptions({
@@ -84,8 +82,7 @@ export function ProfileForm() {
         <form.Field
           name="fullName"
           children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
@@ -106,16 +103,13 @@ export function ProfileForm() {
         <Field>
           <FieldLabel>Email</FieldLabel>
           <Input value={employee.email} disabled aria-disabled="true" />
-          <FieldDescription>
-            Email can only be changed by an administrator.
-          </FieldDescription>
+          <FieldDescription>Email can only be changed by an administrator.</FieldDescription>
         </Field>
 
         <form.Field
           name="position"
           children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Position</FieldLabel>
@@ -135,18 +129,13 @@ export function ProfileForm() {
 
         <Field>
           <FieldLabel>Department</FieldLabel>
-          <Input
-            value={employee.departmentName ?? ""}
-            disabled
-            aria-disabled="true"
-          />
+          <Input value={employee.departmentName ?? ""} disabled aria-disabled="true" />
         </Field>
 
         <form.Field
           name="phone"
           children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Phone</FieldLabel>
@@ -175,9 +164,7 @@ export function ProfileForm() {
                 <FieldLabel>Join Date</FieldLabel>
                 <DatePicker
                   selected={dateValue}
-                  onSelect={(date) =>
-                    field.handleChange(date ? format(date, "yyyy-MM-dd") : "")
-                  }
+                  onSelect={(date) => field.handleChange(date ? format(date, "yyyy-MM-dd") : "")}
                   placeholder="Pick a date"
                 />
               </Field>
@@ -192,13 +179,8 @@ export function ProfileForm() {
           isSubmitting: state.isSubmitting,
         })}
         children={({ canSubmit, isSubmitting }) => (
-          <Button
-            type="submit"
-            disabled={!canSubmit || isSubmitting || mutation.isPending}
-          >
-            {isSubmitting || mutation.isPending
-              ? "Saving..."
-              : "Update profile"}
+          <Button type="submit" disabled={!canSubmit || isSubmitting || mutation.isPending}>
+            {isSubmitting || mutation.isPending ? "Saving..." : "Update profile"}
           </Button>
         )}
       />

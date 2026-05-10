@@ -21,6 +21,7 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
+import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 
@@ -87,6 +88,11 @@ const AuthenticatedDepartmentsIndexRoute =
     path: '/departments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAskAiIndexRoute = AuthenticatedAskAiIndexRouteImport.update({
+  id: '/ask-ai/',
+  path: '/ask-ai/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsAiProvidersRoute =
   AuthenticatedSettingsAiProvidersRouteImport.update({
     id: '/ai-providers',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/ask-ai': typeof AuthenticatedAskAiIndexRoute
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/errors/$error'
     | '/settings/ai-providers'
+    | '/ask-ai/'
     | '/departments/'
     | '/employees/'
     | '/settings/'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/'
     | '/errors/$error'
     | '/settings/ai-providers'
+    | '/ask-ai'
     | '/departments'
     | '/employees'
     | '/settings'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/ai-providers'
+    | '/_authenticated/ask-ai/'
     | '/_authenticated/departments/'
     | '/_authenticated/employees/'
     | '/_authenticated/settings/'
@@ -290,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDepartmentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ask-ai/': {
+      id: '/_authenticated/ask-ai/'
+      path: '/ask-ai'
+      fullPath: '/ask-ai/'
+      preLoaderRoute: typeof AuthenticatedAskAiIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings/ai-providers': {
       id: '/_authenticated/settings/ai-providers'
       path: '/ai-providers'
@@ -328,6 +347,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
+  AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
   AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
   AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
 }
@@ -336,6 +356,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
+  AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,
   AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
   AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
 }

@@ -1,6 +1,7 @@
 import {
   AudioWaveform,
   Bell,
+  BotMessageSquare,
   Command,
   GalleryVerticalEnd,
   LayoutDashboard,
@@ -38,6 +39,11 @@ export const sidebarData: SidebarData = {
           title: "Dashboard",
           url: "/",
           icon: LayoutDashboard,
+        },
+        {
+          title: "Ask AI",
+          url: "/ask-ai",
+          icon: BotMessageSquare,
         },
       ],
     },

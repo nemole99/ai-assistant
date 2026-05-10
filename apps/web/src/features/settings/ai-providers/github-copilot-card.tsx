@@ -3,11 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CheckCircle, Copy, ExternalLink, Loader2 } from "lucide-react";
 import { orpc } from "@/lib/orpc";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/avatar";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
@@ -58,12 +54,8 @@ export function GitHubCopilotCard({
   const [open, setOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const startFlow = useMutation(
-    orpc.aiProvider.startDeviceFlow.mutationOptions(),
-  );
-  const pollFlow = useMutation(
-    orpc.aiProvider.pollDeviceFlow.mutationOptions(),
-  );
+  const startFlow = useMutation(orpc.aiProvider.startDeviceFlow.mutationOptions());
+  const pollFlow = useMutation(orpc.aiProvider.pollDeviceFlow.mutationOptions());
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -118,10 +110,7 @@ export function GitHubCopilotCard({
       });
       startPolling(result.deviceCode, result.interval * 1000, expiresAt);
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to start GitHub connection";
+      const message = err instanceof Error ? err.message : "Failed to start GitHub connection";
       toast.error(message);
       setOpen(false);
     }
@@ -169,9 +158,7 @@ export function GitHubCopilotCard({
                   src={connected.avatarUrl ?? undefined}
                   alt={connected.username ?? "GitHub"}
                 />
-                <AvatarFallback>
-                  {connected.username?.[0]?.toUpperCase() ?? "G"}
-                </AvatarFallback>
+                <AvatarFallback>{connected.username?.[0]?.toUpperCase() ?? "G"}</AvatarFallback>
               </Avatar>
             ) : (
               <div className="size-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs font-bold">
@@ -181,9 +168,7 @@ export function GitHubCopilotCard({
             <div>
               <p className="text-sm font-medium">GitHub Copilot</p>
               {connected ? (
-                <p className="text-xs text-muted-foreground">
-                  @{connected.username}
-                </p>
+                <p className="text-xs text-muted-foreground">@{connected.username}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">Not connected</p>
               )}
@@ -191,35 +176,19 @@ export function GitHubCopilotCard({
           </div>
           <div className="flex items-center gap-2">
             {connected && (
-              <Badge
-                variant="secondary"
-                className="text-green-600 bg-green-50 dark:bg-green-950"
-              >
+              <Badge variant="secondary" className="text-green-600 bg-green-50 dark:bg-green-950">
                 <CheckCircle className="size-3 mr-1" />
                 Connected
               </Badge>
             )}
             {connected ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onDisconnect}
-                disabled={isDisconnecting}
-              >
-                {isDisconnecting && (
-                  <Loader2 className="size-3.5 mr-1.5 animate-spin" />
-                )}
+              <Button variant="outline" size="sm" onClick={onDisconnect} disabled={isDisconnecting}>
+                {isDisconnecting && <Loader2 className="size-3.5 mr-1.5 animate-spin" />}
                 Disconnect
               </Button>
             ) : (
-              <Button
-                size="sm"
-                onClick={handleConnect}
-                disabled={startFlow.isPending}
-              >
-                {startFlow.isPending && (
-                  <Loader2 className="size-3.5 mr-1.5 animate-spin" />
-                )}
+              <Button size="sm" onClick={handleConnect} disabled={startFlow.isPending}>
+                {startFlow.isPending && <Loader2 className="size-3.5 mr-1.5 animate-spin" />}
                 Connect
               </Button>
             )}
@@ -238,9 +207,7 @@ export function GitHubCopilotCard({
             <>
               <DialogHeader>
                 <DialogTitle>Connect GitHub Copilot</DialogTitle>
-                <DialogDescription>
-                  Starting authorization flow…
-                </DialogDescription>
+                <DialogDescription>Starting authorization flow…</DialogDescription>
               </DialogHeader>
               <div className="flex justify-center py-8">
                 <Loader2 className="size-8 animate-spin text-muted-foreground" />
@@ -302,19 +269,12 @@ export function GitHubCopilotCard({
               </DialogHeader>
               <div className="flex flex-col items-center gap-3 py-4">
                 <Avatar className="size-16">
-                  <AvatarImage
-                    src={dialogState.avatarUrl}
-                    alt={dialogState.username}
-                  />
-                  <AvatarFallback>
-                    {dialogState.username[0]?.toUpperCase()}
-                  </AvatarFallback>
+                  <AvatarImage src={dialogState.avatarUrl} alt={dialogState.username} />
+                  <AvatarFallback>{dialogState.username[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="text-center">
                   <p className="font-medium">@{dialogState.username}</p>
-                  <p className="text-sm text-muted-foreground">
-                    GitHub Copilot access granted
-                  </p>
+                  <p className="text-sm text-muted-foreground">GitHub Copilot access granted</p>
                 </div>
                 <CheckCircle className="size-8 text-green-500" />
               </div>
@@ -329,8 +289,7 @@ export function GitHubCopilotCard({
               <DialogHeader>
                 <DialogTitle>Authorization Expired</DialogTitle>
                 <DialogDescription>
-                  The authorization window has closed. Please try connecting
-                  again.
+                  The authorization window has closed. Please try connecting again.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2 sm:gap-0">
