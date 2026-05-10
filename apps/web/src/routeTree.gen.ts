@@ -18,8 +18,9 @@ import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
-import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
+import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
+import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
@@ -69,16 +70,23 @@ const AuthenticatedSettingsRouteRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
-  id: '/users/',
-  path: '/users/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
+const AuthenticatedEmployeesIndexRoute =
+  AuthenticatedEmployeesIndexRouteImport.update({
+    id: '/employees/',
+    path: '/employees/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDepartmentsIndexRoute =
+  AuthenticatedDepartmentsIndexRouteImport.update({
+    id: '/departments/',
+    path: '/departments/',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSettingsNotificationsRoute =
   AuthenticatedSettingsNotificationsRouteImport.update({
@@ -111,8 +119,9 @@ export interface FileRoutesByFullPath {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/departments/': typeof AuthenticatedDepartmentsIndexRoute
+  '/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/users/': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
@@ -125,8 +134,9 @@ export interface FileRoutesByTo {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/departments': typeof AuthenticatedDepartmentsIndexRoute
+  '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
-  '/users': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,8 +152,9 @@ export interface FileRoutesById {
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
+  '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,8 +170,9 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/settings/account'
     | '/settings/notifications'
+    | '/departments/'
+    | '/employees/'
     | '/settings/'
-    | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -173,8 +185,9 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/settings/account'
     | '/settings/notifications'
+    | '/departments'
+    | '/employees'
     | '/settings'
-    | '/users'
   id:
     | '__root__'
     | '/_authenticated'
@@ -189,8 +202,9 @@ export interface FileRouteTypes {
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/departments/'
+    | '/_authenticated/employees/'
     | '/_authenticated/settings/'
-    | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -268,19 +282,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/users/': {
-      id: '/_authenticated/users/'
-      path: '/users'
-      fullPath: '/users/'
-      preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
       fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
+    '/_authenticated/employees/': {
+      id: '/_authenticated/employees/'
+      path: '/employees'
+      fullPath: '/employees/'
+      preLoaderRoute: typeof AuthenticatedEmployeesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/departments/': {
+      id: '/_authenticated/departments/'
+      path: '/departments'
+      fullPath: '/departments/'
+      preLoaderRoute: typeof AuthenticatedDepartmentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/notifications': {
       id: '/_authenticated/settings/notifications'
@@ -329,14 +350,16 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
-  AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
+  AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
-  AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
+  AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

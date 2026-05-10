@@ -4,13 +4,17 @@ import { useState } from "react";
 import { type Table } from "@tanstack/react-table";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { sleep } from "@/lib/utils";
 
-type UserMultiDeleteDialogProps<TData> = {
+type EmployeesMultiDeleteDialogProps<TData> = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   table: Table<TData>;
@@ -18,11 +22,11 @@ type UserMultiDeleteDialogProps<TData> = {
 
 const CONFIRM_WORD = "DELETE";
 
-export function UsersMultiDeleteDialog<TData>({
+export function EmployeesMultiDeleteDialog<TData>({
   open,
   onOpenChange,
   table,
-}: UserMultiDeleteDialogProps<TData>) {
+}: EmployeesMultiDeleteDialogProps<TData>) {
   const [value, setValue] = useState("");
 
   const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -36,11 +40,11 @@ export function UsersMultiDeleteDialog<TData>({
     onOpenChange(false);
 
     toast.promise(sleep(2000), {
-      loading: "Deleting users...",
+      loading: "Deleting employees...",
       success: () => {
         setValue("");
         table.resetRowSelection();
-        return `Deleted ${selectedRows.length} ${selectedRows.length > 1 ? "users" : "user"}`;
+        return `Deleted ${selectedRows.length} ${selectedRows.length > 1 ? "employees" : "employee"}`;
       },
       error: "Error",
     });
@@ -50,17 +54,21 @@ export function UsersMultiDeleteDialog<TData>({
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      form="users-multi-delete-form"
+      form="employees-multi-delete-form"
       disabled={value.trim() !== CONFIRM_WORD}
       title={
         <span className="text-destructive">
-          <AlertTriangle className="me-1 inline-block stroke-destructive" size={18} /> Delete{" "}
-          {selectedRows.length} {selectedRows.length > 1 ? "users" : "user"}
+          <AlertTriangle
+            className="me-1 inline-block stroke-destructive"
+            size={18}
+          />{" "}
+          Delete {selectedRows.length}{" "}
+          {selectedRows.length > 1 ? "employees" : "employee"}
         </span>
       }
       desc={
         <form
-          id="users-multi-delete-form"
+          id="employees-multi-delete-form"
           onSubmit={(e) => {
             e.preventDefault();
             handleDelete();
@@ -68,12 +76,12 @@ export function UsersMultiDeleteDialog<TData>({
           className="space-y-4"
         >
           <p className="mb-2">
-            Are you sure you want to delete the selected users? <br />
+            Are you sure you want to delete the selected employees? <br />
             This action cannot be undone.
           </p>
 
           <Label className="my-4 flex flex-col items-start gap-1.5">
-            <span className="">Confirm by typing "{CONFIRM_WORD}":</span>
+            <span>Confirm by typing "{CONFIRM_WORD}":</span>
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}

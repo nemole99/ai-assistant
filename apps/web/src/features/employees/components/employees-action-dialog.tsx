@@ -13,116 +13,71 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
-import { PasswordInput } from "@workspace/ui/components/password-input";
 import { SelectDropdown } from "@/components/select-dropdown";
-import { roles } from "../data/data";
-import { type User } from "../data/schema";
+import { departmentOptions } from "../data/data";
+import { type Employee } from "../data/schema";
 
-const formSchema = z
-  .object({
-    firstName: z.string().min(1, "First Name is required."),
-    lastName: z.string().min(1, "Last Name is required."),
-    username: z.string().min(1, "Username is required."),
-    phoneNumber: z.string().min(1, "Phone number is required."),
-    email: z.email({
-      error: (iss) => (iss.input === "" ? "Email is required." : undefined),
-    }),
-    password: z.string().transform((pwd) => pwd.trim()),
-    role: z.string().min(1, "Role is required."),
-    confirmPassword: z.string().transform((pwd) => pwd.trim()),
-    isEdit: z.boolean(),
-  })
-  .refine(
-    (data) => {
-      if (data.isEdit && !data.password) return true;
-      return data.password.length > 0;
-    },
-    {
-      message: "Password is required.",
-      path: ["password"],
-    },
-  )
-  .refine(
-    ({ isEdit, password }) => {
-      if (isEdit && !password) return true;
-      return password.length >= 8;
-    },
-    {
-      message: "Password must be at least 8 characters long.",
-      path: ["password"],
-    },
-  )
-  .refine(
-    ({ isEdit, password }) => {
-      if (isEdit && !password) return true;
-      return /[a-z]/.test(password);
-    },
-    {
-      message: "Password must contain at least one lowercase letter.",
-      path: ["password"],
-    },
-  )
-  .refine(
-    ({ isEdit, password }) => {
-      if (isEdit && !password) return true;
-      return /\d/.test(password);
-    },
-    {
-      message: "Password must contain at least one number.",
-      path: ["password"],
-    },
-  )
-  .refine(
-    ({ isEdit, password, confirmPassword }) => {
-      if (isEdit && !password) return true;
-      return password === confirmPassword;
-    },
-    {
-      message: "Passwords don't match.",
-      path: ["confirmPassword"],
-    },
-  );
-type UserForm = z.infer<typeof formSchema>;
+const formSchema = z.object({
+  employeeCode: z.string().min(1, "Employee code is required."),
+  fullName: z.string().min(1, "Full name is required."),
+  email: z.email({
+    error: (iss) => (iss.input === "" ? "Email is required." : undefined),
+  }),
+  phone: z.string().optional(),
+  position: z.string().min(1, "Position is required."),
+  departmentId: z.string().min(1, "Department is required."),
+  joinDate: z.string().min(1, "Join date is required."),
+});
 
-type UserActionDialogProps = {
-  currentRow?: User;
+type EmployeeForm = z.infer<typeof formSchema>;
+
+type EmployeeActionDialogProps = {
+  currentRow?: Employee;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function UsersActionDialog({ currentRow, open, onOpenChange }: UserActionDialogProps) {
+export function EmployeesActionDialog({
+  currentRow,
+  open,
+  onOpenChange,
+}: EmployeeActionDialogProps) {
   const isEdit = !!currentRow;
-  const form = useForm<UserForm>({
+  const form = useForm<EmployeeForm>({
     resolver: zodResolver(formSchema),
     defaultValues: isEdit
       ? {
-          ...currentRow,
-          password: "",
-          confirmPassword: "",
-          isEdit,
+          employeeCode: currentRow.employeeCode,
+          fullName: currentRow.fullName,
+          email: currentRow.email,
+          phone: currentRow.phone ?? "",
+          position: currentRow.position,
+          departmentId: currentRow.departmentId,
+          joinDate: currentRow.joinDate,
         }
       : {
-          firstName: "",
-          lastName: "",
-          username: "",
+          employeeCode: "",
+          fullName: "",
           email: "",
-          role: "",
-          phoneNumber: "",
-          password: "",
-          confirmPassword: "",
-          isEdit,
+          phone: "",
+          position: "",
+          departmentId: "",
+          joinDate: "",
         },
   });
 
-  const onSubmit = (values: UserForm) => {
+  const onSubmit = (values: EmployeeForm) => {
     form.reset();
     showSubmittedData(values);
     onOpenChange(false);
   };
-
-  const isPasswordTouched = !!form.formState.dirtyFields.password;
 
   return (
     <Dialog
@@ -134,76 +89,74 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
-          <DialogTitle>{isEdit ? "Edit User" : "Add New User"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Employee" : "Add New Employee"}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update the user here. " : "Create new user here. "}
+            {isEdit
+              ? "Update the employee here. "
+              : "Create a new employee here. "}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <div className="h-105 w-[calc(100%+0.75rem)] overflow-y-auto py-1 pe-3">
-          <form id="user-form" onSubmit={form.handleSubmit(onSubmit)} className="px-0.5">
+          <form
+            id="employee-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="px-0.5"
+          >
             <FieldGroup>
               <Controller
                 control={form.control}
-                name="firstName"
+                name="employeeCode"
                 render={({ field, fieldState }) => (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={fieldState.invalid}
                   >
-                    <FieldLabel className="col-span-2 text-end">First Name</FieldLabel>
+                    <FieldLabel className="col-span-2 text-end">
+                      Employee Code
+                    </FieldLabel>
                     <Input
-                      placeholder="John"
+                      placeholder="EMP-0001"
                       className="col-span-4"
                       autoComplete="off"
+                      disabled={isEdit}
                       aria-invalid={fieldState.invalid}
                       {...field}
                     />
                     {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
                     )}
                   </Field>
                 )}
               />
               <Controller
                 control={form.control}
-                name="lastName"
+                name="fullName"
                 render={({ field, fieldState }) => (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={fieldState.invalid}
                   >
-                    <FieldLabel className="col-span-2 text-end">Last Name</FieldLabel>
+                    <FieldLabel className="col-span-2 text-end">
+                      Full Name
+                    </FieldLabel>
                     <Input
-                      placeholder="Doe"
+                      placeholder="John Doe"
                       className="col-span-4"
                       autoComplete="off"
                       aria-invalid={fieldState.invalid}
                       {...field}
                     />
                     {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="username"
-                render={({ field, fieldState }) => (
-                  <Field
-                    className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
-                    data-invalid={fieldState.invalid}
-                  >
-                    <FieldLabel className="col-span-2 text-end">Username</FieldLabel>
-                    <Input
-                      placeholder="john_doe"
-                      className="col-span-4"
-                      aria-invalid={fieldState.invalid}
-                      {...field}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
                     )}
                   </Field>
                 )}
@@ -216,28 +169,35 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={fieldState.invalid}
                   >
-                    <FieldLabel className="col-span-2 text-end">Email</FieldLabel>
+                    <FieldLabel className="col-span-2 text-end">
+                      Email
+                    </FieldLabel>
                     <Input
-                      placeholder="john.doe@gmail.com"
+                      placeholder="john.doe@company.com"
                       className="col-span-4"
                       aria-invalid={fieldState.invalid}
                       {...field}
                     />
                     {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
                     )}
                   </Field>
                 )}
               />
               <Controller
                 control={form.control}
-                name="phoneNumber"
+                name="phone"
                 render={({ field, fieldState }) => (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={fieldState.invalid}
                   >
-                    <FieldLabel className="col-span-2 text-end">Phone Number</FieldLabel>
+                    <FieldLabel className="col-span-2 text-end">
+                      Phone
+                    </FieldLabel>
                     <Input
                       placeholder="+123456789"
                       className="col-span-4"
@@ -245,72 +205,92 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                       {...field}
                     />
                     {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
                     )}
                   </Field>
                 )}
               />
               <Controller
                 control={form.control}
-                name="role"
+                name="position"
                 render={({ field, fieldState }) => (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={fieldState.invalid}
                   >
-                    <FieldLabel className="col-span-2 text-end">Role</FieldLabel>
+                    <FieldLabel className="col-span-2 text-end">
+                      Position
+                    </FieldLabel>
+                    <Input
+                      placeholder="Software Engineer"
+                      className="col-span-4"
+                      aria-invalid={fieldState.invalid}
+                      {...field}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="departmentId"
+                render={({ field, fieldState }) => (
+                  <Field
+                    className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
+                    data-invalid={fieldState.invalid}
+                  >
+                    <FieldLabel className="col-span-2 text-end">
+                      Department
+                    </FieldLabel>
                     <SelectDropdown
                       defaultValue={field.value}
                       onValueChange={field.onChange}
-                      placeholder="Select a role"
+                      placeholder="Select a department"
                       className="col-span-4"
-                      items={roles.map(({ label, value }) => ({ label, value }))}
+                      items={departmentOptions.map(({ label, value }) => ({
+                        label,
+                        value,
+                      }))}
                     />
                     {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
                     )}
                   </Field>
                 )}
               />
               <Controller
                 control={form.control}
-                name="password"
+                name="joinDate"
                 render={({ field, fieldState }) => (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={fieldState.invalid}
                   >
-                    <FieldLabel className="col-span-2 text-end">Password</FieldLabel>
-                    <PasswordInput
-                      placeholder="e.g., S3cur3P@ssw0rd"
+                    <FieldLabel className="col-span-2 text-end">
+                      Join Date
+                    </FieldLabel>
+                    <Input
+                      type="date"
                       className="col-span-4"
                       aria-invalid={fieldState.invalid}
                       {...field}
                     />
                     {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="confirmPassword"
-                render={({ field, fieldState }) => (
-                  <Field
-                    className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
-                    data-invalid={fieldState.invalid}
-                  >
-                    <FieldLabel className="col-span-2 text-end">Confirm Password</FieldLabel>
-                    <PasswordInput
-                      disabled={!isPasswordTouched}
-                      placeholder="e.g., S3cur3P@ssw0rd"
-                      className="col-span-4"
-                      aria-invalid={fieldState.invalid}
-                      {...field}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError className="col-span-4 col-start-3" errors={[fieldState.error]} />
+                      <FieldError
+                        className="col-span-4 col-start-3"
+                        errors={[fieldState.error]}
+                      />
                     )}
                   </Field>
                 )}
@@ -319,7 +299,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
           </form>
         </div>
         <DialogFooter>
-          <Button type="submit" form="user-form">
+          <Button type="submit" form="employee-form">
             Save changes
           </Button>
         </DialogFooter>
