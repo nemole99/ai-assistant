@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@workspace/ui/components/popover'
+import { Separator } from '@workspace/ui/components/separator'
 import { PlusCircle } from 'lucide-react'
 import * as React from 'react'
 
@@ -48,7 +49,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         {title}
         {selectedValues?.size > 0 && (
           <>
-            <div className='mx-0.5 h-4 w-px shrink-0 self-center bg-border' />
+             <Separator orientation='vertical' className='mx-2 h-4' />
             <Badge
               variant='secondary'
               className='rounded-sm px-1 font-normal lg:hidden'

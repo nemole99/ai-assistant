@@ -1,0 +1,28 @@
+"use client";
+
+import { ConfigDrawer } from "../config-drawer";
+import { ProfileDropdown } from "../profile-dropdown";
+import { ThemeSwitch } from "../theme-switch";
+import { Header } from "./header";
+import { Main } from "./main";
+
+type ContentLayoutProps = {
+  children?: React.ReactNode;
+  title?: string;
+  hrefBack?: string;
+};
+
+export function ContentLayout({ children }: ContentLayoutProps) {
+  return (
+    <>
+      <Header fixed>
+        <div className="ml-auto">
+          <ThemeSwitch />
+          <ConfigDrawer />
+          <ProfileDropdown />
+        </div>
+      </Header>
+      <Main className="flex flex-1 flex-col gap-4 sm:gap-6">{children}</Main>
+    </>
+  );
+}
