@@ -1,15 +1,14 @@
 import {
   AudioWaveform,
-  Bell,
   BotMessageSquare,
+  Building2,
   Command,
+  Contact,
   GalleryVerticalEnd,
   LayoutDashboard,
   Settings,
   UserCog,
   Wrench,
-  Building2,
-  Contact,
 } from "lucide-react";
 import { type SidebarData } from "../types";
 
@@ -75,14 +74,9 @@ export const sidebarData: SidebarData = {
               icon: UserCog,
             },
             {
-              title: "Account",
-              url: "/settings/account",
+              title: "AI Providers",
+              url: "/settings/ai-providers",
               icon: Wrench,
-            },
-            {
-              title: "Notifications",
-              url: "/settings/notifications",
-              icon: Bell,
             },
           ],
         },

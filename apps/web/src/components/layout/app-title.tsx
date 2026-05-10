@@ -24,8 +24,8 @@ export function AppTitle() {
             onClick={() => setOpenMobile(false)}
             className="grid flex-1 text-start text-sm leading-tight"
           >
-            <span className="truncate font-bold">My Well</span>
-            <span className="truncate text-xs">Vite + ShadcnUI</span>
+            <span className="truncate font-bold">Ewoosoft Viet</span>
+            {/* <span className="truncate text-xs"></span> */}
           </Link>
           <ToggleSidebar />
         </SidebarMenuButton>
@@ -34,7 +34,11 @@ export function AppTitle() {
   );
 }
 
-function ToggleSidebar({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
+function ToggleSidebar({
+  className,
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
 
   return (
