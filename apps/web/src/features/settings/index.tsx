@@ -1,7 +1,7 @@
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Outlet } from "@tanstack/react-router";
 import { Separator } from "@workspace/ui/components/separator";
-import { Bot, UserCog } from "lucide-react";
+import { Bot, KeyRound, UserCog } from "lucide-react";
 import { SidebarNav } from "./components/sidebar-nav";
 
 const sidebarNavItems = [
@@ -9,6 +9,11 @@ const sidebarNavItems = [
     title: "Profile",
     href: "/settings",
     icon: <UserCog size={18} />,
+  },
+  {
+    title: "Password",
+    href: "/settings/password",
+    icon: <KeyRound size={18} />,
   },
   {
     title: "AI Providers",
@@ -21,8 +26,12 @@ export function Settings() {
   return (
     <ContentLayout>
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Settings</h1>
-        <p className="text-muted-foreground">Manage your profile and AI provider connections.</p>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+          Settings
+        </h1>
+        <p className="text-muted-foreground">
+          Manage your profile and AI provider connections.
+        </p>
       </div>
       <Separator className="my-4 lg:my-6" />
       <div className="flex flex-1 flex-col space-y-2 overflow-hidden md:space-y-2 lg:flex-row lg:space-y-0 lg:space-x-12">

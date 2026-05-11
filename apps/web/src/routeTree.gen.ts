@@ -23,6 +23,7 @@ import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
 import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
+import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
@@ -101,6 +102,12 @@ const AuthenticatedAskAiIndexRoute = AuthenticatedAskAiIndexRouteImport.update({
   path: '/ask-ai/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsPasswordRoute =
+  AuthenticatedSettingsPasswordRouteImport.update({
+    id: '/password',
+    path: '/password',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsAiProvidersRoute =
   AuthenticatedSettingsAiProvidersRouteImport.update({
     id: '/ai-providers',
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
@@ -149,6 +157,7 @@ export interface FileRoutesByTo {
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/ask-ai': typeof AuthenticatedAskAiIndexRoute
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
@@ -169,6 +178,7 @@ export interface FileRoutesById {
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/projects/$projectId'
     | '/settings/ai-providers'
+    | '/settings/password'
     | '/ask-ai/'
     | '/departments/'
     | '/employees/'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/errors/$error'
     | '/projects/$projectId'
     | '/settings/ai-providers'
+    | '/settings/password'
     | '/ask-ai'
     | '/departments'
     | '/employees'
@@ -225,6 +237,7 @@ export interface FileRouteTypes {
     | '/_authenticated/errors/$error'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
+    | '/_authenticated/settings/password'
     | '/_authenticated/ask-ai/'
     | '/_authenticated/departments/'
     | '/_authenticated/employees/'
@@ -342,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAskAiIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings/password': {
+      id: '/_authenticated/settings/password'
+      path: '/password'
+      fullPath: '/settings/password'
+      preLoaderRoute: typeof AuthenticatedSettingsPasswordRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
     '/_authenticated/settings/ai-providers': {
       id: '/_authenticated/settings/ai-providers'
       path: '/ai-providers'
@@ -368,6 +388,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAiProvidersRoute: typeof AuthenticatedSettingsAiProvidersRoute
+  AuthenticatedSettingsPasswordRoute: typeof AuthenticatedSettingsPasswordRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
@@ -375,6 +396,7 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
   {
     AuthenticatedSettingsAiProvidersRoute:
       AuthenticatedSettingsAiProvidersRoute,
+    AuthenticatedSettingsPasswordRoute: AuthenticatedSettingsPasswordRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
 
