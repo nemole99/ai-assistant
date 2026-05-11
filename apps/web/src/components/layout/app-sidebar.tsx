@@ -12,16 +12,23 @@ import { sidebarData } from "./data/sidebar-data";
 import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
 
-const EMPLOYEE_HIDDEN_GROUPS = new Set(["Organization"]);
+const EMPLOYEE_HIDDEN_ITEMS = new Set(["/departments", "/employees"]);
 
 export function AppSidebar() {
   const { collapsible, variant } = useLayout();
   const { data: session } = authClient.useSession();
   const isEmployee = session?.user?.role === "EMPLOYEE";
 
-  const navGroups = isEmployee
-    ? sidebarData.navGroups.filter((g) => !EMPLOYEE_HIDDEN_GROUPS.has(g.title))
-    : sidebarData.navGroups;
+  const navGroups = sidebarData.navGroups
+    .map((g) => {
+      if (!isEmployee) return g;
+      const filtered = g.items.filter(
+        (item) =>
+          !("url" in item) || !EMPLOYEE_HIDDEN_ITEMS.has(item.url as string),
+      );
+      return { ...g, items: filtered };
+    })
+    .filter((g) => g.items.length > 0);
 
   return (
     <Sidebar collapsible={collapsible} variant={variant}>

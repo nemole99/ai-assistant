@@ -39,7 +39,9 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data: departments = [] } = useQuery(orpc.department.list.queryOptions());
+  const { data: departments = [] } = useQuery(
+    orpc.department.list.queryOptions(),
+  );
 
   const {
     columnFilters,
@@ -89,7 +91,12 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
   }, [table, ensurePageInRange]);
 
   return (
-    <div className={cn('max-sm:has-[div[role="toolbar"]]:mb-16', "flex flex-1 flex-col gap-4")}>
+    <div
+      className={cn(
+        'max-sm:has-[div[role="toolbar"]]:mb-16',
+        "flex flex-1 flex-col gap-4",
+      )}
+    >
       <DataTableToolbar
         table={table}
         searchPlaceholder="Filter employees..."
@@ -113,7 +120,7 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
           },
         ]}
       />
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -131,7 +138,10 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
                     >
                       {header.isPlaceholder
                         ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -155,14 +165,20 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
                         cell.column.columnDef.meta?.tdClassName,
                       )}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>

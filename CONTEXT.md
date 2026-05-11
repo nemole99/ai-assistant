@@ -57,6 +57,26 @@ _Avoid_: ModelType, ModelRole
 - Một **AIModelAssignment** liên kết với đúng một **User** và một **AIProvider**
 - Một **User** có tối đa một **AIModelAssignment** per **ModelPurpose**
 
+**Project**:
+Một dự án phần mềm cụ thể mà công ty đang hoặc đã triển khai. Có trạng thái (`ACTIVE` hoặc `COMPLETED`) và một Employee phụ trách (manager). Employee có thể tham gia nhiều Project cùng lúc.
+_Avoid_: Workspace, Group, Team
+
+**ProjectMember**:
+Quan hệ giữa một Employee và một Project. Lưu thông tin tham gia của Employee vào Project. Manager của Project tự động là ProjectMember.
+_Avoid_: ProjectParticipant, ProjectEmployee
+
+**ProjectStatus**:
+Trạng thái của một Project. Có 2 giá trị: `ACTIVE` (đang hoạt động) và `COMPLETED` (đã hoàn thành). Project `COMPLETED` là read-only — không upload tài liệu mới.
+_Avoid_: ProjectState
+
+## Relationships
+
+- Một **Project** có tối đa một **Manager** (Employee, qua `managerId`, nullable)
+- Một **Project** có nhiều **ProjectMember** (many-to-many qua bảng trung gian)
+- Một **Employee** có thể là **ProjectMember** của nhiều **Project**
+- **Manager** của Project tự động là **ProjectMember** của Project đó
+- Chỉ **ADMIN** tạo/sửa/xóa **Project** và quản lý **ProjectMember**
+
 ## Flagged ambiguities
 
 - "Account" được dùng lẫn lộn với User và Employee — đã resolve: dùng **User** cho tài khoản đăng nhập, **Employee** cho hồ sơ nhân sự.

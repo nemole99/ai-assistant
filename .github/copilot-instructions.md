@@ -43,7 +43,7 @@ Use **Bun**, not npm/pnpm/yarn. Use `bun run <script>` for any package script.
 
 - **Dependencies**: shared versions live in the root `package.json` `workspaces.catalog`. Reference them via `"dep": "catalog:"` in package manifests rather than pinning a new version.
 - **Cross-package imports**: always `@workspace/<pkg>` — never relative paths across packages.
-- **Forms**: TanStack React Form for authenticated/protected flows; React Hook Form is only used in the existing public auth forms. Prefer TanStack Form for new work.
+- **Forms**: TanStack React Form for all forms. Do not use React Hook Form.
 - **API errors**: throw `ORPCError("UNAUTHORIZED" | "FORBIDDEN" | ...)` from procedures; surface to users via `sonner` toasts on the client.
 - **UI components**: import shared primitives from `@workspace/ui/components/*`. Add new shared primitives via `npx shadcn@latest add <name> -c packages/ui`. App-specific blocks go under `apps/web/src/components/` or the relevant `features/<area>/`.
 - **Frontend feature layout**: code is grouped by feature under `apps/web/src/features/<area>/` (components, routes, data). Mirror that pattern for new features.

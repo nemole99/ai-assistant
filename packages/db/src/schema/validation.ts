@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { department, employee, user } from "./auth";
+import { department, employee, user, project, projectMember } from "./auth";
 
 // --- User ---
 
@@ -38,3 +38,15 @@ export const updateEmployeeSchema = insertEmployeeSchema
   .extend({
     status: selectEmployeeSchema.shape.status.optional(),
   });
+
+// --- Project ---
+
+export const selectProjectSchema = createSelectSchema(project);
+export const insertProjectSchema = createInsertSchema(project).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateProjectSchema = insertProjectSchema.partial();
+
+export const selectProjectMemberSchema = createSelectSchema(projectMember);
