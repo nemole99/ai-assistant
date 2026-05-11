@@ -37,6 +37,7 @@ import { useChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
 import { env } from "@workspace/env/web";
 import { Button } from "@workspace/ui/components/button";
+import { SiriOrb } from "@workspace/ui/components/smoothui/siri-orb";
 import { DefaultChatTransport } from "ai";
 import {
   BotIcon,
@@ -232,8 +233,17 @@ export function AskAi() {
           <Conversation>
             <ConversationContent>
               {messages.length === 0 && !isStreaming && (
-                <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
-                  <BotIcon className="size-10 text-muted-foreground" />
+                <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+                  <SiriOrb
+                    size="100px"
+                    animationDuration={15}
+                    colors={{
+                      bg: "oklch(98% 0.01 220)",
+                      c1: "oklch(60% 0.15 186)", // Xanh Cyan/Teal (tương đồng theme --primary)
+                      c2: "oklch(70% 0.12 210)", // Xanh dương nhạt
+                      c3: "oklch(65% 0.1 160)", // Xanh ngọc
+                    }}
+                  />
                   <p className="text-sm text-muted-foreground">
                     Ask anything about the company
                   </p>
