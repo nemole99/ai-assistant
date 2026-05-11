@@ -5,6 +5,8 @@ import {
 } from "@/components/ai-elements/conversation";
 import {
   Message,
+  MessageAction,
+  MessageActions,
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
@@ -36,15 +38,23 @@ import { useQuery } from "@tanstack/react-query";
 import { env } from "@workspace/env/web";
 import { Button } from "@workspace/ui/components/button";
 import { DefaultChatTransport } from "ai";
-import { BotIcon, CheckIcon, PlusIcon } from "lucide-react";
+import {
+  BotIcon,
+  CheckIcon,
+  ClipboardCheckIcon,
+  ClipboardIcon,
+  PlusIcon,
+  TicketIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AskAiSkeleton } from "./components/ask-ai-skeleton";
 import { ChatError } from "./components/chat-error";
 import { EmptyState } from "./components/empty-state";
+import { TicketDescriptionDialog } from "./components/ticket-description-dialog";
 import { useAskAiDb } from "./hooks/use-ask-ai-db";
 import { useModelAssignment } from "./hooks/use-model-assignment";
 
-const SUGGESTIONS = [
+const CHAT_SUGGESTIONS = [
   "Explain our company's main business areas",
   "What are our core values and working principles?",
   "How does the onboarding process work?",
@@ -54,6 +64,8 @@ const SUGGESTIONS = [
 export function AskAi() {
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [inputText, setInputText] = useState("");
+  const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   // Check if Copilot is connected
   const { data: providers = [], isLoading: isProvidersLoading } = useQuery(
@@ -88,14 +100,29 @@ export function AskAi() {
     modelIdRef.current = selectedModelId;
   }, [selectedModelId]);
 
+  // Holds the full prompt for ticket generation; cleared after the request is sent
+  const ticketPromptRef = useRef<string | null>(null);
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: `${env.VITE_SERVER_URL}/ai/chat`,
         credentials: "include",
         body: () => ({ model: modelIdRef.current }),
+        prepareSendMessagesRequest: ({ messages, body }) => {
+          const fullPrompt = ticketPromptRef.current;
+          ticketPromptRef.current = null;
+          if (!fullPrompt) return { body: { ...body, messages } };
+          // Replace the last user message content with the template prompt
+          const modifiedMessages = messages.map((m, i) =>
+            i === messages.length - 1 && m.role === "user"
+              ? { ...m, parts: [{ type: "text" as const, text: fullPrompt }] }
+              : m,
+          );
+          return { body: { ...body, messages: modifiedMessages } };
+        },
       }),
-    // Re-create only once (model is passed via ref)
+    // Re-create only once (model + ticket prompt are passed via refs)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -137,6 +164,21 @@ export function AskAi() {
     await newChat();
     setMessages([]);
   }, [newChat, setMessages]);
+
+  const handleGenerateTicket = useCallback(
+    (displayText: string, fullPrompt: string) => {
+      ticketPromptRef.current = fullPrompt;
+      sendMessage({ text: displayText });
+    },
+    [sendMessage],
+  );
+
+  const handleCopyMessage = useCallback((id: string, text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedMessageId(id);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    });
+  }, []);
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -202,6 +244,24 @@ export function AskAi() {
                   <MessageContent>
                     <MessageResponse>{getMessageText(message)}</MessageResponse>
                   </MessageContent>
+                  {message.role === "assistant" && getMessageText(message) && (
+                    <MessageActions>
+                      <MessageAction
+                        tooltip={
+                          copiedMessageId === message.id ? "Copied!" : "Copy"
+                        }
+                        onClick={() =>
+                          handleCopyMessage(message.id, getMessageText(message))
+                        }
+                      >
+                        {copiedMessageId === message.id ? (
+                          <ClipboardCheckIcon className="size-4" />
+                        ) : (
+                          <ClipboardIcon className="size-4" />
+                        )}
+                      </MessageAction>
+                    </MessageActions>
+                  )}
                   {/* Inline error on the last assistant message */}
                   {error &&
                     message.role === "assistant" &&
@@ -227,13 +287,21 @@ export function AskAi() {
         <div className="relative w-full max-w-3xl space-y-3">
           {messages.length === 0 && (
             <Suggestions>
-              {SUGGESTIONS.map((s) => (
+              <Suggestion
+                key="ticket"
+                suggestion="Generate ticket description"
+                onClick={() => setTicketDialogOpen(true)}
+              >
+                <TicketIcon className="size-3.5" />
+                Generate ticket description
+              </Suggestion>
+              {/* {CHAT_SUGGESTIONS.map((s) => (
                 <Suggestion
                   key={s}
                   suggestion={s}
                   onClick={handleSuggestionClick}
                 />
-              ))}
+              ))} */}
             </Suggestions>
           )}
           <div className="relative flex-col border bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
@@ -308,6 +376,11 @@ export function AskAi() {
           </div>
         </div>
       </div>
+      <TicketDescriptionDialog
+        open={ticketDialogOpen}
+        onOpenChange={setTicketDialogOpen}
+        onGenerate={handleGenerateTicket}
+      />
     </div>
   );
 }

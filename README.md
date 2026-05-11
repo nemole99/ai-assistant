@@ -69,6 +69,12 @@ Seed danh sách nhân viên mẫu (tuỳ chọn):
 bun run db:seed-employees
 ```
 
+Seed danh sách projects mẫu (tuỳ chọn):
+
+```bash
+bun run db:seed-projects
+```
+
 ### 6. Start the development server
 
 ```bash

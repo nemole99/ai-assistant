@@ -77,6 +77,14 @@ _Avoid_: ProjectState
 - **Manager** của Project tự động là **ProjectMember** của Project đó
 - Chỉ **ADMIN** tạo/sửa/xóa **Project** và quản lý **ProjectMember**
 
+**TicketDescriptionGenerator**:
+Tính năng trong Ask AI cho phép Employee nhập mô tả thô và nhận lại một ticket description đã được AI format theo bảng nội bộ (Background / Purpose / Process / Considerable factors / Resulting Image). Output là text thuần để paste vào Jira — không lưu vào DB, không tạo entity mới. Entry point là suggestion chip trên Ask AI page, mở dialog nhỏ với 1 textarea. Output stream vào conversation như message thường, kèm nút Copy.
+_Avoid_: TicketCreator, TaskGenerator (dễ nhầm là tạo task trong hệ thống)
+
+**Ticket**:
+Task được assign trong Jira — công cụ quản lý công việc bên ngoài hệ thống này. Hệ thống không lưu Ticket; chỉ gen ra description text để Employee paste vào Jira.
+_Avoid_: Task, Issue (trong context nội bộ)
+
 ## Flagged ambiguities
 
 - "Account" được dùng lẫn lộn với User và Employee — đã resolve: dùng **User** cho tài khoản đăng nhập, **Employee** cho hồ sơ nhân sự.

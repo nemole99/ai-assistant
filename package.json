@@ -39,6 +39,7 @@
     "db:push": "turbo -F @workspace/db db:push",
     "db:seed": "turbo -F @workspace/db db:seed",
     "db:seed-employees": "turbo -F @workspace/db db:seed-employees",
+    "db:seed-projects": "turbo -F @workspace/db db:seed-projects",
     "db:studio": "turbo -F @workspace/db db:studio",
     "db:generate": "turbo -F @workspace/db db:generate",
     "db:migrate": "turbo -F @workspace/db db:migrate",

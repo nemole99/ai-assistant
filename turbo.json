@@ -50,6 +50,9 @@
     },
     "db:seed-employees": {
       "cache": false
+    },
+    "db:seed-projects": {
+      "cache": false
     }
   }
 }
