@@ -2,7 +2,11 @@ import { createORPCClient } from "@orpc/client";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  createRootRouteWithContext,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { AppRouterClient } from "@workspace/api/routers/index";
 import { Toaster } from "@workspace/ui/components/sonner";
@@ -25,11 +29,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "workspace",
+        title: "Ewoosoft Internal",
       },
       {
         name: "description",
-        content: "workspace is a web application",
+        content: "Ewoosoft Internal is a web application",
       },
     ],
     links: [

@@ -44,6 +44,12 @@
     },
     "db:down": {
       "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "db:seed-employees": {
+      "cache": false
     }
   }
 }

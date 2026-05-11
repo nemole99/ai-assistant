@@ -25,10 +25,10 @@ const EMPLOYEES = [
   { email: "buddy.nguyen@ewoosoft.com", fullName: "Buddy Nguyen" },
   { email: "mike.bui@ewoosoft.com", fullName: "Mike Bui" },
   { email: "ethan.dang@ewoosoft.com", fullName: "Ethan Dang" },
-  { email: "dan.tran@ewoosoft.com", fullName: "Dan Tran" },
-  { email: "carpenter.luu@ewoosoft.com", fullName: "Carpenter Luu" },
   { email: "billy.bui@ewoosoft.com", fullName: "Billy Bui" },
   { email: "dante.nguyen@ewoosoft.com", fullName: "Dante Nguyen" },
+  { email: "mark.phan@ewoosoft.com", fullName: "Mark Phan" },
+  { email: "joy.luu@ewoosoft.com", fullName: "Joy Luu" },
 ];
 
 async function seedEmployees() {

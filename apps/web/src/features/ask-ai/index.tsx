@@ -29,18 +29,17 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { orpc } from "@/lib/orpc";
 import { useChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { env } from "@workspace/env/web";
-import { Button, buttonVariants } from "@workspace/ui/components/button";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/button";
 import { DefaultChatTransport } from "ai";
 import { BotIcon, CheckIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AskAiSkeleton } from "./components/ask-ai-skeleton";
+import { ChatError } from "./components/chat-error";
 import { EmptyState } from "./components/empty-state";
 import { useAskAiDb } from "./hooks/use-ask-ai-db";
 import { useModelAssignment } from "./hooks/use-model-assignment";
@@ -207,42 +206,16 @@ export function AskAi() {
                   {error &&
                     message.role === "assistant" &&
                     i === messages.length - 1 && (
-                      <div className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                        <p>
-                          {error.message?.includes("403") ||
-                          error.message?.includes("COPILOT_NOT_CONNECTED")
-                            ? "Your GitHub Copilot connection is no longer active."
-                            : "Something went wrong. Please try again."}
-                        </p>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => regenerate()}
-                            size="sm"
-                            variant="outline"
-                          >
-                            Retry
-                          </Button>
-                          {(error.message?.includes("403") ||
-                            error.message?.includes(
-                              "COPILOT_NOT_CONNECTED",
-                            )) && (
-                            <Link
-                              to="/settings/ai-providers"
-                              className={cn(
-                                buttonVariants({
-                                  variant: "outline",
-                                  size: "sm",
-                                }),
-                              )}
-                            >
-                              Reconnect Copilot
-                            </Link>
-                          )}
-                        </div>
-                      </div>
+                      <ChatError error={error} onRetry={regenerate} />
                     )}
                 </Message>
               ))}
+              {/* Fallback error when the last message is from the user (no assistant reply yet) */}
+              {error &&
+                messages.length > 0 &&
+                messages[messages.length - 1]?.role === "user" && (
+                  <ChatError error={error} onRetry={regenerate} />
+                )}
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>

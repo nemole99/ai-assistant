@@ -19,33 +19,76 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 
 ## Getting Started
 
-First, install the dependencies:
+### Prerequisites
+
+- [Bun](https://bun.sh) >= 1.3.11
+- [Node.js](https://nodejs.org) >= 25.8.2
+- [Docker](https://www.docker.com) (for running PostgreSQL locally)
+
+### 1. Install dependencies
 
 ```bash
 bun install
 ```
 
-## Database Setup
+### 2. Configure environment variables
 
-This project uses PostgreSQL with Drizzle ORM.
+Copy the example env file and adjust if needed:
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+```bash
+cp apps/server/.env.example apps/server/.env
+```
 
-3. Apply the schema to your database:
+The defaults already match the Docker Compose config below, so no changes are required for local development.
+
+### 3. Start the database
+
+```bash
+bun run db:start
+```
+
+This spins up a PostgreSQL container on **port 5433** via Docker Compose (`packages/db/docker-compose.yml`).
+
+### 4. Push the schema
 
 ```bash
 bun run db:push
 ```
 
-Then, run the development server:
+### 5. Seed initial data
+
+Seed admin account (bắt buộc lần đầu):
+
+```bash
+bun run db:seed
+```
+
+Seed danh sách nhân viên mẫu (tuỳ chọn):
+
+```bash
+bun run db:seed-employees
+```
+
+### 6. Start the development server
 
 ```bash
 bun run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+- Web app: [http://localhost:5173](http://localhost:5173)
+- API: [http://localhost:3000](http://localhost:3000)
+
+---
+
+### Stopping / cleaning up the database
+
+```bash
+# Stop the container (data is preserved)
+bun run db:stop
+
+# Stop and remove volumes (wipes all data)
+bun run db:down
+```
 
 ## UI Customization
 

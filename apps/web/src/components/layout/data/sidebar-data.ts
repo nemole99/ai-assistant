@@ -15,7 +15,7 @@ import { type SidebarData } from "../types";
 export const sidebarData: SidebarData = {
   teams: [
     {
-      name: "My Well",
+      name: "Ewoosoft Internal",
       logo: Command,
       plan: "Vite + ShadcnUI",
     },
@@ -34,11 +34,11 @@ export const sidebarData: SidebarData = {
     {
       title: "General",
       items: [
-        {
-          title: "Dashboard",
-          url: "/",
-          icon: LayoutDashboard,
-        },
+        // {
+        //   title: "Dashboard",
+        //   url: "/",
+        //   icon: LayoutDashboard,
+        // },
         {
           title: "Ask AI",
           url: "/ask-ai",
