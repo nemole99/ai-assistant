@@ -11,7 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
@@ -39,7 +44,10 @@ export function ProjectsActionDialog({
   const isEdit = !!currentRow;
   const queryClient = useQueryClient();
 
-  const { data: employees = [] } = useQuery(orpc.employee.list.queryOptions());
+  const { data: employees = [] } = useQuery({
+    ...orpc.employee.list.queryOptions(),
+    enabled: open,
+  });
 
   const createMutation = useMutation(
     orpc.project.create.mutationOptions({
@@ -107,9 +115,13 @@ export function ProjectsActionDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
-          <DialogTitle>{isEdit ? "Edit Project" : "Add New Project"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Project" : "Add New Project"}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update the project here. " : "Create a new project here. "}
+            {isEdit
+              ? "Update the project here. "
+              : "Create a new project here. "}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -124,7 +136,8 @@ export function ProjectsActionDialog({
             <form.Field
               name="name"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Name</FieldLabel>
@@ -138,7 +151,9 @@ export function ProjectsActionDialog({
                       autoComplete="off"
                       aria-invalid={isInvalid}
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -146,7 +161,8 @@ export function ProjectsActionDialog({
             <form.Field
               name="description"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Description</FieldLabel>
@@ -161,7 +177,9 @@ export function ProjectsActionDialog({
                       rows={3}
                       aria-invalid={isInvalid}
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -173,7 +191,9 @@ export function ProjectsActionDialog({
                   <FieldLabel htmlFor={field.name}>Status</FieldLabel>
                   <SelectDropdown
                     defaultValue={field.state.value}
-                    onValueChange={(val) => field.handleChange(val as "ACTIVE" | "COMPLETED")}
+                    onValueChange={(val) =>
+                      field.handleChange(val as "ACTIVE" | "COMPLETED")
+                    }
                     placeholder="Select status"
                     items={[
                       { label: "Active", value: "ACTIVE" },
