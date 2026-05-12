@@ -58,12 +58,12 @@ The full `.env.docker.example` documents every available variable.
 
 > **Important — `VITE_SERVER_URL` is a build-time variable.** It is baked into the JS bundle by Vite at `docker compose build` time, not at runtime. Changing `.env.docker` and restarting the container has no effect — you must rebuild the image with the correct value.
 
-> **Important — always pass `--env-file .env.docker`** to every `docker-compose` command. Docker Compose only auto-reads `.env` by default; without this flag, `VITE_SERVER_URL` will be empty at build time and the app will show a blank white page.
+> **Important — always pass `--env-file .env.docker`** to every `docker compose` command. Docker Compose only auto-reads `.env` by default; without this flag, `VITE_SERVER_URL` will be empty at build time and the app will show a blank white page.
 
 ### 2. Start
 
 ```bash
-docker-compose --env-file .env.docker up -d --build
+docker compose --env-file .env.docker up -d --build
 ```
 
 This starts all containers:
@@ -77,7 +77,7 @@ This starts all containers:
 
 The `migrate` service runs before `server` starts, so there is no race condition on first startup.
 
-> **Always pass `--env-file .env.docker --build` when updating** — the web image must be rebuilt any time you change `VITE_SERVER_URL` or pull new code. Use `docker-compose --env-file .env.docker up -d --build` for Ubuntu 20.04.
+> **Always pass `--env-file .env.docker --build` when updating** — the web image must be rebuilt any time you change `VITE_SERVER_URL` or pull new code. Use `docker compose --env-file .env.docker up -d --build`.
 
 ### 3. First login
 
@@ -212,7 +212,7 @@ Open `http://localhost:3001`.
 | `connection refused` on port 5432                             | PostgreSQL not running — run `bun run db:start`                                                                |
 | `BETTER_AUTH_SECRET must be at least 32 characters`           | Generate a proper secret: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`           |
 | `ENCRYPTION_KEY must be a 64-character hex string`            | Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`                           |
-| Frontend still calls old URL after changing `VITE_SERVER_URL` | `VITE_SERVER_URL` is baked in at build time — rebuild: `docker-compose --env-file .env.docker up -d --build`   |
+| Frontend still calls old URL after changing `VITE_SERVER_URL` | `VITE_SERVER_URL` is baked in at build time — rebuild: `docker compose --env-file .env.docker up -d --build`   |
 | CORS errors in browser                                        | Ensure `CORS_ORIGIN` in `.env.docker` exactly matches the URL you open in the browser                          |
 | Auth redirect loop                                            | `BETTER_AUTH_URL` must match the URL you open in the browser (including port)                                  |
 | `migrate` container keeps restarting                          | Database credentials mismatch — check `DATABASE_URL` matches `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` |
