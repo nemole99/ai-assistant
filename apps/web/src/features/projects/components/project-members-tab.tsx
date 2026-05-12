@@ -25,11 +25,7 @@ type ProjectMembersTabProps = {
   members: ProjectMember[];
 };
 
-export function ProjectMembersTab({
-  projectId,
-  managerId,
-  members,
-}: ProjectMembersTabProps) {
+export function ProjectMembersTab({ projectId, managerId, members }: ProjectMembersTabProps) {
   const [addOpen, setAddOpen] = useState(false);
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
@@ -52,11 +48,7 @@ export function ProjectMembersTab({
     <div className="space-y-4">
       {isAdmin && (
         <div className="flex justify-end">
-          <Button
-            size="sm"
-            onClick={() => setAddOpen(true)}
-            className="gap-1.5"
-          >
+          <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
             <UserPlus className="size-4" />
             Add Member
           </Button>
@@ -84,25 +76,17 @@ export function ProjectMembersTab({
                 <TableCell>
                   <div>
                     <p className="font-medium">{member.fullName}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {member.email}
-                    </p>
+                    <p className="text-muted-foreground text-xs">{member.email}</p>
                   </div>
                 </TableCell>
                 <TableCell>{member.position}</TableCell>
                 <TableCell>
-                  <Badge
-                    variant={
-                      member.status === "ACTIVE" ? "default" : "secondary"
-                    }
-                  >
+                  <Badge variant={member.status === "ACTIVE" ? "default" : "secondary"}>
                     {member.status}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {member.id === managerId && (
-                    <Badge variant="outline">Manager</Badge>
-                  )}
+                  {member.id === managerId && <Badge variant="outline">Manager</Badge>}
                 </TableCell>
                 {isAdmin && (
                   <TableCell>

@@ -22,28 +22,26 @@ const projectMemberSchema = selectEmployeeSchema.extend({
 });
 
 export const projectRouter = {
-  list: protectedProcedure
-    .output(z.array(projectWithStatsSchema))
-    .handler(async () => {
-      const rows = await db
-        .select({
-          id: project.id,
-          name: project.name,
-          description: project.description,
-          status: project.status,
-          managerId: project.managerId,
-          createdAt: project.createdAt,
-          updatedAt: project.updatedAt,
-          memberCount: count(projectMember.employeeId),
-          managerName: sql<string | null>`(
+  list: protectedProcedure.output(z.array(projectWithStatsSchema)).handler(async () => {
+    const rows = await db
+      .select({
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        status: project.status,
+        managerId: project.managerId,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        memberCount: count(projectMember.employeeId),
+        managerName: sql<string | null>`(
           SELECT full_name FROM employee WHERE id = ${project.managerId}
         )`,
-        })
-        .from(project)
-        .leftJoin(projectMember, eq(projectMember.projectId, project.id))
-        .groupBy(project.id);
-      return rows;
-    }),
+      })
+      .from(project)
+      .leftJoin(projectMember, eq(projectMember.projectId, project.id))
+      .groupBy(project.id);
+    return rows;
+  }),
 
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -98,11 +96,7 @@ export const projectRouter = {
     .output(selectProjectSchema)
     .handler(async ({ input }) => {
       const { id, ...data } = input;
-      const [updated] = await db
-        .update(project)
-        .set(data)
-        .where(eq(project.id, id))
-        .returning();
+      const [updated] = await db.update(project).set(data).where(eq(project.id, id)).returning();
       if (!updated) throw new ORPCError("NOT_FOUND");
 
       // Auto-add new manager as member if managerId changed
@@ -157,9 +151,7 @@ export const projectRouter = {
       const [emp] = await db
         .select({ id: employee.id })
         .from(employee)
-        .where(
-          and(eq(employee.id, input.employeeId), eq(employee.status, "ACTIVE")),
-        );
+        .where(and(eq(employee.id, input.employeeId), eq(employee.status, "ACTIVE")));
       if (!emp)
         throw new ORPCError("NOT_FOUND", {
           message: "Active employee not found",

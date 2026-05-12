@@ -40,7 +40,6 @@ import { Button } from "@workspace/ui/components/button";
 import { SiriOrb } from "@workspace/ui/components/smoothui/siri-orb";
 import { DefaultChatTransport } from "ai";
 import {
-  BotIcon,
   CheckIcon,
   ClipboardCheckIcon,
   ClipboardIcon,
@@ -55,14 +54,10 @@ import { TicketDescriptionDialog } from "./components/ticket-description-dialog"
 import { useAskAiDb } from "./hooks/use-ask-ai-db";
 import { useModelAssignment } from "./hooks/use-model-assignment";
 
-const CHAT_SUGGESTIONS = [
-  "Explain our company's main business areas",
-  "What are our core values and working principles?",
-  "How does the onboarding process work?",
-  "What departments do we have and what do they do?",
-];
+import { PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react";
+import { ChatHistorySidebar } from "./components/chat-history-sidebar";
 
-export function AskAi() {
+export function AskAi({ conversationId }: { conversationId?: string }) {
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
@@ -77,7 +72,8 @@ export function AskAi() {
   const isCopilotConnected = copilotProvider !== null;
 
   // IndexedDB persistence
-  const { initialMessages, isLoaded, saveMessages, newChat } = useAskAiDb();
+  const { initialMessages, isLoaded, saveMessages, newChat } =
+    useAskAiDb(conversationId);
 
   // Model selection
   const { models, selectedModel, selectedModelId, setSelectedModel } =
@@ -137,26 +133,20 @@ export function AskAi() {
       },
     });
 
-  // Sync initial messages once IndexedDB has loaded
+  // Sync initial messages when conversation switches or finishes loading
   useEffect(() => {
-    if (isLoaded && initialMessages.length > 0 && messages.length === 0) {
+    if (isLoaded) {
       setMessages(initialMessages);
+      setInputText(""); // Reset input when switching chats
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded]);
+  }, [isLoaded, conversationId]);
 
   const handlePromptSubmit = useCallback(
     (message: PromptInputMessage) => {
       if (!message.text.trim()) return;
       sendMessage({ text: message.text });
       setInputText("");
-    },
-    [sendMessage],
-  );
-
-  const handleSuggestionClick = useCallback(
-    (suggestion: string) => {
-      sendMessage({ text: suggestion });
     },
     [sendMessage],
   );
@@ -188,15 +178,7 @@ export function AskAi() {
     [],
   );
 
-  const isInitializing = isProvidersLoading || !isLoaded;
-
-  if (isInitializing) {
-    return <AskAiSkeleton />;
-  }
-
-  if (!isCopilotConnected) {
-    return <EmptyState />;
-  }
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -210,187 +192,221 @@ export function AskAi() {
 
   return (
     <div
+      className="flex size-full flex-col overflow-hidden bg-background"
       data-layout="fixed"
-      className="relative flex size-full flex-col overflow-hidden"
     >
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
-        <h1 className="text-sm font-semibold">Ask AI</h1>
-        <Button
-          onClick={handleNewChat}
-          size="sm"
-          variant="ghost"
-          className="gap-1.5"
-        >
-          <PlusIcon className="size-4" />
-          New Chat
-        </Button>
+      <div className="flex shrink-0 items-center justify-between border-b px-4 py-3 z-20 bg-background">
+        <div className="flex items-center gap-3">
+          <h1 className="text-sm font-semibold">Ask AI</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleNewChat}
+            size="sm"
+            variant="ghost"
+            className="gap-1.5"
+          >
+            <PlusIcon className="size-4" />
+            New Chat
+          </Button>
+          <Button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            title="Toggle chat history"
+          >
+            {sidebarOpen ? (
+              <PanelRightCloseIcon className="size-4" />
+            ) : (
+              <PanelRightOpenIcon className="size-4" />
+            )}
+          </Button>
+        </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex flex-1 justify-center overflow-hidden">
-        <div className="flex w-full max-w-3xl flex-col overflow-hidden">
-          <Conversation>
-            <ConversationContent>
-              {messages.length === 0 && !isStreaming && (
-                <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-                  <SiriOrb
-                    size="100px"
-                    animationDuration={15}
-                    colors={{
-                      bg: "oklch(98% 0.01 220)",
-                      c1: "oklch(60% 0.15 186)", // Xanh Cyan/Teal (tương đồng theme --primary)
-                      c2: "oklch(70% 0.12 210)", // Xanh dương nhạt
-                      c3: "oklch(65% 0.1 160)", // Xanh ngọc
-                    }}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Ask anything about the company
-                  </p>
-                </div>
-              )}
-              {messages.map((message, i) => (
-                <Message from={message.role} key={message.id}>
-                  <MessageContent>
-                    <MessageResponse>{getMessageText(message)}</MessageResponse>
-                  </MessageContent>
-                  {message.role === "assistant" && getMessageText(message) && (
-                    <MessageActions>
-                      <MessageAction
-                        tooltip={
-                          copiedMessageId === message.id ? "Copied!" : "Copy"
-                        }
-                        onClick={() =>
-                          handleCopyMessage(message.id, getMessageText(message))
-                        }
-                      >
-                        {copiedMessageId === message.id ? (
-                          <ClipboardCheckIcon className="size-4" />
-                        ) : (
-                          <ClipboardIcon className="size-4" />
-                        )}
-                      </MessageAction>
-                    </MessageActions>
-                  )}
-                  {/* Inline error on the last assistant message */}
-                  {error &&
-                    message.role === "assistant" &&
-                    i === messages.length - 1 && (
-                      <ChatError error={error} onRetry={regenerate} />
+      {isProvidersLoading ? (
+        <AskAiSkeleton />
+      ) : !isCopilotConnected ? (
+        <EmptyState />
+      ) : (
+        <div className="relative flex flex-1 overflow-hidden">
+          <div className="flex flex-1 flex-col min-w-0">
+            {/* Messages */}
+            <div className="flex flex-1 justify-center overflow-hidden">
+              <div className="flex w-full max-w-3xl flex-col overflow-hidden">
+                <Conversation>
+                  <ConversationContent>
+                    {messages.length === 0 && !isStreaming && (
+                      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+                        <SiriOrb
+                          size="100px"
+                          animationDuration={15}
+                          colors={{
+                            bg: "oklch(98% 0.01 220)", // match background
+                            c1: "oklch(60% 0.15 186)",
+                            c2: "oklch(70% 0.12 210)",
+                            c3: "oklch(65% 0.1 160)",
+                          }}
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Ask anything about the company
+                        </p>
+                      </div>
                     )}
-                </Message>
-              ))}
-              {/* Fallback error when the last message is from the user (no assistant reply yet) */}
-              {error &&
-                messages.length > 0 &&
-                messages[messages.length - 1]?.role === "user" && (
-                  <ChatError error={error} onRetry={regenerate} />
-                )}
-            </ConversationContent>
-            <ConversationScrollButton />
-          </Conversation>
-        </div>
-      </div>
-
-      {/* Input area */}
-      <div className="flex shrink-0 justify-center px-4 pb-6 pt-2">
-        <div className="relative w-full max-w-3xl space-y-3">
-          {messages.length === 0 && (
-            <Suggestions>
-              <Suggestion
-                key="ticket"
-                suggestion="Generate ticket description"
-                onClick={() => setTicketDialogOpen(true)}
-              >
-                <TicketIcon className="size-3.5" />
-                Generate ticket description
-              </Suggestion>
-              {/* {CHAT_SUGGESTIONS.map((s) => (
-                <Suggestion
-                  key={s}
-                  suggestion={s}
-                  onClick={handleSuggestionClick}
-                />
-              ))} */}
-            </Suggestions>
-          )}
-          <div className="relative flex-col border bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
-            <PromptInput
-              onSubmit={handlePromptSubmit}
-              className="px-3 py-1 **:data-[slot=input-group]:border-none"
-            >
-              <PromptInputBody>
-                <PromptInputTextarea
-                  onChange={handleTextChange}
-                  value={inputText}
-                  placeholder="Ask anything about the company..."
-                />
-              </PromptInputBody>
-              <PromptInputFooter>
-                <PromptInputTools>
-                  {/* Model selector */}
-                  <ModelSelector
-                    open={modelSelectorOpen}
-                    onOpenChange={setModelSelectorOpen}
-                  >
-                    <ModelSelectorTrigger className="inline-flex h-8 items-center gap-1.5 rounded px-2 text-xs hover:bg-muted">
-                      {selectedModel && (
-                        <>
-                          <ModelSelectorLogo provider="github-copilot" />
-                          <ModelSelectorName>
-                            {selectedModel.name}
-                          </ModelSelectorName>
-                        </>
+                    {messages.map((message, i) => (
+                      <Message from={message.role} key={message.id}>
+                        <MessageContent>
+                          <MessageResponse>
+                            {getMessageText(message)}
+                          </MessageResponse>
+                        </MessageContent>
+                        {message.role === "assistant" &&
+                          getMessageText(message) && (
+                            <MessageActions>
+                              <MessageAction
+                                tooltip={
+                                  copiedMessageId === message.id
+                                    ? "Copied!"
+                                    : "Copy"
+                                }
+                                onClick={() =>
+                                  handleCopyMessage(
+                                    message.id,
+                                    getMessageText(message),
+                                  )
+                                }
+                              >
+                                {copiedMessageId === message.id ? (
+                                  <ClipboardCheckIcon className="size-4" />
+                                ) : (
+                                  <ClipboardIcon className="size-4" />
+                                )}
+                              </MessageAction>
+                            </MessageActions>
+                          )}
+                        {error &&
+                          message.role === "assistant" &&
+                          i === messages.length - 1 && (
+                            <ChatError error={error} onRetry={regenerate} />
+                          )}
+                      </Message>
+                    ))}
+                    {error &&
+                      messages.length > 0 &&
+                      messages[messages.length - 1]?.role === "user" && (
+                        <ChatError error={error} onRetry={regenerate} />
                       )}
-                    </ModelSelectorTrigger>
-                    <ModelSelectorContent>
-                      <ModelSelectorInput placeholder="Search models..." />
-                      <ModelSelectorList>
-                        <ModelSelectorEmpty>
-                          No models found.
-                        </ModelSelectorEmpty>
-                        {Object.entries(modelsByVendor).map(
-                          ([vendor, vendorModels]) => (
-                            <ModelSelectorGroup heading={vendor} key={vendor}>
-                              {vendorModels.map((m) => (
-                                <ModelSelectorItem
-                                  key={m.id}
-                                  value={m.id}
-                                  onSelect={() => {
-                                    setSelectedModel(m.id);
-                                    setModelSelectorOpen(false);
-                                  }}
-                                >
-                                  <ModelSelectorLogo provider="github-copilot" />
-                                  <ModelSelectorName>
-                                    {m.name}
-                                  </ModelSelectorName>
-                                  {selectedModelId === m.id && (
-                                    <CheckIcon className="ml-auto size-4" />
-                                  )}
-                                </ModelSelectorItem>
-                              ))}
-                            </ModelSelectorGroup>
-                          ),
-                        )}
-                      </ModelSelectorList>
-                    </ModelSelectorContent>
-                  </ModelSelector>
-                </PromptInputTools>
-                <PromptInputSubmit
-                  disabled={!inputText.trim() || isStreaming}
-                  status={isStreaming ? "streaming" : "ready"}
-                />
-              </PromptInputFooter>
-            </PromptInput>
+                  </ConversationContent>
+                  <ConversationScrollButton />
+                </Conversation>
+              </div>
+            </div>
+
+            {/* Input area */}
+            <div className="flex shrink-0 justify-center px-4 pb-6 pt-2">
+              <div className="relative w-full max-w-3xl space-y-3">
+                {messages.length === 0 && (
+                  <Suggestions>
+                    <Suggestion
+                      key="ticket"
+                      suggestion="Generate ticket description"
+                      onClick={() => setTicketDialogOpen(true)}
+                    >
+                      <TicketIcon className="size-3.5" />
+                      Generate ticket description
+                    </Suggestion>
+                  </Suggestions>
+                )}
+                <div className="relative flex-col border bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
+                  <PromptInput
+                    onSubmit={handlePromptSubmit}
+                    className="px-3 py-1 **:data-[slot=input-group]:border-none"
+                  >
+                    <PromptInputBody>
+                      <PromptInputTextarea
+                        onChange={handleTextChange}
+                        value={inputText}
+                        placeholder="Ask anything about the company..."
+                      />
+                    </PromptInputBody>
+                    <PromptInputFooter>
+                      <PromptInputTools>
+                        <ModelSelector
+                          open={modelSelectorOpen}
+                          onOpenChange={setModelSelectorOpen}
+                        >
+                          <ModelSelectorTrigger className="inline-flex h-8 items-center gap-1.5 rounded px-2 text-xs hover:bg-muted">
+                            {selectedModel && (
+                              <>
+                                <ModelSelectorLogo provider="github-copilot" />
+                                <ModelSelectorName>
+                                  {selectedModel.name}
+                                </ModelSelectorName>
+                              </>
+                            )}
+                          </ModelSelectorTrigger>
+                          <ModelSelectorContent>
+                            <ModelSelectorInput placeholder="Search models..." />
+                            <ModelSelectorList>
+                              <ModelSelectorEmpty>
+                                No models found.
+                              </ModelSelectorEmpty>
+                              {Object.entries(modelsByVendor).map(
+                                ([vendor, vendorModels]) => (
+                                  <ModelSelectorGroup
+                                    heading={vendor}
+                                    key={vendor}
+                                  >
+                                    {vendorModels.map((m) => (
+                                      <ModelSelectorItem
+                                        key={m.id}
+                                        value={m.id}
+                                        onSelect={() => {
+                                          setSelectedModel(m.id);
+                                          setModelSelectorOpen(false);
+                                        }}
+                                      >
+                                        <ModelSelectorLogo provider="github-copilot" />
+                                        <ModelSelectorName>
+                                          {m.name}
+                                        </ModelSelectorName>
+                                        {selectedModelId === m.id && (
+                                          <CheckIcon className="ml-auto size-4" />
+                                        )}
+                                      </ModelSelectorItem>
+                                    ))}
+                                  </ModelSelectorGroup>
+                                ),
+                              )}
+                            </ModelSelectorList>
+                          </ModelSelectorContent>
+                        </ModelSelector>
+                      </PromptInputTools>
+                      <PromptInputSubmit
+                        disabled={!inputText.trim() || isStreaming}
+                        status={isStreaming ? "streaming" : "ready"}
+                      />
+                    </PromptInputFooter>
+                  </PromptInput>
+                </div>
+              </div>
+            </div>
+            <TicketDescriptionDialog
+              open={ticketDialogOpen}
+              onOpenChange={setTicketDialogOpen}
+              onGenerate={handleGenerateTicket}
+            />
           </div>
+
+          {/* Right Sidebar for History */}
+          <ChatHistorySidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
         </div>
-      </div>
-      <TicketDescriptionDialog
-        open={ticketDialogOpen}
-        onOpenChange={setTicketDialogOpen}
-        onGenerate={handleGenerateTicket}
-      />
+      )}
     </div>
   );
 }

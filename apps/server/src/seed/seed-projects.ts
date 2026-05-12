@@ -43,11 +43,7 @@ const PROJECTS: {
     description: "GPP internal project.",
     status: "COMPLETED",
     managerEmail: "nemo.le@ewoosoft.com",
-    memberEmails: [
-      "nemo.le@ewoosoft.com",
-      "lotus.duong@ewoosoft.com",
-      "helen.dao@ewoosoft.com",
-    ],
+    memberEmails: ["nemo.le@ewoosoft.com", "lotus.duong@ewoosoft.com", "helen.dao@ewoosoft.com"],
   },
 ];
 
@@ -55,9 +51,7 @@ async function seedProjects() {
   console.log("🌱 Seeding projects...");
 
   // Load all employees indexed by email for fast lookup
-  const allEmails = [
-    ...new Set(PROJECTS.flatMap((p) => [p.managerEmail, ...p.memberEmails])),
-  ];
+  const allEmails = [...new Set(PROJECTS.flatMap((p) => [p.managerEmail, ...p.memberEmails]))];
 
   const employees = await db
     .select({ id: employee.id, email: employee.email })
@@ -101,9 +95,7 @@ async function seedProjects() {
     for (const email of proj.memberEmails) {
       const empId = employeeByEmail.get(email);
       if (!empId) {
-        console.warn(
-          `  ⚠ Member employee not found for email "${email}", skipping.`,
-        );
+        console.warn(`  ⚠ Member employee not found for email "${email}", skipping.`);
         continue;
       }
       memberRows.push({ projectId, employeeId: empId });

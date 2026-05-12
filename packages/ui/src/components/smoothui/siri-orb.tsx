@@ -102,10 +102,7 @@ const SiriOrb: React.FC<SiriOrbProps> = ({
       return CONTRAST_TINY; // Very subtle contrast for tiny sizes
     }
     if (value < SIZE_THRESHOLD_SMALL) {
-      return Math.max(
-        contrastAmount * CONTRAST_MULTIPLIER_FINAL,
-        CONTRAST_MIN_FINAL,
-      ); // Reduced contrast for small sizes
+      return Math.max(contrastAmount * CONTRAST_MULTIPLIER_FINAL, CONTRAST_MIN_FINAL); // Reduced contrast for small sizes
     }
     return contrastAmount;
   };

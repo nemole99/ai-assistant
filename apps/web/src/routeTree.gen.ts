@@ -27,6 +27,7 @@ import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
+import { Route as AuthenticatedAskAiConversationIdRouteImport } from './routes/_authenticated/ask-ai/$conversationId'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -126,6 +127,12 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAskAiConversationIdRoute =
+  AuthenticatedAskAiConversationIdRouteImport.update({
+    id: '/ask-ai/$conversationId',
+    path: '/ask-ai/$conversationId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
+  '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
@@ -175,6 +184,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/ask-ai/$conversationId'
     | '/errors/$error'
     | '/projects/$projectId'
     | '/settings/ai-providers'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/'
+    | '/ask-ai/$conversationId'
     | '/errors/$error'
     | '/projects/$projectId'
     | '/settings/ai-providers'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/_authenticated/ask-ai/$conversationId'
     | '/_authenticated/errors/$error'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ask-ai/$conversationId': {
+      id: '/_authenticated/ask-ai/$conversationId'
+      path: '/ask-ai/$conversationId'
+      fullPath: '/ask-ai/$conversationId'
+      preLoaderRoute: typeof AuthenticatedAskAiConversationIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -408,6 +428,7 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAskAiConversationIdRoute: typeof AuthenticatedAskAiConversationIdRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
@@ -419,6 +440,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAskAiConversationIdRoute: AuthenticatedAskAiConversationIdRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,

@@ -11,12 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { orpc } from "@/lib/orpc";
@@ -93,13 +88,9 @@ export function DepartmentsActionDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
-          <DialogTitle>
-            {isEdit ? "Edit Department" : "Add New Department"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Department" : "Add New Department"}</DialogTitle>
           <DialogDescription>
-            {isEdit
-              ? "Update the department here. "
-              : "Create a new department here. "}
+            {isEdit ? "Update the department here. " : "Create a new department here. "}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -114,8 +105,7 @@ export function DepartmentsActionDialog({
             <form.Field
               name="name"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Name</FieldLabel>
@@ -129,9 +119,7 @@ export function DepartmentsActionDialog({
                       autoComplete="off"
                       aria-invalid={isInvalid}
                     />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
               }}
@@ -139,13 +127,10 @@ export function DepartmentsActionDialog({
             <form.Field
               name="description"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      Description (optional)
-                    </FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Description (optional)</FieldLabel>
                     <Textarea
                       id={field.name}
                       name={field.name}
@@ -156,9 +141,7 @@ export function DepartmentsActionDialog({
                       placeholder="Brief description of the department"
                       aria-invalid={isInvalid}
                     />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
               }}

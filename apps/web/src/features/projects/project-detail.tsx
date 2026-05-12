@@ -2,12 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FolderKanban, ArrowLeft, Clock, CheckCircle2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/badge";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@workspace/ui/components/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@workspace/ui/components/tabs";
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { orpc } from "@/lib/orpc";
@@ -47,15 +42,9 @@ function ProjectDetailInner({ projectId }: ProjectDetailProps) {
                 <FolderKanban className="size-5" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold tracking-tight">
-                  {project.name}
-                </h2>
+                <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                  <Badge
-                    variant={
-                      project.status === "ACTIVE" ? "default" : "secondary"
-                    }
-                  >
+                  <Badge variant={project.status === "ACTIVE" ? "default" : "secondary"}>
                     {project.status === "ACTIVE" ? (
                       <Clock className="mr-1 size-3" />
                     ) : (
@@ -63,16 +52,12 @@ function ProjectDetailInner({ projectId }: ProjectDetailProps) {
                     )}
                     {project.status === "ACTIVE" ? "Active" : "Completed"}
                   </Badge>
-                  {project.managerName && (
-                    <span>Manager: {project.managerName}</span>
-                  )}
+                  {project.managerName && <span>Manager: {project.managerName}</span>}
                 </div>
               </div>
             </div>
             {project.description && (
-              <p className="text-muted-foreground mt-3 text-sm">
-                {project.description}
-              </p>
+              <p className="text-muted-foreground mt-3 text-sm">{project.description}</p>
             )}
           </div>
         </div>
@@ -80,9 +65,7 @@ function ProjectDetailInner({ projectId }: ProjectDetailProps) {
         <Tabs defaultValue="members">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="members">
-              Members ({project.memberCount})
-            </TabsTrigger>
+            <TabsTrigger value="members">Members ({project.memberCount})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
