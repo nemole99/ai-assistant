@@ -2,31 +2,34 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback } from "react";
 import type { UIMessage } from "ai";
 import { db, type Conversation, type ChatMessage } from "../db";
+import { useRouter } from "@tanstack/react-router";
 
-export function useAskAiDb() {
-  // Load the most recent conversation
-  const currentConversation = useLiveQuery(
-    () => db.conversations.orderBy("updatedAt").last() ?? Promise.resolve(null),
-    [],
-  );
+export function useAskAiDb(targetConversationId?: string) {
+  const router = useRouter();
 
-  const conversationId = currentConversation?.id ?? null;
+  // If a target ID is provided, use it directly.
+  // Otherwise, don't auto-fetch the latest. The user is starting a "new chat".
+  const conversationId = targetConversationId || null;
 
   // Load messages for the current conversation
-  const storedMessages = useLiveQuery(
-    () =>
-      conversationId
-        ? db.messages.where("conversationId").equals(conversationId).sortBy("createdAt")
-        : Promise.resolve([]),
-    [conversationId],
-  );
+  const storedData = useLiveQuery(async () => {
+    const messages = conversationId
+      ? await db.messages
+          .where("conversationId")
+          .equals(conversationId)
+          .sortBy("createdAt")
+      : ([] as ChatMessage[]);
+    return { conversationId, messages };
+  }, [conversationId]);
 
-  const initialMessages: UIMessage[] = (storedMessages ?? []).map((m) => ({
-    id: m.id,
-    role: m.role,
-    parts: [{ type: "text" as const, text: m.content }],
-    content: m.content,
-  }));
+  const initialMessages: UIMessage[] = (storedData?.messages ?? []).map(
+    (m) => ({
+      id: m.id,
+      role: m.role,
+      parts: [{ type: "text" as const, text: (m as any).content }],
+      content: (m as any).content,
+    }),
+  );
 
   const saveMessages = useCallback(
     async (messages: UIMessage[]) => {
@@ -37,10 +40,10 @@ export function useAskAiDb() {
         convId = crypto.randomUUID();
         const firstUserMsg = messages.find((m) => m.role === "user");
         const title = firstUserMsg
-          ? typeof firstUserMsg.content === "string"
-            ? firstUserMsg.content
-            : // @ts-expect-error text is on text parts
-              (firstUserMsg.parts?.find((p) => p.type === "text")?.text ?? "New Chat")
+          ? typeof (firstUserMsg as any).content === "string"
+            ? (firstUserMsg as any).content
+            : (firstUserMsg.parts?.find((p) => p.type === "text")?.text ??
+              "New Chat")
           : "New Chat";
 
         const conv: Conversation = {
@@ -50,6 +53,12 @@ export function useAskAiDb() {
           updatedAt: now,
         };
         await db.conversations.add(conv);
+        setTimeout(() => {
+          router.navigate({
+            to: "/ask-ai/$conversationId",
+            params: { conversationId: convId! },
+          });
+        }, 0);
       } else {
         await db.conversations.update(convId, { updatedAt: now });
       }
@@ -61,32 +70,29 @@ export function useAskAiDb() {
           conversationId: convId!,
           role: m.role as "user" | "assistant",
           content:
-            typeof m.content === "string"
-              ? m.content
-              : // @ts-expect-error text is on text parts
-                (m.parts?.find((p) => p.type === "text")?.text ?? ""),
+            typeof (m as any).content === "string"
+              ? (m as any).content
+              : (m.parts?.find((p) => p.type === "text")?.text ?? ""),
           createdAt: now + i,
         }));
 
       // Upsert all messages
       await db.messages.bulkPut(dbMessages);
     },
-    [conversationId],
+    [conversationId, router],
   );
 
   const newChat = useCallback(async () => {
-    if (conversationId) {
-      // Don't delete history — just create a new conversation on next save
-      // We achieve "new chat" by moving to a new conversationId by clearing
-      // the current one from local state. We do this by setting updatedAt far back.
-      await db.conversations.update(conversationId, { updatedAt: 0 });
-    }
-  }, [conversationId]);
+    router.navigate({ to: "/ask-ai" });
+  }, [router]);
 
   return {
     conversationId,
     initialMessages,
-    isLoaded: storedMessages !== undefined,
+    isLoaded: targetConversationId
+      ? storedData !== undefined &&
+        storedData.conversationId === targetConversationId
+      : true,
     saveMessages,
     newChat,
   };

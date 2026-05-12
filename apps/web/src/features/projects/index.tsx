@@ -18,9 +18,7 @@ import { ProjectsPrimaryButtons } from "./components/projects-primary-buttons";
 import { ProjectsProvider } from "./components/projects-provider";
 
 export function Projects() {
-  const { data: projects = [], isLoading } = useQuery(
-    orpc.project.list.queryOptions(),
-  );
+  const { data: projects = [], isLoading } = useQuery(orpc.project.list.queryOptions());
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === "ADMIN";
 
@@ -30,9 +28,7 @@ export function Projects() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Projects</h2>
-            <p className="text-muted-foreground">
-              Manage projects and their team members.
-            </p>
+            <p className="text-muted-foreground">Manage projects and their team members.</p>
           </div>
           {isAdmin && <ProjectsPrimaryButtons />}
         </div>
@@ -46,8 +42,8 @@ export function Projects() {
               </EmptyMedia>
               <EmptyTitle>No projects yet</EmptyTitle>
               <EmptyDescription>
-                Get started by creating your first project to organize employees
-                and manage knowledge.
+                Get started by creating your first project to organize employees and manage
+                knowledge.
               </EmptyDescription>
             </EmptyHeader>
             {isAdmin && (

@@ -11,12 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { orpc } from "@/lib/orpc";
@@ -45,9 +40,7 @@ export function EmployeesActionDialog({
   const isEdit = !!currentRow;
   const queryClient = useQueryClient();
 
-  const { data: departments = [] } = useQuery(
-    orpc.department.list.queryOptions(),
-  );
+  const { data: departments = [] } = useQuery(orpc.department.list.queryOptions());
 
   const createMutation = useMutation(
     orpc.employee.create.mutationOptions({
@@ -106,13 +99,9 @@ export function EmployeesActionDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
-          <DialogTitle>
-            {isEdit ? "Edit Employee" : "Add New Employee"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Employee" : "Add New Employee"}</DialogTitle>
           <DialogDescription>
-            {isEdit
-              ? "Update the employee here. "
-              : "Create a new employee here. "}
+            {isEdit ? "Update the employee here. " : "Create a new employee here. "}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -128,17 +117,13 @@ export function EmployeesActionDialog({
             <form.Field
               name="fullName"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel
-                      className="col-span-2 text-end"
-                      htmlFor={field.name}
-                    >
+                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
                       Full Name
                     </FieldLabel>
                     <Input
@@ -165,17 +150,13 @@ export function EmployeesActionDialog({
             <form.Field
               name="email"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel
-                      className="col-span-2 text-end"
-                      htmlFor={field.name}
-                    >
+                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
                       Email
                     </FieldLabel>
                     <Input
@@ -201,17 +182,13 @@ export function EmployeesActionDialog({
             <form.Field
               name="position"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel
-                      className="col-span-2 text-end"
-                      htmlFor={field.name}
-                    >
+                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
                       Position
                     </FieldLabel>
                     <Input
@@ -237,17 +214,13 @@ export function EmployeesActionDialog({
             <form.Field
               name="departmentId"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel
-                      className="col-span-2 text-end"
-                      htmlFor={field.name}
-                    >
+                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
                       Department
                     </FieldLabel>
                     <SelectDropdown

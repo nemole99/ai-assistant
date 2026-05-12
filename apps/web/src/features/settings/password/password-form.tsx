@@ -3,12 +3,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { PasswordInput } from "@workspace/ui/components/password-input";
 
 const passwordFormSchema = z

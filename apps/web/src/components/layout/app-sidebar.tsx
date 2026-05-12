@@ -23,8 +23,7 @@ export function AppSidebar() {
     .map((g) => {
       if (!isEmployee) return g;
       const filtered = g.items.filter(
-        (item) =>
-          !("url" in item) || !EMPLOYEE_HIDDEN_ITEMS.has(item.url as string),
+        (item) => !("url" in item) || !EMPLOYEE_HIDDEN_ITEMS.has(item.url as string),
       );
       return { ...g, items: filtered };
     })

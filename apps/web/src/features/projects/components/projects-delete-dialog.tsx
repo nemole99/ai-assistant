@@ -4,11 +4,7 @@ import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@workspace/ui/components/alert";
+import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -21,11 +17,7 @@ type ProjectDeleteDialogProps = {
   currentRow: Project;
 };
 
-export function ProjectsDeleteDialog({
-  open,
-  onOpenChange,
-  currentRow,
-}: ProjectDeleteDialogProps) {
+export function ProjectsDeleteDialog({ open, onOpenChange, currentRow }: ProjectDeleteDialogProps) {
   const [value, setValue] = useState("");
   const queryClient = useQueryClient();
 
@@ -54,11 +46,8 @@ export function ProjectsDeleteDialog({
       disabled={value.trim() !== currentRow.name || deleteMutation.isPending}
       title={
         <span className="text-destructive">
-          <AlertTriangle
-            className="me-1 inline-block stroke-destructive"
-            size={18}
-          />{" "}
-          Delete Project
+          <AlertTriangle className="me-1 inline-block stroke-destructive" size={18} /> Delete
+          Project
         </span>
       }
       desc={
@@ -71,18 +60,15 @@ export function ProjectsDeleteDialog({
           className="space-y-4"
         >
           <p className="mb-2">
-            Are you sure you want to delete{" "}
-            <span className="font-bold">{currentRow.name}</span>?
+            Are you sure you want to delete <span className="font-bold">{currentRow.name}</span>?
             <br />
-            This action will permanently remove the project and all its members
-            and cannot be undone.
+            This action will permanently remove the project and all its members and cannot be
+            undone.
           </p>
           <Alert variant="destructive">
             <AlertTriangle className="size-4" />
             <AlertTitle>Warning!</AlertTitle>
-            <AlertDescription>
-              All project membership data will be lost.
-            </AlertDescription>
+            <AlertDescription>All project membership data will be lost.</AlertDescription>
           </Alert>
           <Label className="my-2">
             Project name:

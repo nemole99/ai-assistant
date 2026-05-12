@@ -8,12 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { TicketIcon } from "lucide-react";
 
@@ -52,8 +47,8 @@ export function TicketDescriptionDialog({
             Generate Ticket Description
           </DialogTitle>
           <DialogDescription>
-            Describe your task in plain language. AI will generate a structured
-            Jira ticket description.
+            Describe your task in plain language. AI will generate a structured Jira ticket
+            description.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -66,8 +61,7 @@ export function TicketDescriptionDialog({
             <form.Field
               name="description"
               validators={{
-                onSubmit: ({ value }) =>
-                  !value.trim() ? "Description is required." : undefined,
+                onSubmit: ({ value }) => (!value.trim() ? "Description is required." : undefined),
               }}
             >
               {(field) => (
@@ -87,11 +81,7 @@ export function TicketDescriptionDialog({
             </form.Field>
           </FieldGroup>
           <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit">Generate</Button>
