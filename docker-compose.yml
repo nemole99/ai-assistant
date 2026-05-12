@@ -1,0 +1,73 @@
+# Backend image built once, reused by migrate + server
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: ai-assistant-server:latest
+  env_file: [.env.docker]
+  restart: always
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  # ── Infrastructure ────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16
+    container_name: ai_assistant_postgres
+    restart: always
+    env_file: [.env.docker]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Migration (runs once, then exits) ─────────────────────────
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: ai-assistant-migrate:latest
+    container_name: ai_assistant_migrate
+    env_file: [.env.docker]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-c", "cd /app/packages/db && bun run db:push"]
+
+  # ── Application ───────────────────────────────────────────────
+
+  server:
+    <<: *backend
+    container_name: ai_assistant_server
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - "3000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_SERVER_URL: ${VITE_SERVER_URL}
+    image: ai-assistant-web:latest
+    container_name: ai_assistant_web
+    restart: always
+    ports:
+      - "2103:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:

@@ -5,8 +5,14 @@ import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createContext } from "@workspace/api/context";
 import { appRouter } from "@workspace/api/routers/index";
-import { getCopilotSession, invalidateCopilotSession } from "@workspace/api/copilot-session-cache";
+import {
+  getCopilotSession,
+  invalidateCopilotSession,
+} from "@workspace/api/copilot-session-cache";
 import { auth } from "@workspace/auth";
+import { db } from "@workspace/db";
+import { user } from "@workspace/db/schema/auth";
+import { eq } from "drizzle-orm";
 import { env } from "@workspace/env/server";
 import { streamText, convertToModelMessages } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -128,5 +134,40 @@ app.post("/ai/chat", async (c) => {
 app.get("/", (c) => {
   return c.text("OK");
 });
+
+// Auto-seed admin account on startup if none exists
+async function ensureAdminExists() {
+  const existing = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.role, "ADMIN"))
+    .limit(1);
+
+  if (existing.length > 0) return;
+
+  const result = await auth.api.signUpEmail({
+    body: {
+      email: env.ADMIN_EMAIL,
+      password: env.ADMIN_PASSWORD,
+      name: "Admin",
+    },
+  });
+
+  if (!result?.user?.id) {
+    console.error("❌ Failed to create admin account");
+    return;
+  }
+
+  await db
+    .update(user)
+    .set({ role: "ADMIN", mustChangePassword: false })
+    .where(eq(user.id, result.user.id));
+
+  console.log(`✅ Admin account created: ${env.ADMIN_EMAIL}`);
+}
+
+ensureAdminExists().catch((err) =>
+  console.error("❌ ensureAdminExists failed:", err),
+);
 
 export default app;
