@@ -226,7 +226,6 @@ export const aiModelAssignment = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     providerId: text("provider_id")
-      .notNull()
       .references(() => aiProvider.id, { onDelete: "cascade" }),
     purpose: modelPurposeEnum("purpose").notNull(),
     model: text("model").notNull(),

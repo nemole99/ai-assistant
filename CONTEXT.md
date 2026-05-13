@@ -39,11 +39,11 @@ _Avoid_: Permission, Access Level
 > **Domain expert:** "Không nhất thiết — `managerId` chỉ trỏ vào Employee. Role kiểm soát quyền trong app, còn ai là manager của department là dữ liệu tổ chức."
 
 **AIProvider**:
-Credential của một User với một AI service bên ngoài (GitHub Copilot, OpenAI, Google, Anthropic). Lưu encrypted token/API key. Mỗi User có tối đa một AIProvider per provider type.
+Credential của một User với một AI service bên ngoài (phân loại là User Provider, ví dụ: GitHub Copilot, OpenAI). Lưu encrypted token/API key. Mỗi User có tối đa một AIProvider per provider type. Hệ thống cũng hỗ trợ **System Provider** (như Ollama) được cấu hình toàn cục qua biến môi trường (DevOps config, ví dụ: `OLLAMA_BASE_URL`), không có giao diện Web Admin và không cần record AIProvider trong DB.
 _Avoid_: Integration, Connection, Account
 
 **AIModelAssignment**:
-Mapping từ một mục đích AI (`chat`, `embedding`, `vision`) tới một model cụ thể và AIProvider của User đó. Mỗi User có tối đa một AIModelAssignment per purpose.
+Mapping từ một mục đích AI (`chat`, `embedding`, `vision`) tới một model cụ thể. Có thể liên kết với một **AIProvider** của User (nếu là User Provider) hoặc không liên kết provider nào (nếu dùng System Provider như Ollama). Mỗi User có tối đa một AIModelAssignment per purpose.
 _Avoid_: ModelConfig, ModelPreference
 
 **ModelPurpose**:
@@ -54,7 +54,7 @@ _Avoid_: ModelType, ModelRole
 
 - Một **User** có thể có nhiều **AIProvider** (tối đa 1 per provider type)
 - Một **AIProvider** liên kết với đúng một **User**
-- Một **AIModelAssignment** liên kết với đúng một **User** và một **AIProvider**
+- Một **AIModelAssignment** liên kết với đúng một **User** và **có thể** liên kết với một **AIProvider** (nullable khi đó là System Provider)
 - Một **User** có tối đa một **AIModelAssignment** per **ModelPurpose**
 
 **Project**:
@@ -89,4 +89,4 @@ _Avoid_: Task, Issue (trong context nội bộ)
 
 - "Account" được dùng lẫn lộn với User và Employee — đã resolve: dùng **User** cho tài khoản đăng nhập, **Employee** cho hồ sơ nhân sự.
 - "Connect GitHub" — không phải đăng nhập bằng GitHub (không thay OAuth login). Là liên kết GitHub account để lấy Copilot API access. Dùng **GitHub Device Flow**, không phải OAuth redirect.
-- "Active provider" — không có khái niệm 1 provider active toàn cục. Thay vào đó là **AIModelAssignment**: mỗi purpose (chat/embedding/vision) chỉ ra provider + model đang được dùng.
+- "Active provider" — không có khái niệm 1 provider active toàn cục. Thay vào đó là **AIModelAssignment**: mỗi purpose (chat/embedding/vision) chỉ ra provider + model đang được dùng. System Model list (như Ollama) được fetch dynamic từ server API, không hardcode. `modelId` string được namespace (ví dụ: `ollama:llama3`, `copilot:gpt-4o`) để tự định tuyến đúng provider. Backend trả về một list model tổng hợp (server-side aggregation) để UI dễ dàng render.

@@ -101,33 +101,53 @@ app.post("/ai/chat", async (c) => {
     return c.json({ error: "Missing messages or model" }, 400);
   }
 
-  let copilotSession: Awaited<ReturnType<typeof getCopilotSession>>;
-  try {
-    copilotSession = await getCopilotSession(userId);
-  } catch {
-    return c.json({ error: "COPILOT_NOT_CONNECTED" }, 403);
-  }
+  const [provider, modelId] = model.split(":");
+  let languageModel;
 
-  const copilotProvider = createOpenAI({
-    apiKey: copilotSession.token,
-    baseURL: copilotSession.endpoint,
-    headers: {
-      "Copilot-Integration-Id": "vscode-chat",
-      "Editor-Version": "vscode/1.99.0",
-    },
-  });
+  if (provider === "ollama") {
+    if (!env.OLLAMA_BASE_URL) {
+      return c.json({ error: "Ollama is not configured" }, 500);
+    }
+    const ollamaProvider = createOpenAI({
+      baseURL: `${env.OLLAMA_BASE_URL}/v1`,
+      apiKey: "ollama", // unused but required by generic OpenAI provider
+    });
+    languageModel = ollamaProvider.chat(modelId!);
+  } else if (provider === "copilot") {
+    let copilotSession: Awaited<ReturnType<typeof getCopilotSession>>;
+    try {
+      copilotSession = await getCopilotSession(userId);
+    } catch {
+      return c.json({ error: "COPILOT_NOT_CONNECTED" }, 403);
+    }
+
+    const copilotProvider = createOpenAI({
+      apiKey: copilotSession.token,
+      baseURL: copilotSession.endpoint,
+      headers: {
+        "Copilot-Integration-Id": "vscode-chat",
+        "Editor-Version": "vscode/1.99.0",
+      },
+    });
+    languageModel = copilotProvider.chat(modelId!);
+  } else {
+    return c.json({ error: "Unknown provider" }, 400);
+  }
 
   try {
     const result = streamText({
-      model: copilotProvider.chat(model),
+      model: languageModel,
       system: SYSTEM_PROMPT,
       messages: await convertToModelMessages(messages),
     });
 
     return result.toUIMessageStreamResponse();
   } catch {
-    invalidateCopilotSession(userId);
-    return c.json({ error: "COPILOT_NOT_CONNECTED" }, 403);
+    if (provider === "copilot") {
+      invalidateCopilotSession(userId);
+      return c.json({ error: "COPILOT_NOT_CONNECTED" }, 403);
+    }
+    return c.json({ error: "AI_PROVIDER_ERROR" }, 500);
   }
 });
 

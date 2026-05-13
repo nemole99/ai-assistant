@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { orpc } from "@/lib/orpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-export interface CopilotModel {
+export interface AIModel {
   id: string;
   name: string;
-  vendor: string;
+  provider: string;
 }
 
 export function useModelAssignment(providerId: string | null) {
@@ -14,8 +14,7 @@ export function useModelAssignment(providerId: string | null) {
   );
 
   const { data: models = [] } = useQuery({
-    ...orpc.aiProvider.listCopilotModels.queryOptions({ input: undefined }),
-    enabled: providerId !== null,
+    ...orpc.aiProvider.listModels.queryOptions({ input: undefined }),
   });
 
   const [selectedModelId, setSelectedModelIdState] = useState<string>("");
@@ -35,13 +34,17 @@ export function useModelAssignment(providerId: string | null) {
   const setSelectedModel = useCallback(
     (modelId: string) => {
       setSelectedModelIdState(modelId);
-      if (providerId) {
-        persistAssignment({
-          purpose: "chat",
-          model: modelId,
-          providerId,
-        });
-      }
+      
+      const isSystemModel = modelId.startsWith("ollama:");
+      const determinedProviderId = isSystemModel ? null : providerId;
+
+      if (!isSystemModel && !providerId) return;
+
+      persistAssignment({
+        purpose: "chat",
+        model: modelId,
+        providerId: determinedProviderId,
+      });
     },
     [providerId, persistAssignment],
   );

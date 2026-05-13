@@ -14,6 +14,7 @@ export const env = createEnv({
     DEFAULT_USER_PASSWORD: z.string().min(6),
     ENCRYPTION_KEY: z.string().length(64, "ENCRYPTION_KEY must be a 64-character hex string"),
     GITHUB_COPILOT_CLIENT_ID: z.string().default("Iv1.b507a08c87ecfe98"),
+    OLLAMA_BASE_URL: z.string().url().optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

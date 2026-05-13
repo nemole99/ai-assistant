@@ -233,58 +233,78 @@ export async function getGitHubToken(userId: string): Promise<string | null> {
   return decrypt(rows[0].encryptedToken);
 }
 
-// --- List Copilot Models ---
+// --- List Models ---
 
-const copilotModelSchema = z.object({
+const aiModelSchema = z.object({
   id: z.string(),
   name: z.string(),
-  vendor: z.string(),
+  provider: z.string(),
 });
 
-export const listCopilotModels = protectedProcedure
-  .output(z.array(copilotModelSchema))
+export const listModels = protectedProcedure
+  .output(z.array(aiModelSchema))
   .handler(async ({ context }) => {
     const userId = context.session.user.id;
+    const models: { id: string; name: string; provider: string }[] = [];
 
-    let session: Awaited<ReturnType<typeof getCopilotSession>>;
+    // Fetch Ollama models if configured
+    if (env.OLLAMA_BASE_URL) {
+      try {
+        const res = await fetch(`${env.OLLAMA_BASE_URL}/api/tags`);
+        if (res.ok) {
+          const data = (await res.json()) as { models?: { name: string }[] };
+          if (data.models) {
+            models.push(
+              ...data.models.map((m) => ({
+                id: `ollama:${m.name}`,
+                name: m.name,
+                provider: "Ollama",
+              })),
+            );
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch Ollama models:", err);
+      }
+    }
+
+    let session: Awaited<ReturnType<typeof getCopilotSession>> | null = null;
     try {
       session = await getCopilotSession(userId);
     } catch {
-      throw new ORPCError("FORBIDDEN", {
-        message: "GitHub Copilot is not connected",
-      });
+      // Ignore if no Copilot token
     }
 
-    const res = await fetch(`${session.endpoint}/models`, {
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        "Copilot-Integration-Id": "vscode-chat",
-        Accept: "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: "Failed to fetch Copilot models",
+    if (session) {
+      const res = await fetch(`${session.endpoint}/models`, {
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          "Copilot-Integration-Id": "vscode-chat",
+          Accept: "application/json",
+        },
       });
+
+      if (res.ok) {
+        const data = (await res.json()) as {
+          data?: {
+            id?: string;
+            name?: string;
+            vendor?: string;
+            capabilities?: { type?: string };
+          }[];
+        };
+
+        const copilotModels = (data.data ?? [])
+          .filter((m) => m.capabilities?.type === "chat" && m.id)
+          .map((m) => ({
+            id: `copilot:${m.id!}`,
+            name: m.name ?? m.id!,
+            provider: "GitHub Copilot",
+          }));
+        
+        models.push(...copilotModels);
+      }
     }
-
-    const data = (await res.json()) as {
-      data?: {
-        id?: string;
-        name?: string;
-        vendor?: string;
-        capabilities?: { type?: string };
-      }[];
-    };
-
-    const models = (data.data ?? [])
-      .filter((m) => m.capabilities?.type === "chat" && m.id)
-      .map((m) => ({
-        id: m.id!,
-        name: m.name ?? m.id!,
-        vendor: m.vendor ?? "",
-      }));
 
     return models;
   });
@@ -294,5 +314,5 @@ export const aiProviderRouter = {
   pollDeviceFlow,
   disconnect,
   list,
-  listCopilotModels,
+  listModels,
 };

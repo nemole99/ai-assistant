@@ -79,13 +79,13 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
   const { models, selectedModel, selectedModelId, setSelectedModel } =
     useModelAssignment(copilotProvider?.id ?? null);
 
-  // Group models by vendor
-  const modelsByVendor = useMemo(
+  // Group models by provider
+  const modelsByProvider = useMemo(
     () =>
       models.reduce<Record<string, typeof models>>((acc, m) => {
-        const vendor = m.vendor || "Other";
-        if (!acc[vendor]) acc[vendor] = [];
-        acc[vendor]!.push(m);
+        const providerName = m.provider || "Other";
+        if (!acc[providerName]) acc[providerName] = [];
+        acc[providerName]!.push(m);
         return acc;
       }, {}),
     [models],
@@ -353,13 +353,13 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                               <ModelSelectorEmpty>
                                 No models found.
                               </ModelSelectorEmpty>
-                              {Object.entries(modelsByVendor).map(
-                                ([vendor, vendorModels]) => (
+                              {Object.entries(modelsByProvider).map(
+                                ([providerName, providerModels]) => (
                                   <ModelSelectorGroup
-                                    heading={vendor}
-                                    key={vendor}
+                                    heading={providerName}
+                                    key={providerName}
                                   >
-                                    {vendorModels.map((m) => (
+                                    {providerModels.map((m) => (
                                       <ModelSelectorItem
                                         key={m.id}
                                         value={m.id}

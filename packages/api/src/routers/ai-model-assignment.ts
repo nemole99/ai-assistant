@@ -14,7 +14,7 @@ export const get = protectedProcedure
     z
       .object({
         model: z.string(),
-        providerId: z.string(),
+        providerId: z.string().nullable(),
       })
       .nullable(),
   )
@@ -41,23 +41,25 @@ export const set = protectedProcedure
     z.object({
       purpose: purposeSchema,
       model: z.string().min(1),
-      providerId: z.string().min(1),
+      providerId: z.string().min(1).nullable(),
     }),
   )
   .handler(async ({ input, context }) => {
     const userId = context.session.user.id;
 
-    // Verify the provider belongs to this user
-    const providerRows = await db
-      .select({ id: aiProvider.id })
-      .from(aiProvider)
-      .where(and(eq(aiProvider.id, input.providerId), eq(aiProvider.userId, userId)))
-      .limit(1);
+    // Verify the provider belongs to this user if it's not a system provider
+    if (input.providerId) {
+      const providerRows = await db
+        .select({ id: aiProvider.id })
+        .from(aiProvider)
+        .where(and(eq(aiProvider.id, input.providerId), eq(aiProvider.userId, userId)))
+        .limit(1);
 
-    if (!providerRows[0]) {
-      throw new ORPCError("FORBIDDEN", {
-        message: "Provider not found or does not belong to current user",
-      });
+      if (!providerRows[0]) {
+        throw new ORPCError("FORBIDDEN", {
+          message: "Provider not found or does not belong to current user",
+        });
+      }
     }
 
     const now = new Date();
