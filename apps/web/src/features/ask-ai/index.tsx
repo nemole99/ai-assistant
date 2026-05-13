@@ -53,6 +53,7 @@ import { EmptyState } from "./components/empty-state";
 import { TicketDescriptionDialog } from "./components/ticket-description-dialog";
 import { useAskAiDb } from "./hooks/use-ask-ai-db";
 import { useModelAssignment } from "./hooks/use-model-assignment";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 
 import { PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react";
 import { ChatHistorySidebar } from "./components/chat-history-sidebar";
@@ -75,9 +76,14 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
     useAskAiDb(conversationId);
 
   // Model selection
-  const { models, selectedModel, selectedModelId, setSelectedModel, isModelsLoading } =
-    useModelAssignment(copilotProvider?.id ?? null);
-  
+  const {
+    models,
+    selectedModel,
+    selectedModelId,
+    setSelectedModel,
+    isModelsLoading,
+  } = useModelAssignment(copilotProvider?.id ?? null);
+
   const hasModels = models.length > 0;
 
   // Group models by provider
@@ -182,6 +188,10 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const isStreaming = status === "streaming" || status === "submitted";
+  const showThinkingIndicator =
+    isStreaming &&
+    !error &&
+    messages[messages.length - 1]?.role !== "assistant";
 
   const getMessageText = (message: (typeof messages)[0]) => {
     if (!message.parts) return "";
@@ -294,6 +304,20 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                           )}
                       </Message>
                     ))}
+                    {showThinkingIndicator && (
+                      <Message from="assistant">
+                        <MessageContent>
+                          <div className="inline-flex items-center gap-2 text-muted-foreground">
+                            <Shimmer
+                              className="text-xs font-medium"
+                              duration={1.6}
+                            >
+                              I am cooking...
+                            </Shimmer>
+                          </div>
+                        </MessageContent>
+                      </Message>
+                    )}
                     {error &&
                       messages.length > 0 &&
                       messages[messages.length - 1]?.role === "user" && (

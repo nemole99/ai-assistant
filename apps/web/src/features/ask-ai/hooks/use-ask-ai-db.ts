@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import type { UIMessage } from "ai";
 import { db, type Conversation, type ChatMessage } from "../db";
 import { useRouter } from "@tanstack/react-router";
+import { generateId } from "@workspace/ui/lib/id";
 
 export function useAskAiDb(targetConversationId?: string) {
   const router = useRouter();
@@ -37,7 +38,7 @@ export function useAskAiDb(targetConversationId?: string) {
       let convId = conversationId;
 
       if (!convId) {
-        convId = crypto.randomUUID();
+        convId = generateId();
         const firstUserMsg = messages.find((m) => m.role === "user");
         const title = firstUserMsg
           ? typeof (firstUserMsg as any).content === "string"
