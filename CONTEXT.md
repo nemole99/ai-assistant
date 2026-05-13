@@ -77,6 +77,35 @@ _Avoid_: ProjectState
 - **Manager** của Project tự động là **ProjectMember** của Project đó
 - Chỉ **ADMIN** tạo/sửa/xóa **Project** và quản lý **ProjectMember**
 
+**Document**:
+Tài liệu được upload vào hệ thống (giai đoạn 1: chỉ PDF). Có thể là global (company-wide, `projectId` = null) hoặc thuộc một Project cụ thể. File gốc lưu trên MinIO, nội dung markdown (sau convert) lưu trong Postgres. Chỉ ADMIN được upload/xóa. Employee xem markdown trên web hoặc download PDF gốc qua presigned URL.
+_Avoid_: File, Attachment, Asset
+
+**DocumentCategory**:
+Phân loại tài liệu do Admin quản lý (tạo/sửa/xóa). Mỗi category có tên, màu (hex color), và mô tả tùy chọn. Không thể xóa category đang có Document.
+_Avoid_: Tag, Label, Folder
+
+**DocumentStatus**:
+Trạng thái xử lý của một Document. Có 3 giá trị: `PENDING` (đang chờ convert), `COMPLETED` (đã convert xong markdown), `FAILED` (convert lỗi). Admin có thể retry document FAILED hoặc xóa.
+_Avoid_: DocumentState, ProcessingStatus
+
+## Relationships
+
+- Một **Document** thuộc đúng một **DocumentCategory** (qua `categoryId`, required)
+- Một **Document** có thể thuộc một **Project** (qua `projectId`, nullable) — null nghĩa là global (company-wide)
+- Một **DocumentCategory** có nhiều **Document**
+- Chỉ **ADMIN** upload/xóa **Document** và CRUD **DocumentCategory**
+- Mọi **Employee** (có User account) đều thấy Document global
+- **Project** `COMPLETED` không cho upload Document mới
+
+## Example dialogue
+
+> **Dev:** "Document global khác document thuộc project thế nào?"
+> **Domain expert:** "Global là tài liệu company-wide — nội quy, chính sách. Mọi nhân viên đều thấy. Document thuộc Project thì chỉ ProjectMember thấy."
+
+> **Dev:** "Khi upload PDF, Employee thấy ngay không?"
+> **Domain expert:** "Không ngay — file vào queue convert sang markdown trước. Khi status = COMPLETED thì Employee mới thấy và đọc được."
+
 **TicketDescriptionGenerator**:
 Tính năng trong Ask AI cho phép Employee nhập mô tả thô và nhận lại một ticket description đã được AI format theo bảng nội bộ (Background / Purpose / Process / Considerable factors / Resulting Image). Output là text thuần để paste vào Jira — không lưu vào DB, không tạo entity mới. Entry point là suggestion chip trên Ask AI page, mở dialog nhỏ với 1 textarea. Output stream vào conversation như message thường, kèm nút Copy.
 _Avoid_: TicketCreator, TaskGenerator (dễ nhầm là tạo task trong hệ thống)

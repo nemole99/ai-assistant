@@ -1,0 +1,154 @@
+---
+description: Frontend feature creation patterns - TanStack Router/Query/Form/Table + @workspace/ui
+globs: apps/web/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend Feature Conventions
+
+## Feature Structure
+
+Every feature lives in `apps/web/src/features/<feature-name>/`:
+
+```
+features/<name>/
+  index.tsx              # Page component (default export)
+  components/            # Feature-specific components
+    <name>-table.tsx
+    <name>-columns.tsx
+    <name>-dialogs.tsx
+    <name>-action-dialog.tsx
+    <name>-delete-dialog.tsx
+    <name>-provider.tsx
+    <name>-primary-buttons.tsx
+  data/
+    schema.ts            # Types derived from API (AppRouterClient)
+  hooks/                 # Feature-specific hooks (optional)
+```
+
+## Routing
+
+TanStack Router file-based routes. Route files are thin wrappers:
+
+```tsx
+// routes/_authenticated/<name>/index.tsx
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+import { Feature } from "@/features/<name>";
+
+const searchSchema = z.object({
+  page: z.number().optional().default(1),
+  // filters...
+});
+
+export const Route = createFileRoute("/_authenticated/<name>/")({
+  validateSearch: searchSchema,
+  component: Feature,
+});
+```
+
+## Data Fetching (oRPC + TanStack Query)
+
+```tsx
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+
+// Read
+const { data, isLoading } = useQuery(orpc.<router>.<procedure>.queryOptions());
+
+// With input
+const { data } = useQuery(orpc.<router>.get.queryOptions({ input: { id } }));
+
+// Mutation + invalidation
+const queryClient = useQueryClient();
+const mutation = useMutation(
+  orpc.<router>.create.mutationOptions({
+    onSuccess: () => {
+      queryClient.invalidateQueries(orpc.<router>.list.queryOptions());
+      toast.success("Created successfully");
+    },
+  })
+);
+```
+
+## UI Imports
+
+- **Primitives**: `@workspace/ui/components/<name>` (Button, Dialog, Field, Input, Select, Table, Card, Badge, etc.)
+- **Utilities**: `cn` from `@workspace/ui/lib/utils`
+- **App layout**: `@/components/layout/content-layout`
+- **Data table**: `@/components/data-table` (DataTableToolbar, DataTablePagination)
+- **Confirm dialog**: `@/components/confirm-dialog`
+- **Icons**: `lucide-react`
+
+## Page Component Pattern
+
+```tsx
+import { ContentLayout } from "@/components/layout/content-layout";
+import { Loader } from "@/components/loader";
+
+export default function FeaturePage() {
+  const { data, isLoading } = useQuery(orpc.<router>.list.queryOptions());
+
+  if (isLoading) return <Loader />;
+
+  return (
+    <ContentLayout title="Feature Name">
+      <FeatureProvider>
+        <FeaturePrimaryButtons />
+        <FeatureTable data={data ?? []} />
+        <FeatureDialogs />
+      </FeatureProvider>
+    </ContentLayout>
+  );
+}
+```
+
+## Forms (TanStack Form + Zod)
+
+```tsx
+import { useForm } from "@tanstack/react-form";
+import { Field, FieldLabel, FieldError, FieldGroup } from "@workspace/ui/components/field";
+import { Input } from "@workspace/ui/components/input";
+import { Button } from "@workspace/ui/components/button";
+
+const form = useForm({
+  defaultValues: { name: "", email: "" },
+  validators: { onSubmit: formSchema },
+  onSubmit: async ({ value }) => {
+    await mutation.mutateAsync(value);
+  },
+});
+```
+
+## Dialog / Modal Pattern
+
+Use Provider + `useDialogState` hook to control open state:
+
+```tsx
+// Provider manages: open state ("add" | "edit" | "delete" | null), currentRow
+// Dialogs mount inside Provider, read state via context
+// Actions dispatch: setOpen("add"), setOpen("edit"), setOpen(null)
+```
+
+## Tables (TanStack Table)
+
+- Define columns in `<name>-columns.tsx` with `ColumnDef<T>[]`
+- Use `useReactTable` + `Table` primitives from `@workspace/ui/components/table`
+- Sync pagination/filters to URL via `useTableUrlState` hook
+
+## State Management
+
+- **Server state**: TanStack Query (primary)
+- **Local UI state**: React Context + useState (dialogs, selections)
+- **Complex client-only state**: zustand (when React Context becomes unwieldy)
+- **Toasts**: `sonner` via `toast.success()` / `toast.error()`
+
+## Type Derivation
+
+Derive types from the API client, not manual interfaces:
+
+```tsx
+// data/schema.ts
+import type { AppRouterClient } from "@/lib/orpc";
+type Employee = Awaited<ReturnType<AppRouterClient["employee"]["list"]>>[number];
+```

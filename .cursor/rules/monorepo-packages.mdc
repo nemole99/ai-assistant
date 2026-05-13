@@ -1,0 +1,98 @@
+---
+description: Monorepo structure - Bun workspaces, Turborepo, shared packages
+alwaysApply: true
+---
+
+# Monorepo Conventions
+
+## Workspace Layout
+
+```
+ai-assistant/
+├── apps/
+│   ├── web/          # React SPA (Vite + TanStack Router)
+│   └── server/       # Bun + Hono API server
+├── packages/
+│   ├── api/          # oRPC routers + procedures (@workspace/api)
+│   ├── auth/         # Better Auth config (@workspace/auth)
+│   ├── db/           # Drizzle schema + migrations (@workspace/db)
+│   ├── env/          # Typed env validation (@workspace/env)
+│   ├── ui/           # Shared UI primitives (@workspace/ui)
+│   └── config/       # Shared tsconfig, tailwind (@workspace/config)
+```
+
+## Package Manager & Tools
+
+- **Runtime**: Bun (`bun@1.3.13`)
+- **Monorepo orchestration**: Turborepo (`turbo`)
+- **Linter**: oxlint
+- **Formatter**: oxfmt
+- **Type check**: `tsc -b` (project references)
+
+## Dependency Management
+
+- Use `catalog:` for shared dependency versions (defined in root `package.json` → `workspaces.catalog`)
+- Use `workspace:*` for internal package references
+- Add new shared deps to catalog first, then reference with `catalog:` in package.json
+
+## Package Exports Convention
+
+Packages use **subpath exports** (no barrel index re-exporting everything):
+
+```jsonc
+// @workspace/ui
+"exports": {
+  "./globals.css": "./src/styles/globals.css",
+  "./lib/*": "./src/lib/*.ts",
+  "./components/*": "./src/components/*.tsx",
+  "./hooks/*": "./src/hooks/*.ts"
+}
+
+// @workspace/api
+"exports": {
+  ".": "./src/index.ts",
+  "./*": "./src/*.ts"
+}
+
+// @workspace/db
+"exports": {
+  ".": "./src/index.ts",
+  "./*": "./src/*.ts"
+}
+```
+
+Import examples:
+- `import { Button } from "@workspace/ui/components/button"`
+- `import { cn } from "@workspace/ui/lib/utils"`
+- `import { db } from "@workspace/db"`
+- `import { user } from "@workspace/db/schema/auth"`
+- `import { env } from "@workspace/env/server"`
+- `import { protectedProcedure } from "@workspace/api"`
+
+## Adding a New Shared Package
+
+1. Create `packages/<name>/package.json` with `"name": "@workspace/<name>"`, `"private": true`
+2. Add `"exports"` with subpath mapping (no barrel files)
+3. Add `tsconfig.json` extending `@workspace/config`
+4. Reference from consuming packages: `"@workspace/<name>": "workspace:*"`
+
+## Common Commands
+
+```bash
+bun dev              # Start all apps (turbo)
+bun dev:web          # Only web app
+bun dev:server       # Only API server
+bun db:generate      # Generate Drizzle migration
+bun db:migrate       # Run migrations
+bun db:push          # Push schema to DB (dev)
+bun db:studio        # Drizzle Studio
+bun check            # oxlint + oxfmt
+```
+
+## Key Principles
+
+- Each package has a single responsibility
+- No circular dependencies between packages
+- `packages/` are consumed by `apps/`, never the reverse
+- Environment variables: validated in `@workspace/env`, never raw `process.env` elsewhere
+- Database access: only through `@workspace/db`, never direct connection strings

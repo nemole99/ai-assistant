@@ -116,4 +116,7 @@ ensureAdminExists().catch((err) =>
   console.error("❌ ensureAdminExists failed:", err),
 );
 
-export default app;
+export default {
+  fetch: app.fetch,
+  idleTimeout: 60,
+};

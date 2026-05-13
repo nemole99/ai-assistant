@@ -312,7 +312,7 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                               className="text-xs font-medium"
                               duration={1.6}
                             >
-                              I am cooking...
+                              Let me cook...
                             </Shimmer>
                           </div>
                         </MessageContent>

@@ -1,0 +1,156 @@
+---
+description: Backend API patterns - oRPC procedures, Drizzle, error handling, streaming
+globs: packages/api/**/*.ts, apps/server/**/*.ts
+alwaysApply: false
+---
+
+# Backend API Conventions
+
+## Router Structure
+
+Routers live in `packages/api/src/routers/`. Each file exports a router object:
+
+```ts
+// packages/api/src/routers/<domain>.ts
+import { protectedProcedure, adminProcedure } from "..";
+import { db } from "@workspace/db";
+import { tableName } from "@workspace/db/schema";
+import { insertSchema, selectSchema, updateSchema } from "@workspace/db/schema/validation";
+import { ORPCError } from "@orpc/server";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+
+export const domainRouter = {
+  list: protectedProcedure
+    .output(z.array(selectSchema))
+    .handler(async () => { /* ... */ }),
+
+  get: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .output(selectSchema)
+    .handler(async ({ input }) => { /* ... */ }),
+
+  create: adminProcedure
+    .input(insertSchema)
+    .output(selectSchema)
+    .handler(async ({ input }) => { /* ... */ }),
+
+  update: adminProcedure
+    .input(z.object({ id: z.string().uuid() }).merge(updateSchema))
+    .output(selectSchema)
+    .handler(async ({ input }) => { /* ... */ }),
+
+  delete: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .handler(async ({ input }) => { /* ... */ }),
+};
+```
+
+Register in `packages/api/src/routers/index.ts`:
+
+```ts
+export const appRouter = {
+  // ...existing routers
+  domain: domainRouter,
+};
+```
+
+## Procedure Access Levels
+
+| Procedure | When to use |
+|-----------|-------------|
+| `publicProcedure` | No auth needed (health check, public data) |
+| `protectedProcedure` | Any logged-in user |
+| `managerProcedure` | Manager+ role required |
+| `adminProcedure` | Admin only (CRUD mutations, org-wide ops) |
+
+## Error Handling — Always use ORPCError
+
+```ts
+import { ORPCError } from "@orpc/server";
+
+// ❌ BAD
+throw new Error("Project not found");
+
+// ✅ GOOD
+throw new ORPCError("NOT_FOUND", { message: "Project not found" });
+
+// Common codes: UNAUTHORIZED, FORBIDDEN, NOT_FOUND, BAD_REQUEST, INTERNAL_SERVER_ERROR, CONFLICT
+```
+
+## CRUD Patterns
+
+```ts
+// CREATE — generate UUID, insert, return
+const id = crypto.randomUUID();
+const [created] = await db.insert(table).values({ id, ...input }).returning();
+if (!created) throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to create" });
+return created;
+
+// UPDATE — destructure id, update rest
+const { id, ...data } = input;
+const [updated] = await db.update(table).set(data).where(eq(table.id, id)).returning();
+if (!updated) throw new ORPCError("NOT_FOUND");
+return updated;
+
+// DELETE
+await db.delete(table).where(eq(table.id, input.id));
+return { success: true };
+
+// UPSERT
+await db.insert(table).values(input)
+  .onConflictDoUpdate({ target: table.uniqueCol, set: input });
+```
+
+## Validation (drizzle-zod)
+
+Define in `packages/db/src/schema/validation.ts`:
+
+```ts
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+export const selectEntitySchema = createSelectSchema(entity);
+export const insertEntitySchema = createInsertSchema(entity).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateEntitySchema = insertEntitySchema.partial();
+```
+
+## Streaming Routes (Hono, not oRPC)
+
+For AI/streaming endpoints that need SSE or chunked responses, use raw Hono routes in `apps/server/src/routes/`:
+
+```ts
+// apps/server/src/routes/<name>.ts
+import { Hono } from "hono";
+import { auth } from "@workspace/auth";
+
+const routes = new Hono();
+
+routes.post("/endpoint", async (c) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: "Unauthorized" }, 401);
+
+  // streaming logic...
+  return new Response(stream, { headers: { "Content-Type": "text/event-stream" } });
+});
+
+export { routes as featureRoutes };
+```
+
+Register in `apps/server/src/index.ts`: `app.route("/prefix", featureRoutes);`
+
+## Database Schema
+
+- Tables in `packages/db/src/schema/` using `pgTable`, `pgEnum`
+- Relations via `relations()` for Drizzle relational queries
+- Sensitive data: use `encrypt`/`decrypt` from `packages/db/src/crypto.ts` (AES-256-GCM)
+- Migrations: `drizzle-kit` (`pnpm db:generate`, `pnpm db:migrate`)
+
+## Context & Auth
+
+Per-request context built in `packages/api/src/context.ts`:
+- Reads session from Better Auth via request headers
+- Available as `context.session.user` in protected+ procedures
