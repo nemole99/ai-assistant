@@ -7,6 +7,7 @@ import {
   pgEnum,
   date,
   index,
+  integer,
   jsonb,
   unique,
   primaryKey,
@@ -334,5 +335,83 @@ export const projectMemberRelations = relations(projectMember, ({ one }) => ({
   employee: one(employee, {
     fields: [projectMember.employeeId],
     references: [employee.id],
+  }),
+}));
+
+// --- Documents ---
+
+export const documentStatusEnum = pgEnum("document_status", [
+  "PENDING",
+  "COMPLETED",
+  "FAILED",
+]);
+
+export const documentCategory = pgTable("document_category", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  color: text("color").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const document = pgTable(
+  "document",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    description: text("description"),
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => documentCategory.id),
+    projectId: text("project_id").references(() => project.id, {
+      onDelete: "set null",
+    }),
+    status: documentStatusEnum("status").default("PENDING").notNull(),
+    mimeType: text("mime_type").notNull(),
+    fileSize: integer("file_size").notNull(),
+    objectKey: text("object_key").notNull(),
+    originalFilename: text("original_filename").notNull(),
+    markdownContent: text("markdown_content"),
+    errorMessage: text("error_message"),
+    uploadedBy: text("uploaded_by")
+      .notNull()
+      .references(() => user.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("document_categoryId_idx").on(table.categoryId),
+    index("document_projectId_idx").on(table.projectId),
+    index("document_status_idx").on(table.status),
+    index("document_uploadedBy_idx").on(table.uploadedBy),
+  ],
+);
+
+export const documentCategoryRelations = relations(
+  documentCategory,
+  ({ many }) => ({
+    documents: many(document),
+  }),
+);
+
+export const documentRelations = relations(document, ({ one }) => ({
+  category: one(documentCategory, {
+    fields: [document.categoryId],
+    references: [documentCategory.id],
+  }),
+  project: one(project, {
+    fields: [document.projectId],
+    references: [project.id],
+  }),
+  uploader: one(user, {
+    fields: [document.uploadedBy],
+    references: [user.id],
   }),
 }));

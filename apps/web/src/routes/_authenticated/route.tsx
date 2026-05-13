@@ -11,6 +11,7 @@ export const Route = createFileRoute("/_authenticated")({
         search: { redirect: location.href },
       });
     }
+    return { user: session.user };
   },
   component: AuthenticatedLayout,
 });

@@ -21,12 +21,15 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects/index'
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
+import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
 import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
 import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
+import { Route as AuthenticatedDocumentsCategoriesRouteImport } from './routes/_authenticated/documents/categories'
+import { Route as AuthenticatedDocumentsIdRouteImport } from './routes/_authenticated/documents/$id'
 import { Route as AuthenticatedAskAiConversationIdRouteImport } from './routes/_authenticated/ask-ai/$conversationId'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -92,6 +95,12 @@ const AuthenticatedEmployeesIndexRoute =
     path: '/employees/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDocumentsIndexRoute =
+  AuthenticatedDocumentsIndexRouteImport.update({
+    id: '/documents/',
+    path: '/documents/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDepartmentsIndexRoute =
   AuthenticatedDepartmentsIndexRouteImport.update({
     id: '/departments/',
@@ -127,6 +136,18 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDocumentsCategoriesRoute =
+  AuthenticatedDocumentsCategoriesRouteImport.update({
+    id: '/documents/categories',
+    path: '/documents/categories',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDocumentsIdRoute =
+  AuthenticatedDocumentsIdRouteImport.update({
+    id: '/documents/$id',
+    path: '/documents/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAskAiConversationIdRoute =
   AuthenticatedAskAiConversationIdRouteImport.update({
     id: '/ask-ai/$conversationId',
@@ -144,12 +165,15 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
+  '/documents/$id': typeof AuthenticatedDocumentsIdRoute
+  '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
+  '/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -163,12 +187,15 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
+  '/documents/$id': typeof AuthenticatedDocumentsIdRoute
+  '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/ask-ai': typeof AuthenticatedAskAiIndexRoute
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
+  '/documents': typeof AuthenticatedDocumentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -185,12 +212,15 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
+  '/_authenticated/documents/$id': typeof AuthenticatedDocumentsIdRoute
+  '/_authenticated/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
+  '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -207,12 +237,15 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/ask-ai/$conversationId'
+    | '/documents/$id'
+    | '/documents/categories'
     | '/errors/$error'
     | '/projects/$projectId'
     | '/settings/ai-providers'
     | '/settings/password'
     | '/ask-ai/'
     | '/departments/'
+    | '/documents/'
     | '/employees/'
     | '/projects/'
     | '/settings/'
@@ -226,12 +259,15 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/ask-ai/$conversationId'
+    | '/documents/$id'
+    | '/documents/categories'
     | '/errors/$error'
     | '/projects/$projectId'
     | '/settings/ai-providers'
     | '/settings/password'
     | '/ask-ai'
     | '/departments'
+    | '/documents'
     | '/employees'
     | '/projects'
     | '/settings'
@@ -247,12 +283,15 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/ask-ai/$conversationId'
+    | '/_authenticated/documents/$id'
+    | '/_authenticated/documents/categories'
     | '/_authenticated/errors/$error'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
     | '/_authenticated/settings/password'
     | '/_authenticated/ask-ai/'
     | '/_authenticated/departments/'
+    | '/_authenticated/documents/'
     | '/_authenticated/employees/'
     | '/_authenticated/projects/'
     | '/_authenticated/settings/'
@@ -354,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmployeesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/documents/': {
+      id: '/_authenticated/documents/'
+      path: '/documents'
+      fullPath: '/documents/'
+      preLoaderRoute: typeof AuthenticatedDocumentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/departments/': {
       id: '/_authenticated/departments/'
       path: '/departments'
@@ -396,6 +442,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/documents/categories': {
+      id: '/_authenticated/documents/categories'
+      path: '/documents/categories'
+      fullPath: '/documents/categories'
+      preLoaderRoute: typeof AuthenticatedDocumentsCategoriesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/documents/$id': {
+      id: '/_authenticated/documents/$id'
+      path: '/documents/$id'
+      fullPath: '/documents/$id'
+      preLoaderRoute: typeof AuthenticatedDocumentsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ask-ai/$conversationId': {
       id: '/_authenticated/ask-ai/$conversationId'
       path: '/ask-ai/$conversationId'
@@ -429,10 +489,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAskAiConversationIdRoute: typeof AuthenticatedAskAiConversationIdRoute
+  AuthenticatedDocumentsIdRoute: typeof AuthenticatedDocumentsIdRoute
+  AuthenticatedDocumentsCategoriesRoute: typeof AuthenticatedDocumentsCategoriesRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
   AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
+  AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
   AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
 }
@@ -441,10 +504,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAskAiConversationIdRoute: AuthenticatedAskAiConversationIdRoute,
+  AuthenticatedDocumentsIdRoute: AuthenticatedDocumentsIdRoute,
+  AuthenticatedDocumentsCategoriesRoute: AuthenticatedDocumentsCategoriesRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,
   AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
+  AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
   AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
 }

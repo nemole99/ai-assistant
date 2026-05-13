@@ -11,14 +11,14 @@ const sidebarNavItems = [
     icon: <UserCog size={18} />,
   },
   {
-    title: "Password",
-    href: "/settings/password",
-    icon: <KeyRound size={18} />,
-  },
-  {
     title: "AI Providers",
     href: "/settings/ai-providers",
     icon: <Bot size={18} />,
+  },
+  {
+    title: "Password",
+    href: "/settings/password",
+    icon: <KeyRound size={18} />,
   },
 ];
 

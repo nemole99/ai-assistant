@@ -1,6 +1,14 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-import { department, employee, user, project, projectMember } from "./auth";
+import {
+  department,
+  document,
+  documentCategory,
+  employee,
+  project,
+  projectMember,
+  user,
+} from "./auth";
 
 // --- User ---
 
@@ -50,3 +58,32 @@ export const insertProjectSchema = createInsertSchema(project).omit({
 export const updateProjectSchema = insertProjectSchema.partial();
 
 export const selectProjectMemberSchema = createSelectSchema(projectMember);
+
+// --- DocumentCategory ---
+
+export const selectDocumentCategorySchema =
+  createSelectSchema(documentCategory);
+export const insertDocumentCategorySchema = createInsertSchema(
+  documentCategory,
+).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateDocumentCategorySchema =
+  insertDocumentCategorySchema.partial();
+
+// --- Document ---
+
+export const selectDocumentSchema = createSelectSchema(document);
+export const insertDocumentSchema = createInsertSchema(document).omit({
+  id: true,
+  status: true,
+  markdownContent: true,
+  errorMessage: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateDocumentSchema = insertDocumentSchema
+  .pick({ title: true, description: true, categoryId: true })
+  .partial();

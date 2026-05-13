@@ -18,6 +18,8 @@
     "@workspace/auth": "workspace:*",
     "@workspace/db": "workspace:*",
     "@workspace/env": "workspace:*",
+    "@workspace/queue": "workspace:*",
+    "@workspace/storage": "workspace:*",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.2",
     "zod": "catalog:"

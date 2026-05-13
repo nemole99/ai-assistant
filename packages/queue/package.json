@@ -1,0 +1,21 @@
+{
+  "name": "@workspace/queue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/env": "workspace:*",
+    "bullmq": "^5.76.8",
+    "ioredis": "^5.10.1"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@workspace/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

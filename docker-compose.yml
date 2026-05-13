@@ -1,4 +1,4 @@
-# Backend image built once, reused by migrate + server
+# Backend image built once, reused by migrate + server + worker
 x-backend: &backend
   build:
     context: .
@@ -8,6 +8,8 @@ x-backend: &backend
   restart: always
   depends_on:
     postgres:
+      condition: service_healthy
+    redis:
       condition: service_healthy
 
 services:
@@ -22,6 +24,35 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai_assistant_redis
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio
+    container_name: ai_assistant_minio
+    restart: always
+    env_file: [.env.docker]
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -50,10 +81,28 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
       migrate:
         condition: service_completed_successfully
     expose:
       - "3000"
+
+  worker:
+    <<: *backend
+    container_name: ai_assistant_worker
+    command: ["/app/worker-bin"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   web:
     build:
@@ -71,3 +120,5 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+  minio_data:

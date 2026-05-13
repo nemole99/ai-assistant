@@ -1,11 +1,13 @@
 import {
   AudioWaveform,
   BotMessageSquare,
+  BookOpen,
   Building2,
   Command,
   Contact,
   FolderKanban,
   GalleryVerticalEnd,
+  KeyRound,
   LayoutDashboard,
   Settings,
   UserCog,
@@ -48,6 +50,16 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
+      title: "Knowledge",
+      items: [
+        {
+          title: "Documents",
+          url: "/documents",
+          icon: BookOpen,
+        },
+      ],
+    },
+    {
       title: "Organization",
       items: [
         {
@@ -83,6 +95,11 @@ export const sidebarData: SidebarData = {
               title: "AI Providers",
               url: "/settings/ai-providers",
               icon: Wrench,
+            },
+            {
+              title: "Password",
+              url: "/settings/password",
+              icon: KeyRound,
             },
           ],
         },

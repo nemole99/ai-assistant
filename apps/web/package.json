@@ -46,6 +46,7 @@
     "motion": "^12.38.0",
     "nanoid": "^5.1.11",
     "next-themes": "catalog:",
+    "radix-ui": "^1.4.3",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-jsx-parser": "^2.4.1",

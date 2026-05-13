@@ -74,8 +74,10 @@ const mutation = useMutation(
 ## UI Imports
 
 - **Primitives**: `@workspace/ui/components/<name>` (Button, Dialog, Field, Input, Select, Table, Card, Badge, etc.)
+- **Empty state**: `@workspace/ui/components/empty` (Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent)
 - **Utilities**: `cn` from `@workspace/ui/lib/utils`
 - **App layout**: `@/components/layout/content-layout`
+- **Long text**: `@/components/long-text` (LongText — truncates with tooltip/popover on overflow)
 - **Data table**: `@/components/data-table` (DataTableToolbar, DataTablePagination)
 - **Confirm dialog**: `@/components/confirm-dialog`
 - **Icons**: `lucide-react`
@@ -135,6 +137,9 @@ Use Provider + `useDialogState` hook to control open state:
 - Define columns in `<name>-columns.tsx` with `ColumnDef<T>[]`
 - Use `useReactTable` + `Table` primitives from `@workspace/ui/components/table`
 - Sync pagination/filters to URL via `useTableUrlState` hook
+- Wrap long text cells (titles, filenames) with `<LongText>` from `@/components/long-text`
+- Use `<Empty>` from `@workspace/ui/components/empty` for empty table states instead of plain text
+```
 
 ## State Management
 

@@ -10,21 +10,32 @@ COPY packages/db/package.json packages/db/
 COPY packages/env/package.json packages/env/
 COPY packages/config/package.json packages/config/
 COPY packages/ui/package.json packages/ui/
+COPY packages/queue/package.json packages/queue/
+COPY packages/storage/package.json packages/storage/
 
 RUN bun install
 
 COPY apps/server/ apps/server/
 COPY packages/ packages/
 
-# Compile a self-contained binary — bundles all deps (including @orpc, @workspace/*)
+# Compile self-contained binaries for both server and worker
 RUN bun build --compile --sourcemap ./apps/server/src/index.ts --outfile /server-bin
+RUN bun build --compile --sourcemap ./apps/server/src/worker.ts --outfile /worker-bin
 
 # ── Runtime ──────────────────────────────────────────────────
 FROM oven/bun:1-slim AS runtime
 WORKDIR /app
 
-# Self-contained binary needs no node_modules to run
+# Python + markitdown for the document processing worker
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 python3-pip && \
+    pip3 install --break-system-packages 'markitdown[pdf]' && \
+    apt-get purge -y python3-pip && \
+    apt-get autoremove -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /root/.cache
+
 COPY --from=builder /server-bin ./server-bin
+COPY --from=builder /worker-bin ./worker-bin
 # node_modules + packages + server src needed by migrate + seed services
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages

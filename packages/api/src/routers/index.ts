@@ -5,6 +5,8 @@ import { departmentRouter, employeeRouter } from "./organization";
 import { aiProviderRouter } from "./ai-provider";
 import { aiModelAssignmentRouter } from "./ai-model-assignment";
 import { projectRouter } from "./project";
+import { documentCategoryRouter } from "./document-category";
+import { documentRouter } from "./document";
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -21,6 +23,8 @@ export const appRouter = {
   aiProvider: aiProviderRouter,
   aiModelAssignment: aiModelAssignmentRouter,
   project: projectRouter,
+  documentCategory: documentCategoryRouter,
+  document: documentRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;
