@@ -114,7 +114,10 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 // --- Organization ---
 
-export const employeeStatusEnum = pgEnum("employee_status", ["ACTIVE", "INACTIVE"]);
+export const employeeStatusEnum = pgEnum("employee_status", [
+  "ACTIVE",
+  "INACTIVE",
+]);
 
 export const department = pgTable("department", {
   id: text("id").primaryKey(),
@@ -191,7 +194,11 @@ export const aiProviderTypeEnum = pgEnum("ai_provider_type", [
   "anthropic",
 ]);
 
-export const modelPurposeEnum = pgEnum("model_purpose", ["chat", "embedding", "vision"]);
+export const modelPurposeEnum = pgEnum("model_purpose", [
+  "chat",
+  "embedding",
+  "vision",
+]);
 
 export const aiProvider = pgTable(
   "ai_provider",
@@ -213,7 +220,10 @@ export const aiProvider = pgTable(
       .notNull(),
   },
   (table) => [
-    unique("ai_provider_userId_provider_unique").on(table.userId, table.provider),
+    unique("ai_provider_userId_provider_unique").on(
+      table.userId,
+      table.provider,
+    ),
     index("ai_provider_userId_idx").on(table.userId),
   ],
 );
@@ -225,8 +235,9 @@ export const aiModelAssignment = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    providerId: text("provider_id")
-      .references(() => aiProvider.id, { onDelete: "cascade" }),
+    providerId: text("provider_id").references(() => aiProvider.id, {
+      onDelete: "cascade",
+    }),
     purpose: modelPurposeEnum("purpose").notNull(),
     model: text("model").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -236,7 +247,10 @@ export const aiModelAssignment = pgTable(
       .notNull(),
   },
   (table) => [
-    unique("ai_model_assignment_userId_purpose_unique").on(table.userId, table.purpose),
+    unique("ai_model_assignment_userId_purpose_unique").on(
+      table.userId,
+      table.purpose,
+    ),
     index("ai_model_assignment_userId_idx").on(table.userId),
   ],
 );
@@ -249,20 +263,26 @@ export const aiProviderRelations = relations(aiProvider, ({ one, many }) => ({
   modelAssignments: many(aiModelAssignment),
 }));
 
-export const aiModelAssignmentRelations = relations(aiModelAssignment, ({ one }) => ({
-  user: one(user, {
-    fields: [aiModelAssignment.userId],
-    references: [user.id],
+export const aiModelAssignmentRelations = relations(
+  aiModelAssignment,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [aiModelAssignment.userId],
+      references: [user.id],
+    }),
+    provider: one(aiProvider, {
+      fields: [aiModelAssignment.providerId],
+      references: [aiProvider.id],
+    }),
   }),
-  provider: one(aiProvider, {
-    fields: [aiModelAssignment.providerId],
-    references: [aiProvider.id],
-  }),
-}));
+);
 
 // --- Projects ---
 
-export const projectStatusEnum = pgEnum("project_status", ["ACTIVE", "COMPLETED"]);
+export const projectStatusEnum = pgEnum("project_status", [
+  "ACTIVE",
+  "COMPLETED",
+]);
 
 export const project = pgTable("project", {
   id: text("id").primaryKey(),

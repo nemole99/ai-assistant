@@ -13,7 +13,7 @@ export function useModelAssignment(providerId: string | null) {
     orpc.aiModelAssignment.get.queryOptions({ input: { purpose: "chat" } }),
   );
 
-  const { data: models = [] } = useQuery({
+  const { data: models = [], isLoading: isModelsLoading } = useQuery({
     ...orpc.aiProvider.listModels.queryOptions({ input: undefined }),
   });
 
@@ -29,12 +29,14 @@ export function useModelAssignment(providerId: string | null) {
     }
   }, [assignment, models, selectedModelId]);
 
-  const { mutate: persistAssignment } = useMutation(orpc.aiModelAssignment.set.mutationOptions());
+  const { mutate: persistAssignment } = useMutation(
+    orpc.aiModelAssignment.set.mutationOptions(),
+  );
 
   const setSelectedModel = useCallback(
     (modelId: string) => {
       setSelectedModelIdState(modelId);
-      
+
       const isSystemModel = modelId.startsWith("ollama:");
       const determinedProviderId = isSystemModel ? null : providerId;
 
@@ -49,12 +51,14 @@ export function useModelAssignment(providerId: string | null) {
     [providerId, persistAssignment],
   );
 
-  const selectedModel = models.find((m) => m.id === selectedModelId) ?? models[0] ?? null;
+  const selectedModel =
+    models.find((m) => m.id === selectedModelId) ?? models[0] ?? null;
 
   return {
     models,
     selectedModel,
     selectedModelId: selectedModel?.id ?? "",
     setSelectedModel,
+    isModelsLoading,
   };
 }

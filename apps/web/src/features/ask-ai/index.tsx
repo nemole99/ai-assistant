@@ -63,21 +63,22 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
-  // Check if Copilot is connected
+  // Check if there are any models available (either System Models like Ollama, or User Models like Copilot)
   const { data: providers = [], isLoading: isProvidersLoading } = useQuery(
     orpc.aiProvider.list.queryOptions({ input: undefined }),
   );
   const copilotProvider =
     providers.find((p) => p.provider === "github_copilot") ?? null;
-  const isCopilotConnected = copilotProvider !== null;
 
   // IndexedDB persistence
   const { initialMessages, isLoaded, saveMessages, newChat } =
     useAskAiDb(conversationId);
 
   // Model selection
-  const { models, selectedModel, selectedModelId, setSelectedModel } =
+  const { models, selectedModel, selectedModelId, setSelectedModel, isModelsLoading } =
     useModelAssignment(copilotProvider?.id ?? null);
+  
+  const hasModels = models.length > 0;
 
   // Group models by provider
   const modelsByProvider = useMemo(
@@ -226,9 +227,9 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
         </div>
       </div>
 
-      {isProvidersLoading ? (
+      {isProvidersLoading || isModelsLoading ? (
         <AskAiSkeleton />
-      ) : !isCopilotConnected ? (
+      ) : !hasModels ? (
         <EmptyState />
       ) : (
         <div className="relative flex flex-1 overflow-hidden">

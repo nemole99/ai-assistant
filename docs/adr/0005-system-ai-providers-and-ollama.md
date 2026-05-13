@@ -4,6 +4,7 @@ Date: 2026-05-13
 Status: Accepted
 
 ## Context
+
 We need to support local AI models via Ollama. Unlike GitHub Copilot (which requires per-user authentication and tokens stored in the `AIProvider` table), Ollama is hosted internally and does not require per-user credentials. We needed to decide how to represent and configure this in our data model and user interface.
 
 ## Decisions
@@ -14,5 +15,6 @@ We need to support local AI models via Ollama. Unlike GitHub Copilot (which requ
 4. **Server-side Aggregation:** The backend will expose a single `GET /api/models` endpoint that aggregates Copilot models (if the user has an active token) and the system Ollama models into a single unified list for the frontend.
 
 ## Consequences
+
 - **Pros:** No schema migrations needed for the `AIProvider` table (no dummy models). Minimal frontend complexity (deals with one list of models). Easy to add new Ollama models by just downloading them to the host server without database updates. Perfectly aligns with Vercel AI SDK's provider string routing.
 - **Cons:** We rely on application logic rather than strict foreign key integrity in `AIModelAssignment` for system models (it relies on the string namespace being valid). Admins cannot change the Ollama URL via the web UI without altering the server environment.

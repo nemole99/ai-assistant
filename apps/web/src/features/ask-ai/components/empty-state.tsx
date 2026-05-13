@@ -10,10 +10,9 @@ export function EmptyState() {
         <BotIcon className="size-8 text-muted-foreground" />
       </div>
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Connect GitHub Copilot to start chatting</h2>
+        <h2 className="text-lg font-semibold">Connect an AI Provider to start chatting</h2>
         <p className="max-w-sm text-sm text-muted-foreground">
-          Ask AI uses GitHub Copilot to answer questions about the company. Connect your GitHub
-          account in Settings to get started.
+          Ask AI uses connected AI models. Ask your admin to provide a local Ollama model, or connect your account in Settings.
         </p>
       </div>
       <Link to="/settings/ai-providers" className={cn(buttonVariants({ variant: "default" }))}>
