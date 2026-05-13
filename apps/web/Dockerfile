@@ -13,6 +13,8 @@ COPY packages/db/package.json packages/db/
 COPY packages/env/package.json packages/env/
 COPY packages/config/package.json packages/config/
 COPY packages/ui/package.json packages/ui/
+COPY packages/queue/package.json packages/queue/
+COPY packages/storage/package.json packages/storage/
 
 RUN bun install
 

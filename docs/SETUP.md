@@ -52,6 +52,25 @@ CORS_ORIGIN=http://<server-ip>:2103
 # Required: public URL of the server as seen by the browser
 # Must match BETTER_AUTH_URL (same origin, because Nginx proxies /rpc and /api/auth)
 VITE_SERVER_URL=http://<server-ip>:2103
+
+# Required: Redis connection (used by BullMQ document processing queue)
+REDIS_URL=redis://redis:6379
+
+# Required: MinIO object storage (for document uploads)
+# MINIO_ROOT_USER / MINIO_ROOT_PASSWORD are used by the MinIO container itself
+MINIO_ROOT_USER=minioadmin
+MINIO_ROOT_PASSWORD=<strong-minio-password>
+# MINIO_ENDPOINT: internal Docker service name — used by the server container
+# to connect to MinIO. Must be "minio" (the Docker service name), NOT the public IP.
+MINIO_ENDPOINT=minio
+MINIO_PORT=9000
+MINIO_USE_SSL=false
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=<strong-minio-password>
+MINIO_BUCKET=documents
+# MINIO_PUBLIC_ENDPOINT: public IP/hostname used to rewrite presigned URLs so
+# browsers can reach MinIO directly for upload/download.
+MINIO_PUBLIC_ENDPOINT=<server-ip>
 ```
 
 The full `.env.docker.example` documents every available variable.
@@ -71,11 +90,16 @@ This starts all containers:
 | Container               | Purpose                                                         |
 | ----------------------- | --------------------------------------------------------------- |
 | `ai_assistant_postgres` | PostgreSQL 16 (internal only)                                   |
+| `ai_assistant_redis`    | Redis 7 — BullMQ job queue (internal only)                      |
+| `ai_assistant_minio`    | MinIO — S3-compatible object storage (ports 9000, 9001)         |
 | `ai_assistant_migrate`  | Runs `drizzle-kit push` once, then exits                        |
 | `ai_assistant_server`   | Hono API server (internal, port 3000)                           |
+| `ai_assistant_worker`   | BullMQ worker — converts uploaded PDFs to markdown              |
 | `ai_assistant_web`      | Nginx — serves static web app + reverse proxies API (port 2103) |
 
-The `migrate` service runs before `server` starts, so there is no race condition on first startup.
+The `migrate` service runs before `server` and `worker` start, so there is no race condition on first startup.
+
+> **MinIO console** is accessible at `http://<server-ip>:9001`. Log in with `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD`. The `documents` bucket is created automatically on first server startup.
 
 > **Always pass `--env-file .env.docker --build` when updating** — the web image must be rebuilt any time you change `VITE_SERVER_URL` or pull new code. Use `docker compose --env-file .env.docker up -d --build`.
 
@@ -124,6 +148,18 @@ bun run db:start
 
 This starts PostgreSQL on port **5433** (to avoid conflicts with any local Postgres install).
 
+For document processing you also need Redis and MinIO running locally. The quickest way is a one-off `docker run`:
+
+```bash
+# Redis
+docker run -d --name dev-redis -p 6379:6379 redis:7-alpine
+
+# MinIO
+docker run -d --name dev-minio -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+  minio/minio server /data --console-address ":9001"
+```
+
 ### 2. Install dependencies
 
 ```bash
@@ -145,6 +181,17 @@ DEFAULT_USER_PASSWORD=password123
 # node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ENCRYPTION_KEY=<64-char-hex>
 NODE_ENV=development
+
+# Redis (BullMQ queue)
+REDIS_URL=redis://localhost:6379
+
+# MinIO (document storage)
+MINIO_ENDPOINT=localhost
+MINIO_PORT=9000
+MINIO_USE_SSL=false
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=documents
 ```
 
 Create `apps/web/.env.local`:
@@ -176,8 +223,9 @@ This starts both the Hono server (port **3000**) and the Vite dev server (port *
 Or start them individually:
 
 ```bash
-bun run dev:server   # Hono on :3000
-bun run dev:web      # Vite on :3001
+bun run dev:server          # Hono on :3000
+bun run dev:web             # Vite on :3001
+bun run dev:worker          # BullMQ document processing worker
 ```
 
 Open `http://localhost:3001`.
@@ -200,8 +248,19 @@ Open `http://localhost:3001`.
 | `DEFAULT_USER_PASSWORD`    | —                      | Default password assigned to newly seeded users                                 |
 | `ENCRYPTION_KEY`           | —                      | 64-char hex key for encrypting AI provider credentials in the DB                |
 | `GITHUB_COPILOT_CLIENT_ID` | `Iv1.b507a08c87ecfe98` | GitHub OAuth App Client ID for Copilot integration                              |
+| `OLLAMA_BASE_URL`          | —                      | Ollama base URL (use `http://host.docker.internal:11434` when running on host)  |
 | `VITE_SERVER_URL`          | —                      | Public API URL as seen by the browser — **baked into the bundle at build time** |
 | `NODE_ENV`                 | `development`          | Set to `production` in Docker                                                   |
+| `REDIS_URL`                | `redis://redis:6379`   | Redis connection string — used by BullMQ document processing queue              |
+| `MINIO_ROOT_USER`          | `minioadmin`           | MinIO root username — used by the MinIO container                               |
+| `MINIO_ROOT_PASSWORD`      | —                      | MinIO root password — must match `MINIO_SECRET_KEY`                             |
+| `MINIO_ENDPOINT`           | —                      | MinIO internal hostname for server→MinIO connections. Use `minio` in Docker     |
+| `MINIO_PUBLIC_ENDPOINT`    | —                      | Public IP/hostname rewritten into presigned URLs so browsers can reach MinIO    |
+| `MINIO_PORT`               | `9000`                 | MinIO API port                                                                  |
+| `MINIO_USE_SSL`            | `false`                | Set to `true` if MinIO is behind HTTPS                                          |
+| `MINIO_ACCESS_KEY`         | —                      | MinIO access key (same value as `MINIO_ROOT_USER` in a simple setup)            |
+| `MINIO_SECRET_KEY`         | —                      | MinIO secret key (same value as `MINIO_ROOT_PASSWORD` in a simple setup)        |
+| `MINIO_BUCKET`             | `documents`            | Bucket name for uploaded documents (created automatically on startup)           |
 
 ---
 
@@ -217,3 +276,7 @@ Open `http://localhost:3001`.
 | Auth redirect loop                                            | `BETTER_AUTH_URL` must match the URL you open in the browser (including port)                                  |
 | `migrate` container keeps restarting                          | Database credentials mismatch — check `DATABASE_URL` matches `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` |
 | GitHub Copilot OAuth not working                              | `BETTER_AUTH_URL` must be publicly reachable for the OAuth callback                                            |
+| Document upload fails / bucket not found                      | Ensure `MINIO_BUCKET` exists — the server creates it automatically on startup; check MinIO logs               |
+| Upload/download fails with `ECONNREFUSED`                     | `MINIO_ENDPOINT` must be `minio` (Docker internal), not the public IP — the server can't reach itself via LAN |
+| Presigned URLs don't work in browser                          | Set `MINIO_PUBLIC_ENDPOINT=<server-ip>` so URLs are rewritten to the public address                          |
+| Documents stuck in `PENDING` status                           | Worker is not running — check `ai_assistant_worker` logs or run `bun run dev:worker` locally                  |

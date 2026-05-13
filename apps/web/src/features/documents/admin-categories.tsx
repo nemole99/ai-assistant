@@ -5,6 +5,13 @@ import { Plus, Tag, FileText } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyMedia,
+  EmptyTitle,
+} from "@workspace/ui/components/empty";
+import {
   Table,
   TableBody,
   TableCell,
@@ -101,6 +108,22 @@ export function AdminDocumentCategories() {
 
         {isLoading ? (
           <Loader />
+        ) : categories.length === 0 ? (
+          <Empty className="rounded-lg border border-dashed">
+            <EmptyMedia variant="icon">
+              <Tag />
+            </EmptyMedia>
+            <EmptyContent>
+              <EmptyTitle>No categories yet</EmptyTitle>
+              <EmptyDescription>
+                Create a category to organise your documents.
+              </EmptyDescription>
+              <Button size="sm" onClick={() => { setCurrentRow(null); setDialogOpen(true); }}>
+                <Plus className="mr-2 size-4" />
+                New Category
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
             <Table>
               <TableHeader>
@@ -112,50 +135,42 @@ export function AdminDocumentCategories() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-muted-foreground text-center">
-                      No categories yet.
+                {categories.map((cat) => (
+                  <TableRow key={cat.id}>
+                    <TableCell>
+                      <span className="inline-flex items-center gap-2 font-medium">
+                        <span
+                          className="size-3 rounded-full"
+                          style={{ backgroundColor: cat.color }}
+                        />
+                        {cat.name}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {cat.description ?? "—"}
+                    </TableCell>
+                    <TableCell>{cat.documentCount}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(cat)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(cat)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  categories.map((cat) => (
-                    <TableRow key={cat.id}>
-                      <TableCell>
-                        <span className="inline-flex items-center gap-2 font-medium">
-                          <span
-                            className="size-3 rounded-full"
-                            style={{ backgroundColor: cat.color }}
-                          />
-                          {cat.name}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {cat.description ?? "—"}
-                      </TableCell>
-                      <TableCell>{cat.documentCount}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(cat)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => handleDelete(cat)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
         )}

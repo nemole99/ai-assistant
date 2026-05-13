@@ -134,7 +134,7 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
                     onValueChange={field.handleChange}
                   >
                     <ColorPickerTrigger
-                      render={<Button variant="outline" className="gap-2" />}
+                      render={<Button type="button" variant="outline" className="gap-2" />}
                     >
                       <ColorPickerSwatch className="size-4 rounded-sm" />
                       <span className="font-mono text-sm">{field.state.value}</span>

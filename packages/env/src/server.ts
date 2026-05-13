@@ -19,11 +19,15 @@ export const env = createEnv({
     MINIO_PORT: z.coerce.number().int().positive().default(9000),
     MINIO_USE_SSL: z
       .string()
-      .transform((v) => v === "true")
-      .default("false"),
+      .default("false")
+      .transform((v) => v === "true"),
     MINIO_ACCESS_KEY: z.string().min(1),
     MINIO_SECRET_KEY: z.string().min(1),
     MINIO_BUCKET: z.string().min(1).default("documents"),
+    // Public hostname used to rewrite presigned URLs so browsers can reach MinIO.
+    // In Docker: set MINIO_ENDPOINT=minio (internal) and MINIO_PUBLIC_ENDPOINT=<server-ip>.
+    // In dev: leave unset — MINIO_ENDPOINT is used as-is.
+    MINIO_PUBLIC_ENDPOINT: z.string().optional(),
     REDIS_URL: z.string().url(),
   },
   runtimeEnv: process.env,
