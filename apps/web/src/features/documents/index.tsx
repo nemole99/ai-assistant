@@ -133,7 +133,7 @@ export function Documents() {
               key={doc.id}
               to="/documents/$id"
               params={{ id: doc.id }}
-              className="hover:bg-accent group rounded-lg border p-4 transition-colors"
+              className="hover:bg-accent group border p-4 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-medium leading-tight group-hover:underline">{doc.title}</h3>

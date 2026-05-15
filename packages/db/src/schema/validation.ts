@@ -7,7 +7,11 @@ import {
   employee,
   project,
   projectMember,
+  systemAiConfig,
   user,
+  wikiPage,
+  wikiPageChunk,
+  wikiPageSource,
 } from "./auth";
 
 // --- User ---
@@ -83,3 +87,24 @@ export const insertDocumentSchema = createInsertSchema(document).omit({
 export const updateDocumentSchema = insertDocumentSchema
   .pick({ title: true, description: true, categoryId: true })
   .partial();
+
+// --- SystemAIConfig ---
+
+export const selectSystemAiConfigSchema = createSelectSchema(systemAiConfig);
+export const insertSystemAiConfigSchema = createInsertSchema(systemAiConfig).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// --- WikiPage ---
+
+export const selectWikiPageSchema = createSelectSchema(wikiPage);
+export const insertWikiPageSchema = createInsertSchema(wikiPage).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const selectWikiPageSourceSchema = createSelectSchema(wikiPageSource);
+export const selectWikiPageChunkSchema = createSelectSchema(wikiPageChunk);

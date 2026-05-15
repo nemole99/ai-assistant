@@ -44,19 +44,20 @@ export function DocumentsTable({ data }: { data: Document[] }) {
             <TableCell className="max-w-64 font-medium">
               <div className="flex items-center gap-2">
                 <LongText className="max-w-48">{doc.title}</LongText>
-                {doc.status === "FAILED" && doc.errorMessage && (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <AlertCircle
-                          className="text-destructive size-4 shrink-0"
-                          aria-label="Processing error"
-                        />
-                      }
-                    />
-                    <TooltipContent className="max-w-64">{doc.errorMessage}</TooltipContent>
-                  </Tooltip>
-                )}
+                {(doc.status === "FAILED" || doc.status === "INGEST_FAILED") &&
+                  doc.errorMessage && (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <AlertCircle
+                            className="text-destructive size-4 shrink-0"
+                            aria-label="Processing error"
+                          />
+                        }
+                      />
+                      <TooltipContent className="max-w-64">{doc.errorMessage}</TooltipContent>
+                    </Tooltip>
+                  )}
               </div>
             </TableCell>
             <TableCell>
@@ -89,7 +90,7 @@ export function DocumentsTable({ data }: { data: Document[] }) {
                     <Pencil className="mr-2 size-4" />
                     Edit
                   </DropdownMenuItem>
-                  {doc.status === "FAILED" && (
+                  {(doc.status === "FAILED" || doc.status === "INGEST_FAILED") && (
                     <DropdownMenuItem
                       onClick={() => {
                         setCurrentRow(doc);

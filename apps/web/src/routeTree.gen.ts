@@ -18,12 +18,14 @@ import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
+import { Route as AuthenticatedWikiIndexRouteImport } from './routes/_authenticated/wiki/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects/index'
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
 import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
 import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
+import { Route as AuthenticatedSettingsSystemAiRouteImport } from './routes/_authenticated/settings/system-ai'
 import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
@@ -77,6 +79,11 @@ const AuthenticatedSettingsRouteRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWikiIndexRoute = AuthenticatedWikiIndexRouteImport.update({
+  id: '/wiki/',
+  path: '/wiki/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/',
@@ -112,6 +119,12 @@ const AuthenticatedAskAiIndexRoute = AuthenticatedAskAiIndexRouteImport.update({
   path: '/ask-ai/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsSystemAiRoute =
+  AuthenticatedSettingsSystemAiRouteImport.update({
+    id: '/system-ai',
+    path: '/system-ai',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsPasswordRoute =
   AuthenticatedSettingsPasswordRouteImport.update({
     id: '/password',
@@ -171,12 +184,14 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
+  '/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/wiki/': typeof AuthenticatedWikiIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
@@ -193,12 +208,14 @@ export interface FileRoutesByTo {
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
+  '/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/ask-ai': typeof AuthenticatedAskAiIndexRoute
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
   '/documents': typeof AuthenticatedDocumentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/wiki': typeof AuthenticatedWikiIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,12 +235,14 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
+  '/_authenticated/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/wiki/': typeof AuthenticatedWikiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,12 +262,14 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/settings/ai-providers'
     | '/settings/password'
+    | '/settings/system-ai'
     | '/ask-ai/'
     | '/departments/'
     | '/documents/'
     | '/employees/'
     | '/projects/'
     | '/settings/'
+    | '/wiki/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
@@ -265,12 +286,14 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/settings/ai-providers'
     | '/settings/password'
+    | '/settings/system-ai'
     | '/ask-ai'
     | '/departments'
     | '/documents'
     | '/employees'
     | '/projects'
     | '/settings'
+    | '/wiki'
   id:
     | '__root__'
     | '/_authenticated'
@@ -289,12 +312,14 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
     | '/_authenticated/settings/password'
+    | '/_authenticated/settings/system-ai'
     | '/_authenticated/ask-ai/'
     | '/_authenticated/departments/'
     | '/_authenticated/documents/'
     | '/_authenticated/employees/'
     | '/_authenticated/projects/'
     | '/_authenticated/settings/'
+    | '/_authenticated/wiki/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -372,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/wiki/': {
+      id: '/_authenticated/wiki/'
+      path: '/wiki'
+      fullPath: '/wiki/'
+      preLoaderRoute: typeof AuthenticatedWikiIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
@@ -413,6 +445,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ask-ai/'
       preLoaderRoute: typeof AuthenticatedAskAiIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings/system-ai': {
+      id: '/_authenticated/settings/system-ai'
+      path: '/system-ai'
+      fullPath: '/settings/system-ai'
+      preLoaderRoute: typeof AuthenticatedSettingsSystemAiRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
     '/_authenticated/settings/password': {
       id: '/_authenticated/settings/password'
@@ -469,6 +508,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAiProvidersRoute: typeof AuthenticatedSettingsAiProvidersRoute
   AuthenticatedSettingsPasswordRoute: typeof AuthenticatedSettingsPasswordRoute
+  AuthenticatedSettingsSystemAiRoute: typeof AuthenticatedSettingsSystemAiRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
@@ -477,6 +517,7 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
     AuthenticatedSettingsAiProvidersRoute:
       AuthenticatedSettingsAiProvidersRoute,
     AuthenticatedSettingsPasswordRoute: AuthenticatedSettingsPasswordRoute,
+    AuthenticatedSettingsSystemAiRoute: AuthenticatedSettingsSystemAiRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   }
 
@@ -498,6 +539,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
   AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
+  AuthenticatedWikiIndexRoute: typeof AuthenticatedWikiIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -513,6 +555,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
   AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
+  AuthenticatedWikiIndexRoute: AuthenticatedWikiIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

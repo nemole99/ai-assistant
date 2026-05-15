@@ -5,6 +5,10 @@ import { db, type Conversation, type ChatMessage } from "../db";
 import { useRouter } from "@tanstack/react-router";
 import { generateId } from "@workspace/ui/lib/id";
 
+// Module-level store so a pending first message survives the route transition
+// (component unmounts at /ask-ai and remounts at /ask-ai/$id).
+export const pendingFirstMessages = new Map<string, string>();
+
 export function useAskAiDb(targetConversationId?: string) {
   const router = useRouter();
 
@@ -27,42 +31,47 @@ export function useAskAiDb(targetConversationId?: string) {
     content: (m as any).content,
   }));
 
+  // Called when the user sends their very first message (no conversationId yet).
+  // Creates the conversation record, stores the message text for the new route to
+  // pick up, then navigates — so the stream starts inside the correct component
+  // and no state is lost on redirect.
+  const startNewConversation = useCallback(
+    async (text: string) => {
+      const newId = generateId();
+      const conv: Conversation = {
+        id: newId,
+        title: text.slice(0, 80),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      await db.conversations.add(conv);
+      pendingFirstMessages.set(newId, text);
+      router.navigate({
+        to: "/ask-ai/$conversationId",
+        params: { conversationId: newId },
+      });
+    },
+    [router],
+  );
+
   const saveMessages = useCallback(
     async (messages: UIMessage[]) => {
       const now = Date.now();
-      let convId = conversationId;
+      const convId = conversationId;
 
       if (!convId) {
-        convId = generateId();
-        const firstUserMsg = messages.find((m) => m.role === "user");
-        const title = firstUserMsg
-          ? typeof (firstUserMsg as any).content === "string"
-            ? (firstUserMsg as any).content
-            : (firstUserMsg.parts?.find((p) => p.type === "text")?.text ?? "New Chat")
-          : "New Chat";
-
-        const conv: Conversation = {
-          id: convId,
-          title: String(title).slice(0, 80),
-          createdAt: now,
-          updatedAt: now,
-        };
-        await db.conversations.add(conv);
-        setTimeout(() => {
-          router.navigate({
-            to: "/ask-ai/$conversationId",
-            params: { conversationId: convId! },
-          });
-        }, 0);
-      } else {
-        await db.conversations.update(convId, { updatedAt: now });
+        // Should not happen — startNewConversation guarantees a convId before
+        // streaming begins. Guard here just in case.
+        return;
       }
+
+      await db.conversations.update(convId, { updatedAt: now });
 
       const dbMessages: ChatMessage[] = messages
         .filter((m) => m.role === "user" || m.role === "assistant")
         .map((m, i) => ({
           id: m.id,
-          conversationId: convId!,
+          conversationId: convId,
           role: m.role as "user" | "assistant",
           content:
             typeof (m as any).content === "string"
@@ -74,7 +83,7 @@ export function useAskAiDb(targetConversationId?: string) {
       // Upsert all messages
       await db.messages.bulkPut(dbMessages);
     },
-    [conversationId, router],
+    [conversationId],
   );
 
   const newChat = useCallback(async () => {
@@ -88,6 +97,7 @@ export function useAskAiDb(targetConversationId?: string) {
       ? storedData !== undefined && storedData.conversationId === targetConversationId
       : true,
     saveMessages,
+    startNewConversation,
     newChat,
   };
 }

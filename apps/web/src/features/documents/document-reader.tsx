@@ -52,8 +52,8 @@ export function DocumentReader({ id }: { id: string }) {
       <ContentLayout>
         <div className="flex flex-col items-center gap-4 py-16">
           <p className="text-muted-foreground">Document not found.</p>
-          <Button variant="outline" asChild>
-            <Link to="/documents">Back to Documents</Link>
+          <Button variant="outline" render={<Link to="/documents" />}>
+            Back to Documents
           </Button>
         </div>
       </ContentLayout>
@@ -63,11 +63,9 @@ export function DocumentReader({ id }: { id: string }) {
   return (
     <ContentLayout>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/documents">
-            <ArrowLeft className="mr-1 size-4" />
-            Documents
-          </Link>
+        <Button variant="ghost" size="sm" render={<Link to="/documents" />}>
+          <ArrowLeft className="mr-1 size-4" />
+          Documents
         </Button>
       </div>
 

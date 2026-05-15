@@ -36,27 +36,45 @@ import { orpc } from "@/lib/orpc";
 import { useChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
 import { env } from "@workspace/env/web";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { SiriOrb } from "@workspace/ui/components/smoothui/siri-orb";
 import { DefaultChatTransport } from "ai";
-import { CheckIcon, ClipboardCheckIcon, ClipboardIcon, PlusIcon, TicketIcon } from "lucide-react";
+import {
+  BookOpen,
+  CheckIcon,
+  ClipboardCheckIcon,
+  ClipboardIcon,
+  PlusIcon,
+  TicketIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AskAiSkeleton } from "./components/ask-ai-skeleton";
 import { ChatError } from "./components/chat-error";
 import { EmptyState } from "./components/empty-state";
 import { TicketDescriptionDialog } from "./components/ticket-description-dialog";
-import { useAskAiDb } from "./hooks/use-ask-ai-db";
+import { pendingFirstMessages, useAskAiDb } from "./hooks/use-ask-ai-db";
 import { useModelAssignment } from "./hooks/use-model-assignment";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 
 import { PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react";
 import { ChatHistorySidebar } from "./components/chat-history-sidebar";
+import { WikiPageModal } from "@/features/wiki/wiki-page-modal";
+
+interface WikiCitation {
+  id: string;
+  title: string;
+  slug: string;
+}
 
 export function AskAi({ conversationId }: { conversationId?: string }) {
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [citationsByMessage, setCitationsByMessage] = useState<Record<string, WikiCitation[]>>({});
+  const [viewingWikiPageId, setViewingWikiPageId] = useState<string | null>(null);
+  const pendingCitationsRef = useRef<WikiCitation[]>([]);
 
   // Check if there are any models available (either System Models like Ollama, or User Models like Copilot)
   const { data: providers = [], isLoading: isProvidersLoading } = useQuery(
@@ -65,7 +83,8 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
   const copilotProvider = providers.find((p) => p.provider === "github_copilot") ?? null;
 
   // IndexedDB persistence
-  const { initialMessages, isLoaded, saveMessages, newChat } = useAskAiDb(conversationId);
+  const { initialMessages, isLoaded, saveMessages, startNewConversation, newChat } =
+    useAskAiDb(conversationId);
 
   // Model selection
   const { models, selectedModel, selectedModelId, setSelectedModel, isModelsLoading } =
@@ -100,6 +119,18 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
         api: `${env.VITE_SERVER_URL}/ai/chat`,
         credentials: "include",
         body: () => ({ model: modelIdRef.current }),
+        fetch: async (url, options) => {
+          const response = await globalThis.fetch(url, options as RequestInit);
+          const citationsHeader = response.headers.get("X-Wiki-Citations");
+          if (citationsHeader) {
+            try {
+              pendingCitationsRef.current = JSON.parse(citationsHeader) as WikiCitation[];
+            } catch {
+              pendingCitationsRef.current = [];
+            }
+          }
+          return response;
+        },
         prepareSendMessagesRequest: ({ messages, body }) => {
           const fullPrompt = ticketPromptRef.current;
           ticketPromptRef.current = null;
@@ -123,25 +154,50 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
     messages: isLoaded ? initialMessages : [],
     onFinish: ({ messages: updatedMessages }) => {
       saveMessages(updatedMessages);
+      const citations = pendingCitationsRef.current;
+      if (citations.length > 0) {
+        const lastAssistant = [...updatedMessages].reverse().find((m) => m.role === "assistant");
+        if (lastAssistant) {
+          setCitationsByMessage((prev) => ({ ...prev, [lastAssistant.id]: citations }));
+        }
+        pendingCitationsRef.current = [];
+      }
     },
   });
 
-  // Sync initial messages when conversation switches or finishes loading
+  // Sync initial messages when conversation switches or finishes loading.
+  // Also send the pending first message when we arrive at a freshly-created
+  // conversation (navigation happened before streaming, so state is intact).
   useEffect(() => {
     if (isLoaded) {
       setMessages(initialMessages);
-      setInputText(""); // Reset input when switching chats
+      setInputText("");
+
+      if (conversationId) {
+        const pending = pendingFirstMessages.get(conversationId);
+        if (pending) {
+          pendingFirstMessages.delete(conversationId);
+          sendMessage({ text: pending });
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, conversationId]);
 
   const handlePromptSubmit = useCallback(
-    (message: PromptInputMessage) => {
+    async (message: PromptInputMessage) => {
       if (!message.text.trim()) return;
+      if (!conversationId) {
+        // First message ever — create the conversation and navigate first so
+        // the stream runs inside the correct route component (no remount mid-stream).
+        await startNewConversation(message.text);
+        setInputText("");
+        return;
+      }
       sendMessage({ text: message.text });
       setInputText("");
     },
-    [sendMessage],
+    [sendMessage, conversationId, startNewConversation],
   );
 
   const handleNewChat = useCallback(async () => {
@@ -258,6 +314,24 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                             </MessageAction>
                           </MessageActions>
                         )}
+                        {message.role === "assistant" && citationsByMessage[message.id]?.length ? (
+                          <div className="mt-2 flex flex-wrap gap-1.5 items-center">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <BookOpen size={11} />
+                              Sources:
+                            </span>
+                            {citationsByMessage[message.id]!.map((citation) => (
+                              <Badge
+                                key={citation.id}
+                                variant="outline"
+                                className="cursor-pointer text-xs hover:bg-muted gap-1"
+                                onClick={() => setViewingWikiPageId(citation.id)}
+                              >
+                                {citation.title}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : null}
                         {error && message.role === "assistant" && i === messages.length - 1 && (
                           <ChatError error={error} onRetry={regenerate} />
                         )}
@@ -372,6 +446,10 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
           {/* Right Sidebar for History */}
           <ChatHistorySidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         </div>
+      )}
+
+      {viewingWikiPageId && (
+        <WikiPageModal pageId={viewingWikiPageId} onClose={() => setViewingWikiPageId(null)} />
       )}
     </div>
   );

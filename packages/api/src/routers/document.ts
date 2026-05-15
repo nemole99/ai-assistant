@@ -6,7 +6,7 @@ import {
   selectDocumentSchema,
   updateDocumentSchema,
 } from "@workspace/db/schema/validation";
-import { documentQueue } from "@workspace/queue";
+import { documentQueue, wikiIngestionQueue } from "@workspace/queue";
 import {
   deleteObject,
   documentObjectKey,
@@ -14,7 +14,7 @@ import {
   presignedGetUrl,
   presignedPutUrl,
 } from "@workspace/storage";
-import { and, eq, ilike, isNull } from "drizzle-orm";
+import { and, eq, ilike, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { adminProcedure, protectedProcedure } from "..";
@@ -70,7 +70,9 @@ export const documentRouter = {
         .where(
           and(
             isNull(document.projectId),
-            isAdmin ? undefined : eq(document.status, "COMPLETED"),
+            isAdmin
+              ? undefined
+              : sql`${document.status} IN ('COMPLETED', 'INGESTING', 'INGESTED', 'INGEST_FAILED')`,
             input?.categoryId ? eq(document.categoryId, input.categoryId) : undefined,
             input?.query ? ilike(document.title, `%${input.query}%`) : undefined,
           ),
@@ -121,7 +123,8 @@ export const documentRouter = {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });
       }
 
-      if (!isAdmin && row.status !== "COMPLETED") {
+      const visibleStatuses = ["COMPLETED", "INGESTING", "INGESTED", "INGEST_FAILED"] as const;
+      if (!isAdmin && !visibleStatuses.includes(row.status as (typeof visibleStatuses)[number])) {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });
       }
 
@@ -268,27 +271,39 @@ export const documentRouter = {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });
       }
 
-      if (doc.status !== "FAILED") {
-        throw new ORPCError("BAD_REQUEST", {
-          message: "Only FAILED documents can be retried",
-        });
+      if (doc.status === "FAILED") {
+        const [updated] = await db
+          .update(document)
+          .set({ status: "PENDING", errorMessage: null, markdownContent: null })
+          .where(eq(document.id, input.id))
+          .returning();
+
+        if (!updated) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update document" });
+        }
+
+        await documentQueue.add("process", { documentId: doc.id });
+        return updated;
       }
 
-      const [updated] = await db
-        .update(document)
-        .set({ status: "PENDING", errorMessage: null, markdownContent: null })
-        .where(eq(document.id, input.id))
-        .returning();
+      if (doc.status === "INGEST_FAILED") {
+        const [updated] = await db
+          .update(document)
+          .set({ status: "INGESTING", errorMessage: null })
+          .where(eq(document.id, input.id))
+          .returning();
 
-      if (!updated) {
-        throw new ORPCError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to update document",
-        });
+        if (!updated) {
+          throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to update document" });
+        }
+
+        await wikiIngestionQueue.add("ingest", { documentId: doc.id });
+        return updated;
       }
 
-      await documentQueue.add("process", { documentId: doc.id });
-
-      return updated;
+      throw new ORPCError("BAD_REQUEST", {
+        message: "Only FAILED or INGEST_FAILED documents can be retried",
+      });
     }),
 
   getDownloadUrl: protectedProcedure

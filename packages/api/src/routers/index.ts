@@ -7,6 +7,8 @@ import { aiModelAssignmentRouter } from "./ai-model-assignment";
 import { projectRouter } from "./project";
 import { documentCategoryRouter } from "./document-category";
 import { documentRouter } from "./document";
+import { systemAiConfigRouter } from "./system-ai-config";
+import { wikiPageRouter } from "./wiki-page";
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -25,6 +27,8 @@ export const appRouter = {
   project: projectRouter,
   documentCategory: documentCategoryRouter,
   document: documentRouter,
+  systemAiConfig: systemAiConfigRouter,
+  wikiPage: wikiPageRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

@@ -17,14 +17,26 @@ const EMPLOYEE_HIDDEN_ITEMS = new Set(["/departments", "/employees"]);
 export function AppSidebar() {
   const { collapsible, variant } = useLayout();
   const { data: session } = authClient.useSession();
-  const isEmployee = session?.user?.role === "EMPLOYEE";
+  const role = session?.user?.role;
+  const isEmployee = role === "EMPLOYEE";
+  const isAdmin = role === "ADMIN";
 
   const navGroups = sidebarData.navGroups
     .map((g) => {
-      if (!isEmployee) return g;
-      const filtered = g.items.filter(
-        (item) => !("url" in item) || !EMPLOYEE_HIDDEN_ITEMS.has(item.url as string),
-      );
+      const filtered = g.items
+        .filter((item) => {
+          if (isEmployee && "url" in item && EMPLOYEE_HIDDEN_ITEMS.has(item.url as string)) {
+            return false;
+          }
+          return true;
+        })
+        .map((item) => {
+          if ("items" in item && item.items) {
+            const subFiltered = item.items.filter((sub) => !sub.adminOnly || isAdmin);
+            return { ...item, items: subFiltered };
+          }
+          return item;
+        });
       return { ...g, items: filtered };
     })
     .filter((g) => g.items.length > 0);

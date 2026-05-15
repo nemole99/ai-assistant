@@ -15,7 +15,9 @@ function AdminDocumentsInner() {
   const { data: documents = [], isLoading } = useQuery({
     ...orpc.document.list.queryOptions(),
     refetchInterval: (query) => {
-      const hasProcessing = query.state.data?.some((doc) => doc.status === "PENDING");
+      const hasProcessing = query.state.data?.some(
+        (doc) => doc.status === "PENDING" || doc.status === "INGESTING",
+      );
       return hasProcessing ? 5000 : false;
     },
   });

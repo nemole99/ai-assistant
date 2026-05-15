@@ -11,6 +11,7 @@ import {
   jsonb,
   unique,
   primaryKey,
+  vector,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -321,7 +322,14 @@ export const projectMemberRelations = relations(projectMember, ({ one }) => ({
 
 // --- Documents ---
 
-export const documentStatusEnum = pgEnum("document_status", ["PENDING", "COMPLETED", "FAILED"]);
+export const documentStatusEnum = pgEnum("document_status", [
+  "PENDING",
+  "COMPLETED",
+  "FAILED",
+  "INGESTING",
+  "INGESTED",
+  "INGEST_FAILED",
+]);
 
 export const documentCategory = pgTable("document_category", {
   id: text("id").primaryKey(),
@@ -375,7 +383,7 @@ export const documentCategoryRelations = relations(documentCategory, ({ many }) 
   documents: many(document),
 }));
 
-export const documentRelations = relations(document, ({ one }) => ({
+export const documentRelations = relations(document, ({ one, many }) => ({
   category: one(documentCategory, {
     fields: [document.categoryId],
     references: [documentCategory.id],
@@ -387,5 +395,86 @@ export const documentRelations = relations(document, ({ one }) => ({
   uploader: one(user, {
     fields: [document.uploadedBy],
     references: [user.id],
+  }),
+  wikiPageSources: many(wikiPageSource),
+}));
+
+// --- Wiki ---
+
+export const systemPurposeEnum = pgEnum("system_purpose", ["pipeline_text", "pipeline_embedding"]);
+
+export const systemAiConfig = pgTable("system_ai_config", {
+  id: text("id").primaryKey(),
+  purpose: systemPurposeEnum("purpose").notNull().unique(),
+  providerType: text("provider_type").notNull(),
+  apiKey: text("api_key").notNull(),
+  modelId: text("model_id").notNull(),
+  baseUrl: text("base_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const wikiPage = pgTable("wiki_page", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const wikiPageSource = pgTable(
+  "wiki_page_source",
+  {
+    wikiPageId: text("wiki_page_id")
+      .notNull()
+      .references(() => wikiPage.id, { onDelete: "cascade" }),
+    documentId: text("document_id")
+      .notNull()
+      .references(() => document.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.wikiPageId, table.documentId] })],
+);
+
+export const wikiPageChunk = pgTable(
+  "wiki_page_chunk",
+  {
+    id: text("id").primaryKey(),
+    wikiPageId: text("wiki_page_id")
+      .notNull()
+      .references(() => wikiPage.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    chunkIndex: integer("chunk_index").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }),
+  },
+  (table) => [index("wiki_page_chunk_wikiPageId_idx").on(table.wikiPageId)],
+);
+
+export const wikiPageRelations = relations(wikiPage, ({ many }) => ({
+  sources: many(wikiPageSource),
+  chunks: many(wikiPageChunk),
+}));
+
+export const wikiPageSourceRelations = relations(wikiPageSource, ({ one }) => ({
+  wikiPage: one(wikiPage, {
+    fields: [wikiPageSource.wikiPageId],
+    references: [wikiPage.id],
+  }),
+  document: one(document, {
+    fields: [wikiPageSource.documentId],
+    references: [document.id],
+  }),
+}));
+
+export const wikiPageChunkRelations = relations(wikiPageChunk, ({ one }) => ({
+  wikiPage: one(wikiPage, {
+    fields: [wikiPageChunk.wikiPageId],
+    references: [wikiPage.id],
   }),
 }));

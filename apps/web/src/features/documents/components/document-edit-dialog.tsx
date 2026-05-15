@@ -20,7 +20,7 @@ import { type Document } from "../data/schema";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
+  description: z.string(),
   categoryId: z.string().min(1, "Category is required"),
 });
 

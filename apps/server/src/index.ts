@@ -24,6 +24,7 @@ app.use(
     origin: env.CORS_ORIGIN,
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["X-Wiki-Citations"],
     credentials: true,
   }),
 );

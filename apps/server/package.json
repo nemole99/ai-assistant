@@ -14,6 +14,7 @@
     "start": "bun run dist/index.mjs"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.77",
     "@ai-sdk/devtools": "^0.0.2",
     "@ai-sdk/google": "^3.0.71",
     "@ai-sdk/openai": "^3.0.63",

@@ -9,6 +9,8 @@ import {
   GalleryVerticalEnd,
   KeyRound,
   LayoutDashboard,
+  LibraryBig,
+  ServerCog,
   Settings,
   UserCog,
   Wrench,
@@ -57,6 +59,11 @@ export const sidebarData: SidebarData = {
           url: "/documents",
           icon: BookOpen,
         },
+        {
+          title: "Wiki",
+          url: "/wiki",
+          icon: LibraryBig,
+        },
       ],
     },
     {
@@ -100,6 +107,12 @@ export const sidebarData: SidebarData = {
               title: "Password",
               url: "/settings/password",
               icon: KeyRound,
+            },
+            {
+              title: "System AI",
+              url: "/settings/system-ai",
+              icon: ServerCog,
+              adminOnly: true,
             },
           ],
         },

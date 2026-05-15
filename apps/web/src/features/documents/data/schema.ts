@@ -1,4 +1,4 @@
-import type { AppRouterClient } from "@/lib/orpc";
+import type { AppRouterClient } from "@workspace/api/routers/index";
 
 export type Document = Awaited<ReturnType<AppRouterClient["document"]["list"]>>[number];
 

@@ -2,7 +2,7 @@ name: workspace
 
 services:
   postgres:
-    image: postgres
+    image: pgvector/pgvector:pg17
     container_name: workspace-postgres
     environment:
       POSTGRES_DB: workspace
