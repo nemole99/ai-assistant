@@ -15,7 +15,6 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun --env-file ../../apps/server/.env ../../apps/server/src/seed/index.ts",
-    "db:seed-employees": "bun --env-file ../../apps/server/.env ../../apps/server/src/seed/seed-employees.ts",
     "db:start": "docker compose up -d",
     "db:watch": "docker compose up",
     "db:stop": "docker compose stop",
@@ -32,7 +31,6 @@
   "devDependencies": {
     "@types/pg": "^8.20.0",
     "@workspace/config": "workspace:*",
-    "drizzle-kit": "^0.31.10",
     "typescript": "catalog:"
   }
 }

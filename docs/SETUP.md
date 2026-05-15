@@ -107,21 +107,15 @@ The `migrate` service runs before `server` and `worker` start, so there is no ra
 
 Open `http://<server-ip>:2103` and log in with the credentials set in `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-### 4. Seed sample data (optional)
+### 4. Setup Storage & Seed sample data (optional)
 
-Seed employees and departments:
-
-```bash
-docker run --rm --network ai-assistant_default --env-file .env.docker ai-assistant-migrate:latest sh -c "cd /app/apps/server && bun src/seed/seed-employees.ts"
-```
-
-Seed projects:
+Create the MinIO `documents` bucket, and seed admin account, employees, departments, and projects explicitly:
 
 ```bash
-docker run --rm --network ai-assistant_default --env-file .env.docker ai-assistant-migrate:latest sh -c "cd /app/apps/server && bun src/seed/seed-projects.ts"
+docker run --rm --network ai-assistant_default --env-file .env.docker ai-assistant-migrate:latest sh -c "cd /app/apps/server && bun src/seed/index.ts"
 ```
 
-Edit [apps/server/src/seed/seed-employees.ts](../apps/server/src/seed/seed-employees.ts) to customise departments, positions, and employee list before running.
+Edit [apps/server/src/seed/seed-employees.ts](../apps/server/src/seed/seed-employees.ts) and [apps/server/src/seed/seed-projects.ts](../apps/server/src/seed/seed-projects.ts) to customise the initial data before running.
 
 ### 5. Connect GitHub Copilot
 

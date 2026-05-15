@@ -55,24 +55,12 @@ This spins up a PostgreSQL container on **port 5433** via Docker Compose (`packa
 bun run db:push
 ```
 
-### 5. Seed initial data
+### 5. Config Storage & Seed initial data
 
-Seed admin account (bắt buộc lần đầu):
+The command below will automatically create the MinIO `documents` bucket (if it doesn't exist), then seed the admin account, sample employees, document categories, and sample projects:
 
 ```bash
 bun run db:seed
-```
-
-Seed danh sách nhân viên mẫu (tuỳ chọn):
-
-```bash
-bun run db:seed-employees
-```
-
-Seed danh sách projects mẫu (tuỳ chọn):
-
-```bash
-bun run db:seed-projects
 ```
 
 ### 6. Start the development server

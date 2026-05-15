@@ -16,12 +16,13 @@ services:
   # ── Infrastructure ────────────────────────────────────────────
 
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg17
     container_name: ai_assistant_postgres
     restart: always
     env_file: [.env.docker]
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./packages/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s

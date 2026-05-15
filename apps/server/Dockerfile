@@ -19,8 +19,8 @@ COPY apps/server/ apps/server/
 COPY packages/ packages/
 
 # Compile self-contained binaries for both server and worker
-RUN bun build --compile --sourcemap ./apps/server/src/index.ts --outfile /server-bin
-RUN bun build --compile --sourcemap ./apps/server/src/worker.ts --outfile /worker-bin
+RUN bun build --compile --sourcemap ./apps/server/src/index.ts --outfile /server-bin --external msgpackr-extract
+RUN bun build --compile --sourcemap ./apps/server/src/worker.ts --outfile /worker-bin --external msgpackr-extract
 
 # ── Runtime ──────────────────────────────────────────────────
 FROM oven/bun:1-slim AS runtime

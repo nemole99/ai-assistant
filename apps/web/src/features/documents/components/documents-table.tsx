@@ -1,5 +1,4 @@
-import { format } from "date-fns";
-import { AlertCircle, FileText, MoreHorizontal, Pencil, RefreshCw, Trash2 } from "lucide-react";
+import { LongText } from "@/components/long-text";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -16,8 +15,19 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
-import { LongText } from "@/components/long-text";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import { format } from "date-fns";
+import {
+  AlertCircle,
+  MoreHorizontal,
+  Pencil,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { type Document } from "../data/schema";
 import { DocumentCategoryBadge } from "./document-category-badge";
 import { DocumentStatusBadge } from "./document-status-badge";
@@ -55,7 +65,9 @@ export function DocumentsTable({ data }: { data: Document[] }) {
                           />
                         }
                       />
-                      <TooltipContent className="max-w-64">{doc.errorMessage}</TooltipContent>
+                      <TooltipContent className="max-w-64">
+                        {doc.errorMessage}
+                      </TooltipContent>
                     </Tooltip>
                   )}
               </div>
@@ -75,7 +87,9 @@ export function DocumentsTable({ data }: { data: Document[] }) {
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<Button variant="ghost" size="icon" className="size-8" />}
+                  render={
+                    <Button variant="ghost" size="icon" className="size-8" />
+                  }
                 >
                   <MoreHorizontal className="size-4" />
                   <span className="sr-only">Actions</span>
@@ -90,7 +104,8 @@ export function DocumentsTable({ data }: { data: Document[] }) {
                     <Pencil className="mr-2 size-4" />
                     Edit
                   </DropdownMenuItem>
-                  {(doc.status === "FAILED" || doc.status === "INGEST_FAILED") && (
+                  {(doc.status === "FAILED" ||
+                    doc.status === "INGEST_FAILED") && (
                     <DropdownMenuItem
                       onClick={() => {
                         setCurrentRow(doc);

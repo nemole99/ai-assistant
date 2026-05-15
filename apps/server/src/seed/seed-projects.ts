@@ -47,7 +47,7 @@ const PROJECTS: {
   },
 ];
 
-async function seedProjects() {
+export async function seedProjects() {
   console.log("🌱 Seeding projects...");
 
   // Load all employees indexed by email for fast lookup
@@ -112,10 +112,3 @@ async function seedProjects() {
 
   console.log("\n✅ Projects seeded.");
 }
-
-seedProjects()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error("❌ Seed failed:", err);
-    process.exit(1);
-  });

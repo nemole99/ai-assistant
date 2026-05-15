@@ -3,6 +3,10 @@ import { auth } from "@workspace/auth";
 import { db } from "@workspace/db";
 import { user } from "@workspace/db/schema/auth";
 import { eq } from "drizzle-orm";
+import { seedEmployees } from "./seed-employees";
+import { seedProjects } from "./seed-projects";
+import { seedCategories } from "./seed-categories";
+import { ensureBucketExists } from "@workspace/storage";
 
 async function seed() {
   console.log("🌱 Seeding admin account...");
@@ -38,12 +42,25 @@ async function seed() {
     .set({ role: "ADMIN", mustChangePassword: false })
     .where(eq(user.id, result.user.id));
 
-  console.log(`✅ Admin account created: ${env.ADMIN_EMAIL}`);
+  console.log(`✅ Admin account created: ${env.ADMIN_EMAIL}\n`);
 }
 
-seed()
-  .then(() => process.exit(0))
-  .catch((err) => {
+async function main() {
+  try {
+    console.log("🌱 Initialising MinIO storage bucket...");
+    await ensureBucketExists();
+    console.log("✅ Storage bucket is ready.\n");
+
+    await seed();
+    await seedEmployees();
+    await seedCategories();
+    await seedProjects();
+    console.log("\n🎉 All seeds completed successfully.");
+    process.exit(0);
+  } catch (err) {
     console.error("❌ Seed failed:", err);
     process.exit(1);
-  });
+  }
+}
+
+main();

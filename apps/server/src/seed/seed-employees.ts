@@ -31,7 +31,7 @@ const EMPLOYEES = [
   { email: "joy.luu@ewoosoft.com", fullName: "Joy Luu" },
 ];
 
-async function seedEmployees() {
+export async function seedEmployees() {
   console.log(`🌱 Seeding employees into "${DEPARTMENT_NAME}" department...`);
 
   // Find or create the Dev department
@@ -106,10 +106,3 @@ async function seedEmployees() {
 
   console.log(`\n✅ Done. Inserted: ${inserted}`);
 }
-
-seedEmployees()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error("❌ Seed failed:", err);
-    process.exit(1);
-  });
