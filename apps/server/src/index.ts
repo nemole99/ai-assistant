@@ -112,9 +112,7 @@ async function ensureAdminExists() {
   console.log(`✅ Admin account created: ${env.ADMIN_EMAIL}`);
 }
 
-ensureAdminExists().catch((err) =>
-  console.error("❌ ensureAdminExists failed:", err),
-);
+ensureAdminExists().catch((err) => console.error("❌ ensureAdminExists failed:", err));
 
 export default {
   fetch: app.fetch,

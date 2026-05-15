@@ -1,8 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import {
-  getCopilotSession,
-  invalidateCopilotSession,
-} from "@workspace/api/copilot-session-cache";
+import { getCopilotSession, invalidateCopilotSession } from "@workspace/api/copilot-session-cache";
 import { auth } from "@workspace/auth";
 import { env } from "@workspace/env/server";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";

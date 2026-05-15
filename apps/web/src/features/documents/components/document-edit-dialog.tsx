@@ -11,12 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { SelectDropdown } from "@/components/select-dropdown";
@@ -77,7 +72,13 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
   }));
 
   return (
-    <Dialog open={open} onOpenChange={(s) => { form.reset(); onOpenChange(s); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(s) => {
+        form.reset();
+        onOpenChange(s);
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
           <DialogTitle>Edit Document</DialogTitle>
@@ -87,7 +88,10 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
         </DialogHeader>
         <form
           id="edit-doc-form"
-          onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
         >
           <FieldGroup>
             <form.Field
@@ -131,7 +135,10 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
               name="description"
               children={(field) => (
                 <Field>
-                  <FieldLabel>Description <span className="text-muted-foreground font-normal">(optional)</span></FieldLabel>
+                  <FieldLabel>
+                    Description{" "}
+                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  </FieldLabel>
                   <Textarea
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -145,7 +152,9 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
           </FieldGroup>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button type="submit" form="edit-doc-form" disabled={updateMutation.isPending}>
             {updateMutation.isPending ? "Saving…" : "Save"}
           </Button>

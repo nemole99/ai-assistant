@@ -6,17 +6,10 @@ import { useChatHistory, type TimeGroup } from "../hooks/use-chat-history";
 
 const GROUPS: TimeGroup[] = ["Today", "Yesterday", "Previous 7 Days", "Older"];
 
-export function ChatHistorySidebar({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+export function ChatHistorySidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { grouped, deleteConversation } = useChatHistory();
   const match = useMatch({ strict: false });
-  const activeChatId =
-    "conversationId" in match.params ? match.params.conversationId : undefined;
+  const activeChatId = "conversationId" in match.params ? match.params.conversationId : undefined;
   const router = useRouter();
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
@@ -39,12 +32,7 @@ export function ChatHistorySidebar({
       >
         <div className="flex h-14 items-center justify-between border-b px-4 shrink-0">
           <h2 className="font-semibold text-sm">Chat History</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={onClose}
-          >
+          <Button variant="ghost" size="icon" className="size-8" onClick={onClose}>
             <XIcon className="size-4" />
           </Button>
         </div>
@@ -55,9 +43,7 @@ export function ChatHistorySidebar({
 
             return (
               <div key={group} className="space-y-1">
-                <h3 className="text-xs font-medium text-muted-foreground px-2 mb-2">
-                  {group}
-                </h3>
+                <h3 className="text-xs font-medium text-muted-foreground px-2 mb-2">{group}</h3>
                 {chats.map((chat) => (
                   <Link
                     key={chat.id}
@@ -65,16 +51,12 @@ export function ChatHistorySidebar({
                     params={{ conversationId: chat.id }}
                     className={cn(
                       "group flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted",
-                      chat.id === activeChatId
-                        ? "bg-muted font-medium"
-                        : "text-muted-foreground",
+                      chat.id === activeChatId ? "bg-muted font-medium" : "text-muted-foreground",
                     )}
                   >
                     <div className="flex items-center gap-2 overflow-hidden">
                       <MessageSquareIcon className="size-3.5 shrink-0" />
-                      <span className="truncate">
-                        {chat.title || "New Chat"}
-                      </span>
+                      <span className="truncate">{chat.title || "New Chat"}</span>
                     </div>
                     <Button
                       variant="ghost"

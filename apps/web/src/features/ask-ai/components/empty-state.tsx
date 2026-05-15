@@ -12,7 +12,8 @@ export function EmptyState() {
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Connect an AI Provider to start chatting</h2>
         <p className="max-w-sm text-sm text-muted-foreground">
-          Ask AI uses connected AI models. Ask your admin to provide a local Ollama model, or connect your account in Settings.
+          Ask AI uses connected AI models. Ask your admin to provide a local Ollama model, or
+          connect your account in Settings.
         </p>
       </div>
       <Link to="/settings/ai-providers" className={cn(buttonVariants({ variant: "default" }))}>

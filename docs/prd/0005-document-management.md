@@ -54,9 +54,11 @@ Xây dựng tính năng **Document Management** — cho phép Admin upload tài 
 ### Database Schema Changes
 
 **New table: `document_category`**
+
 - `id`, `name` (unique), `color` (hex string), `description` (nullable), `createdAt`, `updatedAt`
 
 **New table: `document`**
+
 - `id`, `title`, `description` (nullable), `categoryId` (FK → `document_category`, required), `projectId` (FK → `project`, nullable — null = global), `status` (enum: `PENDING`, `COMPLETED`, `FAILED`), `mimeType`, `fileSize` (bytes), `objectKey` (MinIO path), `originalFilename`, `markdownContent` (nullable text), `errorMessage` (nullable), `uploadedBy` (FK → `user`), `createdAt`, `updatedAt`
 
 MinIO object path convention: `global/{documentId}/original.pdf` for global documents, `projects/{projectId}/{documentId}/original.pdf` for project-scoped (future).
@@ -72,6 +74,7 @@ MinIO object path convention: `global/{documentId}/original.pdf` for global docu
 Separate Bun process entry point. Connects to the same Redis as the API server, registers a BullMQ `Worker` on `documentQueue`.
 
 Job handler:
+
 1. Fetch Document record from Postgres (bail if not found or not `PENDING`).
 2. Download PDF from MinIO to a temp file.
 3. Run `markitdown <tempfile>` as a subprocess (MarkItDown must be installed via `pip install 'markitdown[pdf]'` in the deployment environment).
@@ -85,6 +88,7 @@ BullMQ job config: 3 automatic retries with exponential backoff before marking a
 ### API Router: `documentCategory`
 
 New oRPC router in `packages/api/src/routers/document-category.ts`:
+
 - `list` — `protectedProcedure` — returns all categories with document count
 - `create` — `adminProcedure` — creates category
 - `update` — `adminProcedure` — updates name/color/description
@@ -93,6 +97,7 @@ New oRPC router in `packages/api/src/routers/document-category.ts`:
 ### API Router: `document`
 
 New oRPC router in `packages/api/src/routers/document.ts`:
+
 - `list` — `protectedProcedure` — returns documents with `status = COMPLETED` for employees; all statuses for admins. Supports filter by `categoryId`.
 - `get` — `protectedProcedure` — returns a single document including `markdownContent`.
 - `requestUpload` — `adminProcedure` — validates, creates DB record, returns presigned PUT URL.
@@ -117,10 +122,12 @@ REDIS_URL=
 ### Frontend Feature Layout
 
 Feature code lives under `apps/web/src/features/documents/`:
+
 - Admin view: category management + document list with status badges + upload form
 - Employee view: document list (completed only) + document reader page
 
 Route structure:
+
 - `/documents` — list view (all authenticated users)
 - `/documents/:id` — reader view (all authenticated users)
 - `/admin/documents` — admin management view
@@ -138,6 +145,7 @@ Good tests for this feature verify observable behavior from the outside — what
 - **Worker job handler** — unit tests with mocked MinIO + mocked `markitdown` subprocess: successful conversion updates status to COMPLETED and sets `markdownContent`; subprocess failure updates status to FAILED and sets `errorMessage`.
 
 **Prior art:**
+
 - `packages/api/src/routers/organization.ts` and `project.ts` show the oRPC router + procedure pattern to follow.
 - No worker/queue test prior art exists yet; follow a similar pattern to the Hono integration tests.
 

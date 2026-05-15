@@ -28,10 +28,7 @@ export const get = protectedProcedure
       })
       .from(aiModelAssignment)
       .where(
-        and(
-          eq(aiModelAssignment.userId, userId),
-          eq(aiModelAssignment.purpose, input.purpose),
-        ),
+        and(eq(aiModelAssignment.userId, userId), eq(aiModelAssignment.purpose, input.purpose)),
       )
       .limit(1);
 
@@ -55,12 +52,7 @@ export const set = protectedProcedure
       const providerRows = await db
         .select({ id: aiProvider.id })
         .from(aiProvider)
-        .where(
-          and(
-            eq(aiProvider.id, input.providerId),
-            eq(aiProvider.userId, userId),
-          ),
-        )
+        .where(and(eq(aiProvider.id, input.providerId), eq(aiProvider.userId, userId)))
         .limit(1);
 
       if (!providerRows[0]) {

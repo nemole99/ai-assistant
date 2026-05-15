@@ -39,13 +39,7 @@ import { env } from "@workspace/env/web";
 import { Button } from "@workspace/ui/components/button";
 import { SiriOrb } from "@workspace/ui/components/smoothui/siri-orb";
 import { DefaultChatTransport } from "ai";
-import {
-  CheckIcon,
-  ClipboardCheckIcon,
-  ClipboardIcon,
-  PlusIcon,
-  TicketIcon,
-} from "lucide-react";
+import { CheckIcon, ClipboardCheckIcon, ClipboardIcon, PlusIcon, TicketIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AskAiSkeleton } from "./components/ask-ai-skeleton";
 import { ChatError } from "./components/chat-error";
@@ -68,21 +62,14 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
   const { data: providers = [], isLoading: isProvidersLoading } = useQuery(
     orpc.aiProvider.list.queryOptions({ input: undefined }),
   );
-  const copilotProvider =
-    providers.find((p) => p.provider === "github_copilot") ?? null;
+  const copilotProvider = providers.find((p) => p.provider === "github_copilot") ?? null;
 
   // IndexedDB persistence
-  const { initialMessages, isLoaded, saveMessages, newChat } =
-    useAskAiDb(conversationId);
+  const { initialMessages, isLoaded, saveMessages, newChat } = useAskAiDb(conversationId);
 
   // Model selection
-  const {
-    models,
-    selectedModel,
-    selectedModelId,
-    setSelectedModel,
-    isModelsLoading,
-  } = useModelAssignment(copilotProvider?.id ?? null);
+  const { models, selectedModel, selectedModelId, setSelectedModel, isModelsLoading } =
+    useModelAssignment(copilotProvider?.id ?? null);
 
   const hasModels = models.length > 0;
 
@@ -131,14 +118,13 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
     [],
   );
 
-  const { messages, sendMessage, status, error, regenerate, setMessages } =
-    useChat({
-      transport,
-      messages: isLoaded ? initialMessages : [],
-      onFinish: ({ messages: updatedMessages }) => {
-        saveMessages(updatedMessages);
-      },
-    });
+  const { messages, sendMessage, status, error, regenerate, setMessages } = useChat({
+    transport,
+    messages: isLoaded ? initialMessages : [],
+    onFinish: ({ messages: updatedMessages }) => {
+      saveMessages(updatedMessages);
+    },
+  });
 
   // Sync initial messages when conversation switches or finishes loading
   useEffect(() => {
@@ -178,20 +164,15 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
     });
   }, []);
 
-  const handleTextChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInputText(e.target.value);
-    },
-    [],
-  );
+  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputText(e.target.value);
+  }, []);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const isStreaming = status === "streaming" || status === "submitted";
   const showThinkingIndicator =
-    isStreaming &&
-    !error &&
-    messages[messages.length - 1]?.role !== "assistant";
+    isStreaming && !error && messages[messages.length - 1]?.role !== "assistant";
 
   const getMessageText = (message: (typeof messages)[0]) => {
     if (!message.parts) return "";
@@ -202,22 +183,14 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
   };
 
   return (
-    <div
-      className="flex size-full flex-col overflow-hidden bg-background"
-      data-layout="fixed"
-    >
+    <div className="flex size-full flex-col overflow-hidden bg-background" data-layout="fixed">
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b px-4 py-3 z-20 bg-background">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold">Ask AI</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            onClick={handleNewChat}
-            size="sm"
-            variant="ghost"
-            className="gap-1.5"
-          >
+          <Button onClick={handleNewChat} size="sm" variant="ghost" className="gap-1.5">
             <PlusIcon className="size-4" />
             New Chat
           </Button>
@@ -269,49 +242,32 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                     {messages.map((message, i) => (
                       <Message from={message.role} key={message.id}>
                         <MessageContent>
-                          <MessageResponse>
-                            {getMessageText(message)}
-                          </MessageResponse>
+                          <MessageResponse>{getMessageText(message)}</MessageResponse>
                         </MessageContent>
-                        {message.role === "assistant" &&
-                          getMessageText(message) && (
-                            <MessageActions>
-                              <MessageAction
-                                tooltip={
-                                  copiedMessageId === message.id
-                                    ? "Copied!"
-                                    : "Copy"
-                                }
-                                onClick={() =>
-                                  handleCopyMessage(
-                                    message.id,
-                                    getMessageText(message),
-                                  )
-                                }
-                              >
-                                {copiedMessageId === message.id ? (
-                                  <ClipboardCheckIcon className="size-4" />
-                                ) : (
-                                  <ClipboardIcon className="size-4" />
-                                )}
-                              </MessageAction>
-                            </MessageActions>
-                          )}
-                        {error &&
-                          message.role === "assistant" &&
-                          i === messages.length - 1 && (
-                            <ChatError error={error} onRetry={regenerate} />
-                          )}
+                        {message.role === "assistant" && getMessageText(message) && (
+                          <MessageActions>
+                            <MessageAction
+                              tooltip={copiedMessageId === message.id ? "Copied!" : "Copy"}
+                              onClick={() => handleCopyMessage(message.id, getMessageText(message))}
+                            >
+                              {copiedMessageId === message.id ? (
+                                <ClipboardCheckIcon className="size-4" />
+                              ) : (
+                                <ClipboardIcon className="size-4" />
+                              )}
+                            </MessageAction>
+                          </MessageActions>
+                        )}
+                        {error && message.role === "assistant" && i === messages.length - 1 && (
+                          <ChatError error={error} onRetry={regenerate} />
+                        )}
                       </Message>
                     ))}
                     {showThinkingIndicator && (
                       <Message from="assistant">
                         <MessageContent>
                           <div className="inline-flex items-center gap-2 text-muted-foreground">
-                            <Shimmer
-                              className="text-xs font-medium"
-                              duration={1.6}
-                            >
+                            <Shimmer className="text-xs font-medium" duration={1.6}>
                               Let me cook...
                             </Shimmer>
                           </div>
@@ -358,32 +314,22 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                     </PromptInputBody>
                     <PromptInputFooter>
                       <PromptInputTools>
-                        <ModelSelector
-                          open={modelSelectorOpen}
-                          onOpenChange={setModelSelectorOpen}
-                        >
+                        <ModelSelector open={modelSelectorOpen} onOpenChange={setModelSelectorOpen}>
                           <ModelSelectorTrigger className="inline-flex h-8 items-center gap-1.5 rounded px-2 text-xs hover:bg-muted">
                             {selectedModel && (
                               <>
                                 <ModelSelectorLogo provider="github-copilot" />
-                                <ModelSelectorName>
-                                  {selectedModel.name}
-                                </ModelSelectorName>
+                                <ModelSelectorName>{selectedModel.name}</ModelSelectorName>
                               </>
                             )}
                           </ModelSelectorTrigger>
                           <ModelSelectorContent>
                             <ModelSelectorInput placeholder="Search models..." />
                             <ModelSelectorList>
-                              <ModelSelectorEmpty>
-                                No models found.
-                              </ModelSelectorEmpty>
+                              <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
                               {Object.entries(modelsByProvider).map(
                                 ([providerName, providerModels]) => (
-                                  <ModelSelectorGroup
-                                    heading={providerName}
-                                    key={providerName}
-                                  >
+                                  <ModelSelectorGroup heading={providerName} key={providerName}>
                                     {providerModels.map((m) => (
                                       <ModelSelectorItem
                                         key={m.id}
@@ -394,9 +340,7 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
                                         }}
                                       >
                                         <ModelSelectorLogo provider="github-copilot" />
-                                        <ModelSelectorName>
-                                          {m.name}
-                                        </ModelSelectorName>
+                                        <ModelSelectorName>{m.name}</ModelSelectorName>
                                         {selectedModelId === m.id && (
                                           <CheckIcon className="ml-auto size-4" />
                                         )}
@@ -426,10 +370,7 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
           </div>
 
           {/* Right Sidebar for History */}
-          <ChatHistorySidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
+          <ChatHistorySidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         </div>
       )}
     </div>

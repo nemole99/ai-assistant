@@ -2,11 +2,7 @@ import "dotenv/config";
 import { Worker } from "bullmq";
 import { db } from "@workspace/db";
 import { document } from "@workspace/db/schema/auth";
-import {
-  DOCUMENT_QUEUE_NAME,
-  redisConnection,
-  type DocumentJobData,
-} from "@workspace/queue";
+import { DOCUMENT_QUEUE_NAME, redisConnection, type DocumentJobData } from "@workspace/queue";
 import { getObjectBuffer } from "@workspace/storage";
 import { eq } from "drizzle-orm";
 import { tmpdir } from "os";
@@ -14,16 +10,10 @@ import { join } from "path";
 import { writeFile, unlink } from "fs/promises";
 
 async function processDocument(documentId: string): Promise<void> {
-  const [doc] = await db
-    .select()
-    .from(document)
-    .where(eq(document.id, documentId))
-    .limit(1);
+  const [doc] = await db.select().from(document).where(eq(document.id, documentId)).limit(1);
 
   if (!doc || doc.status !== "PENDING") {
-    console.log(
-      `[worker] Skipping document ${documentId} — not found or not PENDING`,
-    );
+    console.log(`[worker] Skipping document ${documentId} — not found or not PENDING`);
     return;
   }
 
@@ -46,9 +36,7 @@ async function processDocument(documentId: string): Promise<void> {
     const stderr = await new Response(proc.stderr).text();
 
     if (exitCode !== 0) {
-      throw new Error(
-        `markitdown exited with code ${exitCode}: ${stderr.trim()}`,
-      );
+      throw new Error(`markitdown exited with code ${exitCode}: ${stderr.trim()}`);
     }
 
     if (!markdown.trim()) {
@@ -62,8 +50,7 @@ async function processDocument(documentId: string): Promise<void> {
 
     console.log(`[worker] Document ${documentId} processed successfully`);
   } catch (err) {
-    const errorMessage =
-      err instanceof Error ? err.message : "Unknown error during conversion";
+    const errorMessage = err instanceof Error ? err.message : "Unknown error during conversion";
 
     console.error(`[worker] Document ${documentId} failed:`, errorMessage);
 

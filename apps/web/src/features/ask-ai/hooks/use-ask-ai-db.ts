@@ -15,22 +15,17 @@ export function useAskAiDb(targetConversationId?: string) {
   // Load messages for the current conversation
   const storedData = useLiveQuery(async () => {
     const messages = conversationId
-      ? await db.messages
-          .where("conversationId")
-          .equals(conversationId)
-          .sortBy("createdAt")
+      ? await db.messages.where("conversationId").equals(conversationId).sortBy("createdAt")
       : ([] as ChatMessage[]);
     return { conversationId, messages };
   }, [conversationId]);
 
-  const initialMessages: UIMessage[] = (storedData?.messages ?? []).map(
-    (m) => ({
-      id: m.id,
-      role: m.role,
-      parts: [{ type: "text" as const, text: (m as any).content }],
-      content: (m as any).content,
-    }),
-  );
+  const initialMessages: UIMessage[] = (storedData?.messages ?? []).map((m) => ({
+    id: m.id,
+    role: m.role,
+    parts: [{ type: "text" as const, text: (m as any).content }],
+    content: (m as any).content,
+  }));
 
   const saveMessages = useCallback(
     async (messages: UIMessage[]) => {
@@ -43,8 +38,7 @@ export function useAskAiDb(targetConversationId?: string) {
         const title = firstUserMsg
           ? typeof (firstUserMsg as any).content === "string"
             ? (firstUserMsg as any).content
-            : (firstUserMsg.parts?.find((p) => p.type === "text")?.text ??
-              "New Chat")
+            : (firstUserMsg.parts?.find((p) => p.type === "text")?.text ?? "New Chat")
           : "New Chat";
 
         const conv: Conversation = {
@@ -91,8 +85,7 @@ export function useAskAiDb(targetConversationId?: string) {
     conversationId,
     initialMessages,
     isLoaded: targetConversationId
-      ? storedData !== undefined &&
-        storedData.conversationId === targetConversationId
+      ? storedData !== undefined && storedData.conversationId === targetConversationId
       : true,
     saveMessages,
     newChat,

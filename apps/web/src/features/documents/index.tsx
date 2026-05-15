@@ -24,9 +24,7 @@ export function Documents() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const { data: categories = [] } = useQuery(
-    orpc.documentCategory.list.queryOptions(),
-  );
+  const { data: categories = [] } = useQuery(orpc.documentCategory.list.queryOptions());
 
   const { data: documents = [], isLoading } = useQuery(
     orpc.document.list.queryOptions({
@@ -47,9 +45,7 @@ export function Documents() {
     <ContentLayout>
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Documents</h2>
-        <p className="text-muted-foreground">
-          Company-wide documents, policies, and guidelines.
-        </p>
+        <p className="text-muted-foreground">Company-wide documents, policies, and guidelines.</p>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -81,21 +77,13 @@ export function Documents() {
           <button
             key={cat.id}
             type="button"
-            onClick={() =>
-              setSelectedCategoryId(
-                selectedCategoryId === cat.id ? null : cat.id,
-              )
-            }
+            onClick={() => setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors",
-              selectedCategoryId === cat.id
-                ? "border-transparent"
-                : "hover:bg-accent",
+              selectedCategoryId === cat.id ? "border-transparent" : "hover:bg-accent",
             )}
             style={
-              selectedCategoryId === cat.id
-                ? { backgroundColor: cat.color, color: "white" }
-                : {}
+              selectedCategoryId === cat.id ? { backgroundColor: cat.color, color: "white" } : {}
             }
           >
             <span
@@ -127,7 +115,11 @@ export function Documents() {
               <button
                 type="button"
                 className="text-primary text-sm underline"
-                onClick={() => { setSearch(""); setDebouncedSearch(""); setSelectedCategoryId(null); }}
+                onClick={() => {
+                  setSearch("");
+                  setDebouncedSearch("");
+                  setSelectedCategoryId(null);
+                }}
               >
                 Clear filters
               </button>
@@ -144,9 +136,7 @@ export function Documents() {
               className="hover:bg-accent group rounded-lg border p-4 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
-                <h3 className="font-medium leading-tight group-hover:underline">
-                  {doc.title}
-                </h3>
+                <h3 className="font-medium leading-tight group-hover:underline">{doc.title}</h3>
                 <span
                   className="mt-0.5 size-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: doc.category.color }}
@@ -154,9 +144,7 @@ export function Documents() {
                 />
               </div>
               {doc.description && (
-                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                  {doc.description}
-                </p>
+                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">{doc.description}</p>
               )}
               <div className="text-muted-foreground mt-3 flex items-center gap-2 text-xs">
                 <Badge variant="outline" className="text-xs">

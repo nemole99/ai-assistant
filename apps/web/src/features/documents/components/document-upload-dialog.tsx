@@ -13,12 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import {
   FileUpload,
   FileUploadDropzone,
@@ -57,12 +52,8 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
     enabled: open,
   });
 
-  const requestUploadMutation = useMutation(
-    orpc.document.requestUpload.mutationOptions(),
-  );
-  const confirmUploadMutation = useMutation(
-    orpc.document.confirmUpload.mutationOptions(),
-  );
+  const requestUploadMutation = useMutation(orpc.document.requestUpload.mutationOptions());
+  const confirmUploadMutation = useMutation(orpc.document.confirmUpload.mutationOptions());
 
   const form = useForm({
     defaultValues: { title: "", description: "", categoryId: "" },
@@ -77,15 +68,14 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
       setUploadProgress(0);
 
       try {
-        const { documentId, presignedUrl } =
-          await requestUploadMutation.mutateAsync({
-            title: value.title,
-            description: value.description || undefined,
-            categoryId: value.categoryId,
-            filename: selectedFile.name,
-            fileSize: selectedFile.size,
-            mimeType: "application/pdf",
-          });
+        const { documentId, presignedUrl } = await requestUploadMutation.mutateAsync({
+          title: value.title,
+          description: value.description || undefined,
+          categoryId: value.categoryId,
+          filename: selectedFile.name,
+          fileSize: selectedFile.size,
+          mimeType: "application/pdf",
+        });
 
         const xhr = new XMLHttpRequest();
         await new Promise<void>((resolve, reject) => {
@@ -132,12 +122,16 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
   }));
 
   const isPending =
-    requestUploadMutation.isPending ||
-    confirmUploadMutation.isPending ||
-    isUploading;
+    requestUploadMutation.isPending || confirmUploadMutation.isPending || isUploading;
 
   return (
-    <Dialog open={open} onOpenChange={(s) => { if (!isPending) handleClose(); else if (s) onOpenChange(s); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(s) => {
+        if (!isPending) handleClose();
+        else if (s) onOpenChange(s);
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
           <DialogTitle>Upload Document</DialogTitle>
@@ -164,10 +158,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                   const file = files[0] ?? null;
                   setSelectedFile(file);
                   if (file && !form.getFieldValue("title")) {
-                    form.setFieldValue(
-                      "title",
-                      file.name.replace(/\.pdf$/i, ""),
-                    );
+                    form.setFieldValue("title", file.name.replace(/\.pdf$/i, ""));
                   }
                 }}
                 onFileReject={(_file, message) => toast.error(message)}
@@ -204,8 +195,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             <form.Field
               name="title"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Title</FieldLabel>
@@ -217,9 +207,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                       placeholder="e.g., Employee Handbook 2026"
                       autoComplete="off"
                     />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
               }}
@@ -228,8 +216,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             <form.Field
               name="categoryId"
               children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Category</FieldLabel>
@@ -239,9 +226,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                       placeholder="Select a category"
                       items={categoryOptions}
                     />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
               }}
@@ -253,9 +238,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     Description{" "}
-                    <span className="text-muted-foreground font-normal">
-                      (optional)
-                    </span>
+                    <span className="text-muted-foreground font-normal">(optional)</span>
                   </FieldLabel>
                   <Textarea
                     id={field.name}
@@ -276,11 +259,7 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             Cancel
           </Button>
           <Button type="submit" form="upload-form" disabled={isPending}>
-            {isPending
-              ? isUploading
-                ? `Uploading ${uploadProgress}%…`
-                : "Processing…"
-              : "Upload"}
+            {isPending ? (isUploading ? `Uploading ${uploadProgress}%…` : "Processing…") : "Upload"}
           </Button>
         </DialogFooter>
       </DialogContent>

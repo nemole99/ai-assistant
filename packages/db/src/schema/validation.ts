@@ -61,17 +61,13 @@ export const selectProjectMemberSchema = createSelectSchema(projectMember);
 
 // --- DocumentCategory ---
 
-export const selectDocumentCategorySchema =
-  createSelectSchema(documentCategory);
-export const insertDocumentCategorySchema = createInsertSchema(
-  documentCategory,
-).omit({
+export const selectDocumentCategorySchema = createSelectSchema(documentCategory);
+export const insertDocumentCategorySchema = createInsertSchema(documentCategory).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
-export const updateDocumentCategorySchema =
-  insertDocumentCategorySchema.partial();
+export const updateDocumentCategorySchema = insertDocumentCategorySchema.partial();
 
 // --- Document ---
 

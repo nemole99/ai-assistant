@@ -71,12 +71,8 @@ export const documentRouter = {
           and(
             isNull(document.projectId),
             isAdmin ? undefined : eq(document.status, "COMPLETED"),
-            input?.categoryId
-              ? eq(document.categoryId, input.categoryId)
-              : undefined,
-            input?.query
-              ? ilike(document.title, `%${input.query}%`)
-              : undefined,
+            input?.categoryId ? eq(document.categoryId, input.categoryId) : undefined,
+            input?.query ? ilike(document.title, `%${input.query}%`) : undefined,
           ),
         )
         .orderBy(document.createdAt);
@@ -231,11 +227,7 @@ export const documentRouter = {
         }
       }
 
-      const [updated] = await db
-        .update(document)
-        .set(data)
-        .where(eq(document.id, id))
-        .returning();
+      const [updated] = await db.update(document).set(data).where(eq(document.id, id)).returning();
 
       if (!updated) {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });
@@ -244,39 +236,33 @@ export const documentRouter = {
       return updated;
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
-    .handler(async ({ input }) => {
-      const [doc] = await db
-        .select({ objectKey: document.objectKey })
-        .from(document)
-        .where(eq(document.id, input.id))
-        .limit(1);
+  delete: adminProcedure.input(z.object({ id: z.string() })).handler(async ({ input }) => {
+    const [doc] = await db
+      .select({ objectKey: document.objectKey })
+      .from(document)
+      .where(eq(document.id, input.id))
+      .limit(1);
 
-      if (!doc) {
-        throw new ORPCError("NOT_FOUND", { message: "Document not found" });
-      }
+    if (!doc) {
+      throw new ORPCError("NOT_FOUND", { message: "Document not found" });
+    }
 
-      await db.delete(document).where(eq(document.id, input.id));
+    await db.delete(document).where(eq(document.id, input.id));
 
-      try {
-        await deleteObject(doc.objectKey);
-      } catch {
-        // Object may already be gone; DB record is already deleted so this is non-fatal
-      }
+    try {
+      await deleteObject(doc.objectKey);
+    } catch {
+      // Object may already be gone; DB record is already deleted so this is non-fatal
+    }
 
-      return { success: true };
-    }),
+    return { success: true };
+  }),
 
   retry: adminProcedure
     .input(z.object({ id: z.string() }))
     .output(selectDocumentSchema)
     .handler(async ({ input }) => {
-      const [doc] = await db
-        .select()
-        .from(document)
-        .where(eq(document.id, input.id))
-        .limit(1);
+      const [doc] = await db.select().from(document).where(eq(document.id, input.id)).limit(1);
 
       if (!doc) {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });

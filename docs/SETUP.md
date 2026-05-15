@@ -276,7 +276,7 @@ Open `http://localhost:3001`.
 | Auth redirect loop                                            | `BETTER_AUTH_URL` must match the URL you open in the browser (including port)                                  |
 | `migrate` container keeps restarting                          | Database credentials mismatch — check `DATABASE_URL` matches `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` |
 | GitHub Copilot OAuth not working                              | `BETTER_AUTH_URL` must be publicly reachable for the OAuth callback                                            |
-| Document upload fails / bucket not found                      | Ensure `MINIO_BUCKET` exists — the server creates it automatically on startup; check MinIO logs               |
-| Upload/download fails with `ECONNREFUSED`                     | `MINIO_ENDPOINT` must be `minio` (Docker internal), not the public IP — the server can't reach itself via LAN |
-| Presigned URLs don't work in browser                          | Set `MINIO_PUBLIC_ENDPOINT=<server-ip>` so URLs are rewritten to the public address                          |
-| Documents stuck in `PENDING` status                           | Worker is not running — check `ai_assistant_worker` logs or run `bun run dev:worker` locally                  |
+| Document upload fails / bucket not found                      | Ensure `MINIO_BUCKET` exists — the server creates it automatically on startup; check MinIO logs                |
+| Upload/download fails with `ECONNREFUSED`                     | `MINIO_ENDPOINT` must be `minio` (Docker internal), not the public IP — the server can't reach itself via LAN  |
+| Presigned URLs don't work in browser                          | Set `MINIO_PUBLIC_ENDPOINT=<server-ip>` so URLs are rewritten to the public address                            |
+| Documents stuck in `PENDING` status                           | Worker is not running — check `ai_assistant_worker` logs or run `bun run dev:worker` locally                   |

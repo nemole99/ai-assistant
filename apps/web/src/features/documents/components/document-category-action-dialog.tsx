@@ -21,21 +21,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@workspace/ui/components/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { orpc } from "@/lib/orpc";
 import { type DocumentCategory } from "../data/schema";
 
 const PRESET_COLORS = [
-  "#ef4444", "#f97316", "#eab308", "#22c55e",
-  "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899",
-  "#64748b", "#0f172a",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#06b6d4",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#64748b",
+  "#0f172a",
 ];
 
 const formSchema = z.object({
@@ -81,12 +83,20 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
 
   const form = useForm({
     defaultValues: isEdit
-      ? { name: currentRow.name, color: currentRow.color, description: currentRow.description ?? "" }
+      ? {
+          name: currentRow.name,
+          color: currentRow.color,
+          description: currentRow.description ?? "",
+        }
       : { name: "", color: PRESET_COLORS[0]!, description: "" },
     validators: { onSubmit: formSchema },
     onSubmit: ({ value }) => {
       if (isEdit) {
-        updateMutation.mutate({ id: currentRow.id, ...value, description: value.description || undefined });
+        updateMutation.mutate({
+          id: currentRow.id,
+          ...value,
+          description: value.description || undefined,
+        });
       } else {
         createMutation.mutate({ ...value, description: value.description || undefined });
       }
@@ -94,7 +104,13 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
   });
 
   return (
-    <Dialog open={open} onOpenChange={(s) => { form.reset(); onOpenChange(s); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(s) => {
+        form.reset();
+        onOpenChange(s);
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-start">
           <DialogTitle>{isEdit ? "Edit Category" : "New Category"}</DialogTitle>
@@ -102,7 +118,13 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
             {isEdit ? "Update the document category." : "Create a new document category."}
           </DialogDescription>
         </DialogHeader>
-        <form id="category-form" onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}>
+        <form
+          id="category-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
           <FieldGroup>
             <form.Field
               name="name"
@@ -129,10 +151,7 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
               children={(field) => (
                 <Field>
                   <FieldLabel>Color</FieldLabel>
-                  <ColorPicker
-                    value={field.state.value}
-                    onValueChange={field.handleChange}
-                  >
+                  <ColorPicker value={field.state.value} onValueChange={field.handleChange}>
                     <ColorPickerTrigger
                       render={<Button type="button" variant="outline" className="gap-2" />}
                     >
@@ -148,14 +167,8 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
                             className="size-6 rounded-full border-2 transition-all"
                             style={{
                               backgroundColor: c,
-                              borderColor:
-                                field.state.value === c
-                                  ? "white"
-                                  : "transparent",
-                              outline:
-                                field.state.value === c
-                                  ? `2px solid ${c}`
-                                  : "none",
+                              borderColor: field.state.value === c ? "white" : "transparent",
+                              outline: field.state.value === c ? `2px solid ${c}` : "none",
                             }}
                             onClick={() => field.handleChange(c)}
                           />
@@ -177,7 +190,10 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
               name="description"
               children={(field) => (
                 <Field>
-                  <FieldLabel>Description <span className="text-muted-foreground font-normal">(optional)</span></FieldLabel>
+                  <FieldLabel>
+                    Description{" "}
+                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  </FieldLabel>
                   <Textarea
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -192,7 +208,9 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
           </FieldGroup>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button type="submit" form="category-form" disabled={isPending}>
             {isPending ? "Saving…" : "Save"}
           </Button>

@@ -14,15 +14,11 @@ export async function resolveOllamaModelId(modelId: string): Promise<string> {
 
     if (modelNames.includes(modelId)) return modelId;
 
-    const prefixedMatches = modelNames.filter((name) =>
-      name.startsWith(`${modelId}:`),
-    );
+    const prefixedMatches = modelNames.filter((name) => name.startsWith(`${modelId}:`));
 
     if (prefixedMatches.length === 0) return modelId;
 
-    const latestMatch = prefixedMatches.find((name) =>
-      name.endsWith(":latest"),
-    );
+    const latestMatch = prefixedMatches.find((name) => name.endsWith(":latest"));
     return latestMatch ?? prefixedMatches[0]!;
   } catch {
     return modelId;

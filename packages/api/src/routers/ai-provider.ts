@@ -52,10 +52,7 @@ export const startDeviceFlow = protectedProcedure
 
     if (!res.ok || data.error || !data.device_code) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message:
-          data.error_description ??
-          data.error ??
-          "Failed to start GitHub device flow",
+        message: data.error_description ?? data.error ?? "Failed to start GitHub device flow",
       });
     }
 
@@ -229,12 +226,7 @@ export async function getGitHubToken(userId: string): Promise<string | null> {
   const rows = await db
     .select({ encryptedToken: aiProvider.encryptedToken })
     .from(aiProvider)
-    .where(
-      and(
-        eq(aiProvider.userId, userId),
-        eq(aiProvider.provider, "github_copilot"),
-      ),
-    )
+    .where(and(eq(aiProvider.userId, userId), eq(aiProvider.provider, "github_copilot")))
     .limit(1);
 
   if (!rows[0]) return null;

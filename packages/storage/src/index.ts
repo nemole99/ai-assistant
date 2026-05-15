@@ -36,17 +36,11 @@ export async function ensureBucketExists(): Promise<void> {
   }
 }
 
-export async function presignedPutUrl(
-  objectKey: string,
-  ttlSeconds = 300,
-): Promise<string> {
+export async function presignedPutUrl(objectKey: string, ttlSeconds = 300): Promise<string> {
   return presignClient.presignedPutObject(BUCKET, objectKey, ttlSeconds);
 }
 
-export async function presignedGetUrl(
-  objectKey: string,
-  ttlSeconds = 300,
-): Promise<string> {
+export async function presignedGetUrl(objectKey: string, ttlSeconds = 300): Promise<string> {
   return presignClient.presignedGetObject(BUCKET, objectKey, ttlSeconds);
 }
 
@@ -77,9 +71,6 @@ export function documentObjectKey(documentId: string): string {
   return `global/${documentId}/original.pdf`;
 }
 
-export function projectDocumentObjectKey(
-  projectId: string,
-  documentId: string,
-): string {
+export function projectDocumentObjectKey(projectId: string, documentId: string): string {
   return `projects/${projectId}/${documentId}/original.pdf`;
 }

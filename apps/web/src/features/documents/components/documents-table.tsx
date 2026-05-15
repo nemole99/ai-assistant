@@ -16,18 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@workspace/ui/components/empty";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 import { LongText } from "@/components/long-text";
 import { type Document } from "../data/schema";
 import { DocumentCategoryBadge } from "./document-category-badge";
@@ -37,106 +26,97 @@ import { useDocuments } from "./documents-provider";
 export function DocumentsTable({ data }: { data: Document[] }) {
   const { setOpen, setCurrentRow } = useDocuments();
 
-  if (data.length === 0) {
-    return (
-      <Empty className="min-h-[60vh]">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileText />
-          </EmptyMedia>
-          <EmptyTitle>No documents</EmptyTitle>
-          <EmptyDescription>
-            Upload your first document to get started.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
-
   return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>File</TableHead>
-            <TableHead>Uploaded</TableHead>
-            <TableHead className="w-10" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((doc) => (
-            <TableRow key={doc.id}>
-              <TableCell className="max-w-64 font-medium">
-                <div className="flex items-center gap-2">
-                  <LongText className="max-w-48">{doc.title}</LongText>
-                  {doc.status === "FAILED" && doc.errorMessage && (
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <AlertCircle
-                            className="text-destructive size-4 shrink-0"
-                            aria-label="Processing error"
-                          />
-                        }
-                      />
-                      <TooltipContent className="max-w-64">
-                        {doc.errorMessage}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <DocumentCategoryBadge category={doc.category} />
-              </TableCell>
-              <TableCell>
-                <DocumentStatusBadge status={doc.status} />
-              </TableCell>
-              <TableCell className="text-muted-foreground max-w-48 text-sm">
-                <LongText className="max-w-44">{doc.originalFilename}</LongText>
-              </TableCell>
-              <TableCell className="text-muted-foreground text-sm">
-                {format(new Date(doc.createdAt), "dd MMM yyyy")}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={<Button variant="ghost" size="icon" className="size-8" />}
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Title</TableHead>
+          <TableHead>Category</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>File</TableHead>
+          <TableHead>Uploaded</TableHead>
+          <TableHead className="w-10" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map((doc) => (
+          <TableRow key={doc.id}>
+            <TableCell className="max-w-64 font-medium">
+              <div className="flex items-center gap-2">
+                <LongText className="max-w-48">{doc.title}</LongText>
+                {doc.status === "FAILED" && doc.errorMessage && (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <AlertCircle
+                          className="text-destructive size-4 shrink-0"
+                          aria-label="Processing error"
+                        />
+                      }
+                    />
+                    <TooltipContent className="max-w-64">{doc.errorMessage}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </TableCell>
+            <TableCell>
+              <DocumentCategoryBadge category={doc.category} />
+            </TableCell>
+            <TableCell>
+              <DocumentStatusBadge status={doc.status} />
+            </TableCell>
+            <TableCell className="text-muted-foreground max-w-48 text-sm">
+              <LongText className="max-w-44">{doc.originalFilename}</LongText>
+            </TableCell>
+            <TableCell className="text-muted-foreground text-sm">
+              {format(new Date(doc.createdAt), "dd MMM yyyy")}
+            </TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={<Button variant="ghost" size="icon" className="size-8" />}
+                >
+                  <MoreHorizontal className="size-4" />
+                  <span className="sr-only">Actions</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setCurrentRow(doc);
+                      setOpen("edit");
+                    }}
                   >
-                    <MoreHorizontal className="size-4" />
-                    <span className="sr-only">Actions</span>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                    <Pencil className="mr-2 size-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  {doc.status === "FAILED" && (
                     <DropdownMenuItem
-                      onClick={() => { setCurrentRow(doc); setOpen("edit"); }}
+                      onClick={() => {
+                        setCurrentRow(doc);
+                        setOpen("retry");
+                      }}
                     >
-                      <Pencil className="mr-2 size-4" />
-                      Edit
+                      <RefreshCw className="mr-2 size-4" />
+                      Retry
                     </DropdownMenuItem>
-                    {doc.status === "FAILED" && (
-                      <DropdownMenuItem
-                        onClick={() => { setCurrentRow(doc); setOpen("retry"); }}
-                      >
-                        <RefreshCw className="mr-2 size-4" />
-                        Retry
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => { setCurrentRow(doc); setOpen("delete"); }}
-                    >
-                      <Trash2 className="mr-2 size-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      setCurrentRow(doc);
+                      setOpen("delete");
+                    }}
+                  >
+                    <Trash2 className="mr-2 size-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

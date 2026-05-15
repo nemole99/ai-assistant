@@ -26,9 +26,11 @@ function DocumentReaderSkeleton() {
 }
 
 export function DocumentReader({ id }: { id: string }) {
-  const { data: doc, isLoading, isError } = useQuery(
-    orpc.document.get.queryOptions({ input: { id } }),
-  );
+  const {
+    data: doc,
+    isLoading,
+    isError,
+  } = useQuery(orpc.document.get.queryOptions({ input: { id } }));
 
   const downloadUrlMutation = useMutation(
     orpc.document.getDownloadUrl.mutationOptions({
@@ -76,9 +78,7 @@ export function DocumentReader({ id }: { id: string }) {
             <DocumentCategoryBadge category={doc.category} />
             <span>{format(new Date(doc.createdAt), "dd MMM yyyy")}</span>
           </div>
-          {doc.description && (
-            <p className="text-muted-foreground text-sm">{doc.description}</p>
-          )}
+          {doc.description && <p className="text-muted-foreground text-sm">{doc.description}</p>}
         </div>
         <Button
           variant="outline"

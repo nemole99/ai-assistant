@@ -29,9 +29,7 @@ export function useModelAssignment(providerId: string | null) {
     }
   }, [assignment, models, selectedModelId]);
 
-  const { mutate: persistAssignment } = useMutation(
-    orpc.aiModelAssignment.set.mutationOptions(),
-  );
+  const { mutate: persistAssignment } = useMutation(orpc.aiModelAssignment.set.mutationOptions());
 
   const setSelectedModel = useCallback(
     (modelId: string) => {
@@ -51,8 +49,7 @@ export function useModelAssignment(providerId: string | null) {
     [providerId, persistAssignment],
   );
 
-  const selectedModel =
-    models.find((m) => m.id === selectedModelId) ?? models[0] ?? null;
+  const selectedModel = models.find((m) => m.id === selectedModelId) ?? models[0] ?? null;
 
   return {
     models,

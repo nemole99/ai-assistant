@@ -110,12 +110,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -198,12 +194,8 @@
           "name": "ai_model_assignment_user_id_user_id_fk",
           "tableFrom": "ai_model_assignment",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -211,12 +203,8 @@
           "name": "ai_model_assignment_provider_id_ai_provider_id_fk",
           "tableFrom": "ai_model_assignment",
           "tableTo": "ai_provider",
-          "columnsFrom": [
-            "provider_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["provider_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -226,10 +214,7 @@
         "ai_model_assignment_userId_purpose_unique": {
           "name": "ai_model_assignment_userId_purpose_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "purpose"
-          ]
+          "columns": ["user_id", "purpose"]
         }
       },
       "policies": {},
@@ -308,12 +293,8 @@
           "name": "ai_provider_user_id_user_id_fk",
           "tableFrom": "ai_provider",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -323,10 +304,7 @@
         "ai_provider_userId_provider_unique": {
           "name": "ai_provider_userId_provider_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "provider"
-          ]
+          "columns": ["user_id", "provider"]
         }
       },
       "policies": {},
@@ -383,9 +361,7 @@
         "department_name_unique": {
           "name": "department_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -510,12 +486,8 @@
           "name": "employee_department_id_department_id_fk",
           "tableFrom": "employee",
           "tableTo": "department",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -523,12 +495,8 @@
           "name": "employee_user_id_user_id_fk",
           "tableFrom": "employee",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -538,23 +506,17 @@
         "employee_employee_code_unique": {
           "name": "employee_employee_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "employee_code"
-          ]
+          "columns": ["employee_code"]
         },
         "employee_email_unique": {
           "name": "employee_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "employee_user_id_unique": {
           "name": "employee_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -618,12 +580,8 @@
           "name": "project_manager_id_employee_id_fk",
           "tableFrom": "project",
           "tableTo": "employee",
-          "columnsFrom": [
-            "manager_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["manager_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -695,12 +653,8 @@
           "name": "project_member_project_id_project_id_fk",
           "tableFrom": "project_member",
           "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -708,12 +662,8 @@
           "name": "project_member_employee_id_employee_id_fk",
           "tableFrom": "project_member",
           "tableTo": "employee",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -721,10 +671,7 @@
       "compositePrimaryKeys": {
         "project_member_project_id_employee_id_pk": {
           "name": "project_member_project_id_employee_id_pk",
-          "columns": [
-            "project_id",
-            "employee_id"
-          ]
+          "columns": ["project_id", "employee_id"]
         }
       },
       "uniqueConstraints": {},
@@ -808,12 +755,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -823,9 +766,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -903,9 +844,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -984,37 +923,22 @@
     "public.ai_provider_type": {
       "name": "ai_provider_type",
       "schema": "public",
-      "values": [
-        "github_copilot",
-        "openai",
-        "google",
-        "anthropic"
-      ]
+      "values": ["github_copilot", "openai", "google", "anthropic"]
     },
     "public.employee_status": {
       "name": "employee_status",
       "schema": "public",
-      "values": [
-        "ACTIVE",
-        "INACTIVE"
-      ]
+      "values": ["ACTIVE", "INACTIVE"]
     },
     "public.model_purpose": {
       "name": "model_purpose",
       "schema": "public",
-      "values": [
-        "chat",
-        "embedding",
-        "vision"
-      ]
+      "values": ["chat", "embedding", "vision"]
     },
     "public.project_status": {
       "name": "project_status",
       "schema": "public",
-      "values": [
-        "ACTIVE",
-        "COMPLETED"
-      ]
+      "values": ["ACTIVE", "COMPLETED"]
     }
   },
   "schemas": {},

@@ -34,10 +34,7 @@ export function DocumentsDialogs() {
 
   return (
     <>
-      <DocumentUploadDialog
-        open={open === "upload"}
-        onOpenChange={(s) => !s && setOpen(null)}
-      />
+      <DocumentUploadDialog open={open === "upload"} onOpenChange={(s) => !s && setOpen(null)} />
 
       {currentRow && (
         <>

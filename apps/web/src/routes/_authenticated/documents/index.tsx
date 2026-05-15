@@ -9,10 +9,10 @@ export const Route = createFileRoute("/_authenticated/documents/")({
 
 function DocumentsRoute() {
   const { data: session } = authClient.useSession();
-  
+
   if (session?.user?.role === "ADMIN") {
     return <AdminDocuments />;
   }
-  
+
   return <Documents />;
 }

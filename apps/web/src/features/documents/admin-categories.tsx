@@ -5,13 +5,6 @@ import { Plus, Tag, FileText } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyMedia,
-  EmptyTitle,
-} from "@workspace/ui/components/empty";
-import {
   Table,
   TableBody,
   TableCell,
@@ -24,13 +17,12 @@ import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { orpc } from "@/lib/orpc";
 import { DocumentCategoryActionDialog } from "./components/document-category-action-dialog";
+import { DocumentsEmptyState } from "./components/documents-empty-state";
 import { type DocumentCategory } from "./data/schema";
 
 export function AdminDocumentCategories() {
   const queryClient = useQueryClient();
-  const { data: categories = [], isLoading } = useQuery(
-    orpc.documentCategory.list.queryOptions(),
-  );
+  const { data: categories = [], isLoading } = useQuery(orpc.documentCategory.list.queryOptions());
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -66,14 +58,15 @@ export function AdminDocumentCategories() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Documents
-            </h2>
-            <p className="text-muted-foreground">
-              Upload and manage company documents.
-            </p>
+            <h2 className="text-2xl font-bold tracking-tight">Documents</h2>
+            <p className="text-muted-foreground">Upload and manage company documents.</p>
           </div>
-          <Button onClick={() => { setCurrentRow(null); setDialogOpen(true); }}>
+          <Button
+            onClick={() => {
+              setCurrentRow(null);
+              setDialogOpen(true);
+            }}
+          >
             <Plus className="mr-2 size-4" />
             New Category
           </Button>
@@ -109,81 +102,85 @@ export function AdminDocumentCategories() {
         {isLoading ? (
           <Loader />
         ) : categories.length === 0 ? (
-          <Empty className="rounded-lg border border-dashed">
-            <EmptyMedia variant="icon">
-              <Tag />
-            </EmptyMedia>
-            <EmptyContent>
-              <EmptyTitle>No categories yet</EmptyTitle>
-              <EmptyDescription>
-                Create a category to organise your documents.
-              </EmptyDescription>
-              <Button size="sm" onClick={() => { setCurrentRow(null); setDialogOpen(true); }}>
+          <DocumentsEmptyState
+            icon={<Tag />}
+            title="No categories yet"
+            description="Create a category to organise your documents."
+            action={
+              <Button
+                size="sm"
+                onClick={() => {
+                  setCurrentRow(null);
+                  setDialogOpen(true);
+                }}
+              >
                 <Plus className="mr-2 size-4" />
                 New Category
               </Button>
-            </EmptyContent>
-          </Empty>
+            }
+          />
         ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Documents</TableHead>
-                  <TableHead className="w-32" />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Documents</TableHead>
+                <TableHead className="w-32" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {categories.map((cat) => (
+                <TableRow key={cat.id}>
+                  <TableCell>
+                    <span className="inline-flex items-center gap-2 font-medium">
+                      <span
+                        className="size-3 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      {cat.name}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {cat.description ?? "—"}
+                  </TableCell>
+                  <TableCell>{cat.documentCount}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(cat)}>
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(cat)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((cat) => (
-                  <TableRow key={cat.id}>
-                    <TableCell>
-                      <span className="inline-flex items-center gap-2 font-medium">
-                        <span
-                          className="size-3 rounded-full"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                        {cat.name}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {cat.description ?? "—"}
-                    </TableCell>
-                    <TableCell>{cat.documentCount}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(cat)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(cat)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+              ))}
+            </TableBody>
+          </Table>
         )}
 
         <DocumentCategoryActionDialog
           currentRow={currentRow ?? undefined}
           open={dialogOpen}
-          onOpenChange={(s) => { setDialogOpen(s); if (!s) setCurrentRow(null); }}
+          onOpenChange={(s) => {
+            setDialogOpen(s);
+            if (!s) setCurrentRow(null);
+          }}
         />
 
         <ConfirmDialog
           open={deleteOpen}
-          onOpenChange={(s) => { setDeleteOpen(s); if (!s) setCurrentRow(null); }}
+          onOpenChange={(s) => {
+            setDeleteOpen(s);
+            if (!s) setCurrentRow(null);
+          }}
           title="Delete category?"
           desc={
             currentRow

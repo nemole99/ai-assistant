@@ -16,26 +16,24 @@ const selectWithCountSchema = selectDocumentCategorySchema.extend({
 });
 
 export const documentCategoryRouter = {
-  list: protectedProcedure
-    .output(z.array(selectWithCountSchema))
-    .handler(async () => {
-      const rows = await db
-        .select({
-          id: documentCategory.id,
-          name: documentCategory.name,
-          color: documentCategory.color,
-          description: documentCategory.description,
-          createdAt: documentCategory.createdAt,
-          updatedAt: documentCategory.updatedAt,
-          documentCount: count(document.id),
-        })
-        .from(documentCategory)
-        .leftJoin(document, eq(document.categoryId, documentCategory.id))
-        .groupBy(documentCategory.id)
-        .orderBy(documentCategory.name);
+  list: protectedProcedure.output(z.array(selectWithCountSchema)).handler(async () => {
+    const rows = await db
+      .select({
+        id: documentCategory.id,
+        name: documentCategory.name,
+        color: documentCategory.color,
+        description: documentCategory.description,
+        createdAt: documentCategory.createdAt,
+        updatedAt: documentCategory.updatedAt,
+        documentCount: count(document.id),
+      })
+      .from(documentCategory)
+      .leftJoin(document, eq(document.categoryId, documentCategory.id))
+      .groupBy(documentCategory.id)
+      .orderBy(documentCategory.name);
 
-      return rows;
-    }),
+    return rows;
+  }),
 
   create: adminProcedure
     .input(insertDocumentCategorySchema)
@@ -69,11 +67,7 @@ export const documentCategoryRouter = {
     }),
 
   update: adminProcedure
-    .input(
-      z
-        .object({ id: z.string() })
-        .merge(updateDocumentCategorySchema.required().partial()),
-    )
+    .input(z.object({ id: z.string() }).merge(updateDocumentCategorySchema.required().partial()))
     .output(selectDocumentCategorySchema)
     .handler(async ({ input }) => {
       const { id, ...data } = input;
@@ -105,24 +99,20 @@ export const documentCategoryRouter = {
       return updated;
     }),
 
-  delete: adminProcedure
-    .input(z.object({ id: z.string() }))
-    .handler(async ({ input }) => {
-      const [docCount] = await db
-        .select({ count: count(document.id) })
-        .from(document)
-        .where(eq(document.categoryId, input.id));
+  delete: adminProcedure.input(z.object({ id: z.string() })).handler(async ({ input }) => {
+    const [docCount] = await db
+      .select({ count: count(document.id) })
+      .from(document)
+      .where(eq(document.categoryId, input.id));
 
-      if (docCount && docCount.count > 0) {
-        throw new ORPCError("BAD_REQUEST", {
-          message: `Cannot delete category — it has ${docCount.count} document(s). Move or delete them first.`,
-        });
-      }
+    if (docCount && docCount.count > 0) {
+      throw new ORPCError("BAD_REQUEST", {
+        message: `Cannot delete category — it has ${docCount.count} document(s). Move or delete them first.`,
+      });
+    }
 
-      await db
-        .delete(documentCategory)
-        .where(eq(documentCategory.id, input.id));
+    await db.delete(documentCategory).where(eq(documentCategory.id, input.id));
 
-      return { success: true };
-    }),
+    return { success: true };
+  }),
 };

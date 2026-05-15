@@ -14,11 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@workspace/ui/components/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
 import {
   Command,
   CommandEmpty,
@@ -64,18 +60,14 @@ export function ProjectAddMemberDialog({
     if (!selectedIds.length) return;
     try {
       await Promise.all(
-        selectedIds.map((employeeId) =>
-          addMutation.mutateAsync({ projectId, employeeId }),
-        ),
+        selectedIds.map((employeeId) => addMutation.mutateAsync({ projectId, employeeId })),
       );
       await Promise.all([
         queryClient.invalidateQueries(
           orpc.project.listMembers.queryOptions({ input: { projectId } }),
         ),
         queryClient.invalidateQueries(orpc.project.list.queryOptions()),
-        queryClient.invalidateQueries(
-          orpc.project.get.queryOptions({ input: { id: projectId } }),
-        ),
+        queryClient.invalidateQueries(orpc.project.get.queryOptions({ input: { id: projectId } })),
       ]);
       toast.success(
         selectedIds.length === 1
@@ -90,14 +82,10 @@ export function ProjectAddMemberDialog({
   };
 
   const toggle = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  const selectedEmployees = availableEmployees.filter((e) =>
-    selectedIds.includes(e.id),
-  );
+  const selectedEmployees = availableEmployees.filter((e) => selectedIds.includes(e.id));
 
   return (
     <Dialog
@@ -137,10 +125,7 @@ export function ProjectAddMemberDialog({
               </span>
               <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
             </PopoverTrigger>
-            <PopoverContent
-              className="w-(--radix-popover-trigger-width) p-0"
-              align="start"
-            >
+            <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
               <Command>
                 <CommandInput placeholder="Search employee..." />
                 <CommandList>
@@ -155,16 +140,12 @@ export function ProjectAddMemberDialog({
                         <Check
                           className={cn(
                             "mr-2 size-4",
-                            selectedIds.includes(e.id)
-                              ? "opacity-100"
-                              : "opacity-0",
+                            selectedIds.includes(e.id) ? "opacity-100" : "opacity-0",
                           )}
                         />
                         <div>
                           <p className="text-sm font-medium">{e.fullName}</p>
-                          <p className="text-muted-foreground text-xs">
-                            {e.position}
-                          </p>
+                          <p className="text-muted-foreground text-xs">{e.position}</p>
                         </div>
                       </CommandItem>
                     ))}
@@ -196,10 +177,7 @@ export function ProjectAddMemberDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={handleAdd}
-            disabled={!selectedIds.length || addMutation.isPending}
-          >
+          <Button onClick={handleAdd} disabled={!selectedIds.length || addMutation.isPending}>
             {addMutation.isPending
               ? "Adding..."
               : `Add ${selectedIds.length > 0 ? selectedIds.length : ""} Member${selectedIds.length !== 1 ? "s" : ""}`}
