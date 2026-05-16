@@ -40,8 +40,15 @@ export async function presignedPutUrl(objectKey: string, ttlSeconds = 300): Prom
   return presignClient.presignedPutObject(BUCKET, objectKey, ttlSeconds);
 }
 
-export async function presignedGetUrl(objectKey: string, ttlSeconds = 300): Promise<string> {
-  return presignClient.presignedGetObject(BUCKET, objectKey, ttlSeconds);
+export async function presignedGetUrl(
+  objectKey: string,
+  ttlSeconds = 300,
+  filename?: string,
+): Promise<string> {
+  const reqParams = filename
+    ? { "response-content-disposition": `attachment; filename="${filename}"` }
+    : undefined;
+  return presignClient.presignedGetObject(BUCKET, objectKey, ttlSeconds, reqParams);
 }
 
 export async function deleteObject(objectKey: string): Promise<void> {

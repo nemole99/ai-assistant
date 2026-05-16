@@ -247,25 +247,48 @@ export const listModels = protectedProcedure
     const userId = context.session.user.id;
     const models: { id: string; name: string; provider: string }[] = [];
 
-    // Fetch Ollama models if configured
+    // Fetch Local AI models if configured
     if (env.OLLAMA_BASE_URL) {
+      let fetchedModels: { id: string; name: string; provider: string }[] = [];
       try {
         const res = await fetch(`${env.OLLAMA_BASE_URL}/api/tags`);
         if (res.ok) {
           const data = (await res.json()) as { models?: { name: string }[] };
-          if (data.models) {
-            models.push(
+          if (data.models && Array.isArray(data.models)) {
+            fetchedModels.push(
               ...data.models.map((m) => ({
                 id: `ollama:${m.name}`,
                 name: m.name,
-                provider: "Ollama",
+                provider: "Local AI",
               })),
             );
           }
         }
       } catch (err) {
-        console.error("Failed to fetch Ollama models:", err);
+        // Ignore and try fallback
       }
+
+      if (fetchedModels.length === 0) {
+        try {
+          const res = await fetch(`${env.OLLAMA_BASE_URL}/v1/models`);
+          if (res.ok) {
+            const data = (await res.json()) as { data?: { id: string }[] };
+            if (data.data && Array.isArray(data.data)) {
+              fetchedModels.push(
+                ...data.data.map((m) => ({
+                  id: `ollama:${m.id}`,
+                  name: m.id,
+                  provider: "Local AI",
+                })),
+              );
+            }
+          }
+        } catch (err) {
+          console.error("Failed to fetch local AI models:", err);
+        }
+      }
+
+      models.push(...fetchedModels);
     }
 
     let session: Awaited<ReturnType<typeof getCopilotSession>> | null = null;

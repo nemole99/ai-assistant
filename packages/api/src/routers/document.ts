@@ -313,7 +313,11 @@ export const documentRouter = {
       const isAdmin = context.session.user.role === "ADMIN";
 
       const [doc] = await db
-        .select({ status: document.status, objectKey: document.objectKey })
+        .select({
+          status: document.status,
+          objectKey: document.objectKey,
+          originalFilename: document.originalFilename,
+        })
         .from(document)
         .where(eq(document.id, input.id))
         .limit(1);
@@ -322,11 +326,12 @@ export const documentRouter = {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });
       }
 
-      if (!isAdmin && doc.status !== "COMPLETED") {
+      const visibleStatuses = ["COMPLETED", "INGESTING", "INGESTED", "INGEST_FAILED"] as const;
+      if (!isAdmin && !visibleStatuses.includes(doc.status as (typeof visibleStatuses)[number])) {
         throw new ORPCError("NOT_FOUND", { message: "Document not found" });
       }
 
-      const url = await presignedGetUrl(doc.objectKey, 300);
+      const url = await presignedGetUrl(doc.objectKey, 300, doc.originalFilename);
 
       return { url };
     }),

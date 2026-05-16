@@ -36,11 +36,7 @@ export function DocumentReader({ id }: { id: string }) {
   const downloadUrlMutation = useMutation(
     orpc.document.getDownloadUrl.mutationOptions({
       onSuccess: ({ url }) => {
-        const a = window.document.createElement("a");
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.click();
+        window.location.assign(url);
       },
       onError: (err) => toast.error(err.message),
     }),

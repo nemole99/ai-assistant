@@ -31,7 +31,7 @@ interface SystemAIConfigCardProps {
 }
 
 const PROVIDER_OPTIONS = [
-  { value: "openai", label: "OpenAI" },
+  { value: "openai", label: "OpenAI / LM Studio" },
   { value: "anthropic", label: "Anthropic" },
   { value: "google", label: "Google (Gemini)" },
   { value: "ollama", label: "Ollama (local)" },
@@ -220,7 +220,7 @@ export function SystemAIConfigCard({
             <span className="font-medium text-foreground">API Key:</span>{" "}
             {config.apiKeyMasked}
           </div>
-          {config.providerType === "ollama" && config.baseUrl && (
+          {config.baseUrl && (
             <div>
               <span className="font-medium text-foreground">Base URL:</span>{" "}
               {config.baseUrl}
@@ -361,30 +361,32 @@ export function SystemAIConfigCard({
 
             <form.Subscribe
               selector={(state) => state.values.providerType}
-              children={(providerType) =>
-                providerType === "ollama" ? (
-                  <form.Field
-                    name="baseUrl"
-                    children={(field) => (
-                      <Field>
-                        <FieldLabel>
-                          Base URL{" "}
-                          <span className="text-muted-foreground text-xs">
-                            (optional)
-                          </span>
-                        </FieldLabel>
-                        <Input
-                          id={field.name}
-                          placeholder="http://localhost:11434"
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                      </Field>
-                    )}
-                  />
-                ) : null
-              }
+              children={(providerType) => (
+                <form.Field
+                  name="baseUrl"
+                  children={(field) => (
+                    <Field>
+                      <FieldLabel>
+                        Base URL{" "}
+                        <span className="text-muted-foreground text-xs">
+                          (optional, for custom endpoints like LM Studio)
+                        </span>
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        placeholder={
+                          providerType === "ollama"
+                            ? "http://localhost:11434"
+                            : "https://api.openai.com/v1"
+                        }
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                    </Field>
+                  )}
+                />
+              )}
             />
           </FieldGroup>
 
