@@ -1,8 +1,15 @@
+import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 import { orpc } from "@/lib/orpc";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import {
   Select,
   SelectContent,
@@ -30,26 +37,36 @@ const PROVIDER_OPTIONS = [
   { value: "ollama", label: "Ollama (local)" },
 ];
 
-export function SystemAIConfigCard({ purpose, title, description }: SystemAIConfigCardProps) {
+const configFormSchema = z.object({
+  providerType: z.string().min(1, "Provider is required."),
+  modelId: z.string().min(1, "Model ID is required."),
+  apiKey: z.string(),
+  baseUrl: z.string(),
+});
+
+type ConfigFormValues = z.infer<typeof configFormSchema>;
+
+export function SystemAIConfigCard({
+  purpose,
+  title,
+  description,
+}: SystemAIConfigCardProps) {
   const queryClient = useQueryClient();
 
   const { data: config, isPending } = useQuery({
     ...orpc.systemAiConfig.get.queryOptions({ input: { purpose } }),
   });
 
-  const [providerType, setProviderType] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [modelId, setModelId] = useState("");
-  const [baseUrl, setBaseUrl] = useState("");
   const [editing, setEditing] = useState(false);
 
   const upsertMutation = useMutation(
     orpc.systemAiConfig.upsert.mutationOptions({
       onSuccess: () => {
         toast.success(`${title} configuration saved`);
-        queryClient.invalidateQueries(orpc.systemAiConfig.get.queryOptions({ input: { purpose } }));
+        queryClient.invalidateQueries(
+          orpc.systemAiConfig.get.queryOptions({ input: { purpose } }),
+        );
         setEditing(false);
-        setApiKey("");
       },
       onError: (err) => {
         toast.error(`Failed to save: ${err.message}`);
@@ -61,7 +78,9 @@ export function SystemAIConfigCard({ purpose, title, description }: SystemAIConf
     orpc.systemAiConfig.delete.mutationOptions({
       onSuccess: () => {
         toast.success(`${title} configuration removed`);
-        queryClient.invalidateQueries(orpc.systemAiConfig.get.queryOptions({ input: { purpose } }));
+        queryClient.invalidateQueries(
+          orpc.systemAiConfig.get.queryOptions({ input: { purpose } }),
+        );
         setEditing(false);
       },
       onError: (err) => {
@@ -85,30 +104,49 @@ export function SystemAIConfigCard({ purpose, title, description }: SystemAIConf
     }),
   );
 
-  const handleStartEdit = () => {
-    setProviderType(config?.providerType ?? "openai");
-    setModelId(config?.modelId ?? "");
-    setBaseUrl(config?.baseUrl ?? "");
-    setApiKey("");
-    setEditing(true);
-  };
+  const form = useForm({
+    defaultValues: {
+      providerType: config?.providerType ?? "openai",
+      modelId: config?.modelId ?? "",
+      apiKey: "",
+      baseUrl: config?.baseUrl ?? "",
+    } satisfies ConfigFormValues,
+    validators: {
+      onSubmit: configFormSchema.superRefine((data, ctx) => {
+        if (!data.apiKey && !config && data.providerType !== "ollama") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "API key is required for new configuration.",
+            path: ["apiKey"],
+          });
+        }
+      }),
+    },
+    onSubmit: async ({ value }) => {
+      upsertMutation.mutate({
+        purpose,
+        providerType: value.providerType,
+        apiKey:
+          value.apiKey ||
+          (value.providerType === "ollama" ? "local" : "KEEP_EXISTING"),
+        modelId: value.modelId,
+        baseUrl:
+          value.baseUrl ||
+          (value.providerType === "ollama"
+            ? "http://localhost:11434/"
+            : null),
+      });
+    },
+  });
 
-  const handleSave = () => {
-    if (!providerType || !modelId) {
-      toast.error("Provider and model are required");
-      return;
-    }
-    if (!apiKey && !config) {
-      toast.error("API key is required for new configuration");
-      return;
-    }
-    upsertMutation.mutate({
-      purpose,
-      providerType,
-      apiKey: apiKey || "KEEP_EXISTING",
-      modelId,
-      baseUrl: baseUrl || null,
+  const handleStartEdit = () => {
+    form.reset({
+      providerType: config?.providerType ?? "openai",
+      modelId: config?.modelId ?? "",
+      apiKey: "",
+      baseUrl: config?.baseUrl ?? "",
     });
+    setEditing(true);
   };
 
   if (isPending) {
@@ -150,7 +188,11 @@ export function SystemAIConfigCard({ purpose, title, description }: SystemAIConf
                 onClick={() => testMutation.mutate({ purpose })}
                 disabled={testMutation.isPending}
               >
-                {testMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : "Test"}
+                {testMutation.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  "Test"
+                )}
               </Button>
               <Button
                 variant="ghost"
@@ -168,103 +210,220 @@ export function SystemAIConfigCard({ purpose, title, description }: SystemAIConf
       {isConfigured && !editing && (
         <div className="text-sm space-y-1 text-muted-foreground bg-muted/40 rounded-md p-3">
           <div>
-            <span className="font-medium text-foreground">Provider:</span> {config.providerType}
+            <span className="font-medium text-foreground">Provider:</span>{" "}
+            {config.providerType}
           </div>
           <div>
-            <span className="font-medium text-foreground">Model:</span> {config.modelId}
+            <span className="font-medium text-foreground">Model:</span>{" "}
+            {config.modelId}
           </div>
           <div>
-            <span className="font-medium text-foreground">API Key:</span> {config.apiKeyMasked}
+            <span className="font-medium text-foreground">API Key:</span>{" "}
+            {config.apiKeyMasked}
           </div>
           {config.baseUrl && (
             <div>
-              <span className="font-medium text-foreground">Base URL:</span> {config.baseUrl}
+              <span className="font-medium text-foreground">Base URL:</span>{" "}
+              {config.baseUrl}
             </div>
           )}
         </div>
       )}
 
       {editing ? (
-        <div className="space-y-3">
-          <div className="grid gap-2">
-            <Label>Provider</Label>
-            <Select
-              items={PROVIDER_OPTIONS}
-              value={providerType}
-              onValueChange={(v) => {
-                if (v) setProviderType(v);
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-3"
+        >
+          <FieldGroup>
+            <form.Field
+              name="providerType"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel>Provider</FieldLabel>
+                    <Select
+                      items={PROVIDER_OPTIONS}
+                      value={field.state.value}
+                      onValueChange={(v) => {
+                        if (v) {
+                          field.handleChange(v);
+                          if (
+                            v === "ollama" &&
+                            !form.getFieldValue("baseUrl")
+                          ) {
+                            form.setFieldValue(
+                              "baseUrl",
+                              "http://localhost:11434/",
+                            );
+                          }
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select provider" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROVIDER_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
               }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select provider" />
-              </SelectTrigger>
-              <SelectContent>
-                {PROVIDER_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            />
 
-          <div className="grid gap-2">
-            <Label>Model ID</Label>
-            <Input
-              placeholder={
-                purpose === "pipeline_text"
-                  ? "e.g. gpt-4o-mini, gemini-2.0-flash"
-                  : "e.g. gemini-embedding-001, text-embedding-004"
+            <form.Field
+              name="modelId"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel>Model ID</FieldLabel>
+                    <Input
+                      id={field.name}
+                      placeholder={
+                        purpose === "pipeline_text"
+                          ? "e.g. gpt-4o-mini, gemini-2.0-flash"
+                          : "e.g. gemini-embedding-001, text-embedding-004"
+                      }
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+
+            <form.Subscribe
+              selector={(state) => state.values.providerType}
+              children={(providerType) =>
+                providerType !== "ollama" ? (
+                  <form.Field
+                    name="apiKey"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched &&
+                        !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel>
+                            API Key
+                            {isConfigured && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (leave blank to keep existing:{" "}
+                                {config.apiKeyMasked})
+                              </span>
+                            )}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="password"
+                            placeholder={
+                              isConfigured
+                                ? "Leave blank to keep existing key"
+                                : "Enter API key"
+                            }
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) =>
+                              field.handleChange(e.target.value)
+                            }
+                            aria-invalid={isInvalid}
+                          />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
+                ) : null
               }
-              value={modelId}
-              onChange={(e) => setModelId(e.target.value)}
             />
-          </div>
 
-          <div className="grid gap-2">
-            <Label>
-              API Key
-              {isConfigured && (
-                <span className="text-xs text-muted-foreground ml-2">
-                  (leave blank to keep existing: {config.apiKeyMasked})
-                </span>
-              )}
-            </Label>
-            <Input
-              type="password"
-              placeholder={isConfigured ? "Leave blank to keep existing key" : "Enter API key"}
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+            <form.Subscribe
+              selector={(state) => state.values.providerType}
+              children={(providerType) =>
+                providerType === "ollama" || providerType === "openai" ? (
+                  <form.Field
+                    name="baseUrl"
+                    children={(field) => (
+                      <Field>
+                        <FieldLabel>
+                          Base URL{" "}
+                          <span className="text-muted-foreground text-xs">
+                            (optional)
+                          </span>
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          placeholder={
+                            providerType === "ollama"
+                              ? "http://localhost:11434"
+                              : "https://api.openai.com/v1"
+                          }
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                        />
+                      </Field>
+                    )}
+                  />
+                ) : null
+              }
             />
-          </div>
+          </FieldGroup>
 
-          {(providerType === "ollama" || providerType === "openai") && (
-            <div className="grid gap-2">
-              <Label>
-                Base URL <span className="text-muted-foreground text-xs">(optional)</span>
-              </Label>
-              <Input
-                placeholder={
-                  providerType === "ollama" ? "http://localhost:11434" : "https://api.openai.com/v1"
-                }
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-              />
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button size="sm" onClick={handleSave} disabled={upsertMutation.isPending}>
-              {upsertMutation.isPending ? (
-                <Loader2 size={14} className="animate-spin mr-1" />
-              ) : null}
-              Save
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
-              Cancel
-            </Button>
-          </div>
-        </div>
+          <form.Subscribe
+            selector={(state) => ({
+              canSubmit: state.canSubmit,
+              isSubmitting: state.isSubmitting,
+            })}
+            children={({ canSubmit, isSubmitting }) => (
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={
+                    !canSubmit || isSubmitting || upsertMutation.isPending
+                  }
+                >
+                  {upsertMutation.isPending ? (
+                    <Loader2 size={14} className="animate-spin mr-1" />
+                  ) : null}
+                  Save
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setEditing(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+          />
+        </form>
       ) : (
         <Button variant="outline" size="sm" onClick={handleStartEdit}>
           {isConfigured ? "Edit" : "Configure"}

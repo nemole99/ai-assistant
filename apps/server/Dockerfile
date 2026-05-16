@@ -29,7 +29,7 @@ WORKDIR /app
 # Python + markitdown for the document processing worker
 RUN apt-get update && \
     apt-get install -y --no-install-recommends python3 python3-pip && \
-    pip3 install --break-system-packages 'markitdown[pdf]' && \
+    pip3 install --break-system-packages 'markitdown[pptx, pdf, docx, xlsx, xls]' && \
     apt-get purge -y python3-pip && \
     apt-get autoremove -y && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /root/.cache

@@ -1,21 +1,44 @@
-# workspace
+# AI Assistant — Internal Tooling Platform
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, ORPC, and more.
+- **Document Management** — Upload tài liệu dự án (PDF), tự động convert sang markdown
+- **Wiki Knowledge Base** — LLM tổng hợp Document thành WikiPage, duy trì cross-reference tự động
+- **Ask AI (RAG Chat)** — Chatbot trả lời dựa trên vector search WikiPage, có citation nguồn
+- **Ticket Description Generator** — AI format mô tả thô thành ticket theo template nội bộ
+- **Employee & Department Management** — Quản lý nhân sự, phòng ban, dự án
 
-## Features
+## Tech Stack
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Hono** - Lightweight, performant server framework
-- **oRPC** - End-to-end type-safe APIs with OpenAPI integration
-- **Bun** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Oxlint** - Oxlint + Oxfmt (linting & formatting)
-- **Turborepo** - Optimized monorepo build system
+| Layer         | Technology                                                    |
+| ------------- | ------------------------------------------------------------- |
+| Frontend      | React, TanStack Router, TanStack Form, TailwindCSS, shadcn/ui |
+| Backend       | Hono, oRPC, Bun                                               |
+| Worker        | BullMQ (Redis-backed job queue)                               |
+| Database      | PostgreSQL + pgvector, Drizzle ORM                            |
+| Storage       | MinIO (S3-compatible)                                         |
+| AI            | Vercel AI SDK (Anthropic, OpenAI, Google, Ollama)             |
+| Auth          | Better-Auth                                                   |
+| Monorepo      | Turborepo, Bun workspaces                                     |
+| Lint & Format | Oxlint + Oxfmt                                                |
+
+## Project Structure
+
+```
+ai-assistant/
+├── apps/
+│   ├── web/              # Frontend (React + TanStack Router)
+│   └── server/           # API server + Worker (Hono, oRPC, BullMQ)
+├── packages/
+│   ├── api/              # Shared API contracts & business logic
+│   ├── auth/             # Authentication configuration
+│   ├── db/               # Database schema, migrations & Docker infra
+│   ├── env/              # Shared environment variable validation
+│   ├── queue/            # BullMQ job definitions
+│   ├── storage/          # MinIO storage abstraction
+│   ├── ui/               # Shared shadcn/ui components & styles
+│   └── config/           # Shared tooling config (TypeScript, etc.)
+├── docker-compose.yml    # Production: all services in Docker
+└── CONTEXT.md            # Domain language & project decisions
+```
 
 ## Getting Started
 
@@ -23,7 +46,13 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 
 - [Bun](https://bun.sh) >= 1.3.11
 - [Node.js](https://nodejs.org) >= 25.8.2
-- [Docker](https://www.docker.com) (for running PostgreSQL locally)
+- [Docker](https://www.docker.com) (for PostgreSQL, Redis, MinIO)
+- [Python 3](https://www.python.org) + `markitdown` (for document processing worker)
+
+```bash
+# Install markitdown (one-time setup)
+pip install 'markitdown[pptx, pdf, docx, xlsx, xls]'
+```
 
 ### 1. Install dependencies
 
@@ -33,110 +62,79 @@ bun install
 
 ### 2. Configure environment variables
 
-Copy the example env file and adjust if needed:
-
 ```bash
 cp apps/server/.env.example apps/server/.env
 ```
 
-The defaults already match the Docker Compose config below, so no changes are required for local development.
+Defaults đã match với Docker Compose config — không cần chỉnh cho local dev.
 
-### 3. Start the database
+### 3. Start infrastructure (Docker)
 
 ```bash
 bun run db:start
 ```
 
-This spins up a PostgreSQL container on **port 5433** via Docker Compose (`packages/db/docker-compose.yml`).
+Khởi động PostgreSQL (port `5433`), Redis (port `6379`), MinIO (port `9000`/`9001`) via Docker Compose (`packages/db/docker-compose.yml`).
 
-### 4. Push the schema
+### 4. Push database schema
 
 ```bash
 bun run db:push
 ```
 
-### 5. Config Storage & Seed initial data
+### 5. Seed initial data
 
-The command below will automatically create the MinIO `documents` bucket (if it doesn't exist), then seed the admin account, sample employees, document categories, and sample projects:
+Tự động tạo MinIO bucket, admin account, sample employees, document categories, và sample projects:
 
 ```bash
 bun run db:seed
 ```
 
-### 6. Start the development server
+### 6. Start development
 
 ```bash
 bun run dev
 ```
 
-- Web app: [http://localhost:5173](http://localhost:5173)
-- API: [http://localhost:3000](http://localhost:3000)
+Chạy đồng thời web, server, và worker (hot-reload):
 
----
+| Service       | URL                                            |
+| ------------- | ---------------------------------------------- |
+| Web           | [http://localhost:3001](http://localhost:3001) |
+| API Server    | [http://localhost:3000](http://localhost:3000) |
+| MinIO Console | [http://localhost:9001](http://localhost:9001) |
 
-### Stopping / cleaning up the database
+### Stopping infrastructure
 
 ```bash
-# Stop the container (data is preserved)
+# Stop containers (data preserved)
 bun run db:stop
 
 # Stop and remove volumes (wipes all data)
 bun run db:down
 ```
 
-## UI Customization
-
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
-
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
-
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
-
-Import shared components like this:
-
-```tsx
-import { Button } from "@workspace/ui/components/button";
-```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Git Hooks and Formatting
-
-- Format and lint fix: `bun run check`
-
-## Project Structure
-
-```
-workspace/
-├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Hono, ORPC)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
-```
-
 ## Available Scripts
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:generate`: Generate database client/types
-- `bun run db:migrate`: Run database migrations
-- `bun run db:studio`: Open database studio UI
-- `bun run check`: Run Oxlint and Oxfmt
+| Script                | Description                               |
+| --------------------- | ----------------------------------------- |
+| `bun run dev`         | Start web + server + worker (hot-reload)  |
+| `bun run dev:web`     | Start web only                            |
+| `bun run dev:server`  | Start server only                         |
+| `bun run build`       | Build all apps for production             |
+| `bun run check-types` | TypeScript type check across all packages |
+| `bun run db:start`    | Start Docker infrastructure               |
+| `bun run db:stop`     | Stop Docker containers                    |
+| `bun run db:down`     | Stop + remove volumes                     |
+| `bun run db:push`     | Push schema changes to database           |
+| `bun run db:generate` | Generate Drizzle migrations               |
+| `bun run db:migrate`  | Run Drizzle migrations                    |
+| `bun run db:studio`   | Open Drizzle Studio UI                    |
+| `bun run db:seed`     | Seed database with initial data           |
+| `bun run check`       | Run Oxlint + Oxfmt                        |
+| `bun run lint`        | Run Oxlint only                           |
+| `bun run format`      | Run Oxfmt only                            |
+
+## Production Deployment
+
+Xem [Setup Guide](docs/SETUP.md#option-a--docker-production) để biết cách deploy toàn bộ services bằng Docker Compose.
