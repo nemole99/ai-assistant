@@ -40,7 +40,12 @@ export type PlanProps = ComponentProps<typeof Collapsible> & {
   isStreaming?: boolean;
 };
 
-export const Plan = ({ className, isStreaming = false, children, ...props }: PlanProps) => {
+export const Plan = ({
+  className,
+  isStreaming = false,
+  children,
+  ...props
+}: PlanProps) => {
   const contextValue = useMemo(() => ({ isStreaming }), [isStreaming]);
 
   return (
@@ -66,7 +71,10 @@ export const PlanHeader = ({ className, ...props }: PlanHeaderProps) => (
   />
 );
 
-export type PlanTitleProps = Omit<ComponentProps<typeof CardTitle>, "children"> & {
+export type PlanTitleProps = Omit<
+  ComponentProps<typeof CardTitle>,
+  "children"
+> & {
   children: string;
 };
 
@@ -80,11 +88,18 @@ export const PlanTitle = ({ children, ...props }: PlanTitleProps) => {
   );
 };
 
-export type PlanDescriptionProps = Omit<ComponentProps<typeof CardDescription>, "children"> & {
+export type PlanDescriptionProps = Omit<
+  ComponentProps<typeof CardDescription>,
+  "children"
+> & {
   children: string;
 };
 
-export const PlanDescription = ({ className, children, ...props }: PlanDescriptionProps) => {
+export const PlanDescription = ({
+  className,
+  children,
+  ...props
+}: PlanDescriptionProps) => {
   const { isStreaming } = usePlan();
 
   return (

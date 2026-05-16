@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { orpc } from "@/lib/orpc";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+
+import { orpc } from "@/lib/orpc";
 
 export interface AIModel {
   id: string;
@@ -10,7 +11,7 @@ export interface AIModel {
 
 export function useModelAssignment(providerId: string | null) {
   const { data: assignment } = useQuery(
-    orpc.aiModelAssignment.get.queryOptions({ input: { purpose: "chat" } }),
+    orpc.aiModelAssignment.get.queryOptions({ input: { purpose: "chat" } })
   );
 
   const { data: models = [], isLoading: isModelsLoading } = useQuery({
@@ -21,7 +22,9 @@ export function useModelAssignment(providerId: string | null) {
 
   // Initialise from saved assignment or first available model
   useEffect(() => {
-    if (selectedModelId) return;
+    if (selectedModelId) {
+      return;
+    }
     if (assignment?.model) {
       setSelectedModelIdState(assignment.model);
     } else if (models.length > 0 && models[0]) {
@@ -29,7 +32,9 @@ export function useModelAssignment(providerId: string | null) {
     }
   }, [assignment, models, selectedModelId]);
 
-  const { mutate: persistAssignment } = useMutation(orpc.aiModelAssignment.set.mutationOptions());
+  const { mutate: persistAssignment } = useMutation(
+    orpc.aiModelAssignment.set.mutationOptions()
+  );
 
   const setSelectedModel = useCallback(
     (modelId: string) => {
@@ -38,24 +43,27 @@ export function useModelAssignment(providerId: string | null) {
       const isSystemModel = modelId.startsWith("ollama:");
       const determinedProviderId = isSystemModel ? null : providerId;
 
-      if (!isSystemModel && !providerId) return;
+      if (!isSystemModel && !providerId) {
+        return;
+      }
 
       persistAssignment({
-        purpose: "chat",
         model: modelId,
         providerId: determinedProviderId,
+        purpose: "chat",
       });
     },
-    [providerId, persistAssignment],
+    [providerId, persistAssignment]
   );
 
-  const selectedModel = models.find((m) => m.id === selectedModelId) ?? models[0] ?? null;
+  const selectedModel =
+    models.find((m) => m.id === selectedModelId) ?? models[0] ?? null;
 
   return {
+    isModelsLoading,
     models,
     selectedModel,
     selectedModelId: selectedModel?.id ?? "",
     setSelectedModel,
-    isModelsLoading,
   };
 }

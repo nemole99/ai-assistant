@@ -1,7 +1,5 @@
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -11,26 +9,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { SelectDropdown } from "@/components/select-dropdown";
 import { orpc } from "@/lib/orpc";
-import { type Employee } from "../data/schema";
+
+import type { Employee } from "../data/schema";
 
 const formSchema = z.object({
-  fullName: z.string().min(1, "Full name is required."),
+  departmentId: z.string().min(1, "Department is required."),
   email: z.email({
     error: (iss) => (iss.input === "" ? "Email is required." : undefined),
   }),
+  fullName: z.string().min(1, "Full name is required."),
   position: z.string().min(1, "Position is required."),
-  departmentId: z.string().min(1, "Department is required."),
 });
 
-type EmployeeActionDialogProps = {
+interface EmployeeActionDialogProps {
   currentRow?: Employee;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
 export function EmployeesActionDialog({
   currentRow,
@@ -40,30 +47,32 @@ export function EmployeesActionDialog({
   const isEdit = !!currentRow;
   const queryClient = useQueryClient();
 
-  const { data: departments = [] } = useQuery(orpc.department.list.queryOptions());
+  const { data: departments = [] } = useQuery(
+    orpc.department.list.queryOptions()
+  );
 
   const createMutation = useMutation(
     orpc.employee.create.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.employee.list.queryOptions());
         toast.success("Employee created successfully.");
         form.reset();
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const updateMutation = useMutation(
     orpc.employee.update.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.employee.list.queryOptions());
         toast.success("Employee updated successfully.");
         form.reset();
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -71,21 +80,21 @@ export function EmployeesActionDialog({
   const form = useForm({
     defaultValues: isEdit
       ? {
-          fullName: currentRow.fullName,
-          email: currentRow.email,
-          position: currentRow.position,
           departmentId: currentRow.departmentId,
+          email: currentRow.email,
+          fullName: currentRow.fullName,
+          position: currentRow.position,
         }
-      : { fullName: "", email: "", position: "", departmentId: "" },
-    validators: {
-      onSubmit: formSchema,
-    },
+      : { departmentId: "", email: "", fullName: "", position: "" },
     onSubmit: ({ value }) => {
       if (isEdit) {
         updateMutation.mutate({ id: currentRow.id, ...value });
       } else {
         createMutation.mutate(value);
       }
+    },
+    validators: {
+      onSubmit: formSchema,
     },
   });
 
@@ -99,9 +108,13 @@ export function EmployeesActionDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="text-start">
-          <DialogTitle>{isEdit ? "Edit Employee" : "Add New Employee"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Employee" : "Add New Employee"}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update the employee here. " : "Create a new employee here. "}
+            {isEdit
+              ? "Update the employee here. "
+              : "Create a new employee here. "}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -117,13 +130,17 @@ export function EmployeesActionDialog({
             <form.Field
               name="fullName"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
+                    <FieldLabel
+                      className="col-span-2 text-end"
+                      htmlFor={field.name}
+                    >
                       Full Name
                     </FieldLabel>
                     <Input
@@ -150,13 +167,17 @@ export function EmployeesActionDialog({
             <form.Field
               name="email"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
+                    <FieldLabel
+                      className="col-span-2 text-end"
+                      htmlFor={field.name}
+                    >
                       Email
                     </FieldLabel>
                     <Input
@@ -182,13 +203,17 @@ export function EmployeesActionDialog({
             <form.Field
               name="position"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
+                    <FieldLabel
+                      className="col-span-2 text-end"
+                      htmlFor={field.name}
+                    >
                       Position
                     </FieldLabel>
                     <Input
@@ -214,13 +239,17 @@ export function EmployeesActionDialog({
             <form.Field
               name="departmentId"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field
                     className="grid grid-cols-6 items-center gap-x-4 gap-y-1"
                     data-invalid={isInvalid}
                   >
-                    <FieldLabel className="col-span-2 text-end" htmlFor={field.name}>
+                    <FieldLabel
+                      className="col-span-2 text-end"
+                      htmlFor={field.name}
+                    >
                       Department
                     </FieldLabel>
                     <SelectDropdown

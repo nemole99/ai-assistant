@@ -1,4 +1,3 @@
-import { LongText } from "@/components/long-text";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -28,7 +27,10 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import { type Document } from "../data/schema";
+
+import { LongText } from "@/components/long-text";
+
+import type { Document } from "../data/schema";
 import { DocumentCategoryBadge } from "./document-category-badge";
 import { DocumentStatusBadge } from "./document-status-badge";
 import { useDocuments } from "./documents-provider";

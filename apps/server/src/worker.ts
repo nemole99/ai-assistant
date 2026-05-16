@@ -1,5 +1,8 @@
 import "dotenv/config";
-import { Worker } from "bullmq";
+import { writeFile, unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { db } from "@workspace/db";
 import { document, systemAiConfig } from "@workspace/db/schema/auth";
 import {
@@ -7,21 +10,25 @@ import {
   WIKI_INGESTION_QUEUE_NAME,
   redisConnection,
   wikiIngestionQueue,
-  type DocumentJobData,
-  type WikiIngestionJobData,
 } from "@workspace/queue";
+import type { DocumentJobData, WikiIngestionJobData } from "@workspace/queue";
 import { getObjectBuffer } from "@workspace/storage";
+import { Worker } from "bullmq";
 import { eq } from "drizzle-orm";
-import { tmpdir } from "os";
-import { join } from "path";
-import { writeFile, unlink } from "fs/promises";
+
 import { runIngestionPipeline } from "./wiki/ingestion-pipeline";
 
 async function processDocument(documentId: string): Promise<void> {
-  const [doc] = await db.select().from(document).where(eq(document.id, documentId)).limit(1);
+  const [doc] = await db
+    .select()
+    .from(document)
+    .where(eq(document.id, documentId))
+    .limit(1);
 
   if (!doc || doc.status !== "PENDING") {
-    console.log(`[worker] Skipping document ${documentId} — not found or not PENDING`);
+    console.log(
+      `[worker] Skipping document ${documentId} — not found or not PENDING`
+    );
     return;
   }
 
@@ -35,8 +42,8 @@ async function processDocument(documentId: string): Promise<void> {
     const markitdownBin = process.env.MARKITDOWN_PATH ?? "markitdown";
     console.log(`[worker] Running markitdown on ${tempPath}...`);
     const proc = Bun.spawn([markitdownBin, tempPath], {
-      stdout: "pipe",
       stderr: "pipe",
+      stdout: "pipe",
     });
 
     const exitCode = await proc.exited;
@@ -44,7 +51,9 @@ async function processDocument(documentId: string): Promise<void> {
     const stderr = await new Response(proc.stderr).text();
 
     if (exitCode !== 0) {
-      throw new Error(`markitdown exited with code ${exitCode}: ${stderr.trim()}`);
+      throw new Error(
+        `markitdown exited with code ${exitCode}: ${stderr.trim()}`
+      );
     }
 
     if (!markdown.trim()) {
@@ -53,7 +62,7 @@ async function processDocument(documentId: string): Promise<void> {
 
     await db
       .update(document)
-      .set({ status: "COMPLETED", markdownContent: markdown })
+      .set({ markdownContent: markdown, status: "COMPLETED" })
       .where(eq(document.id, documentId));
 
     console.log(`[worker] Document ${documentId} processed successfully`);
@@ -72,21 +81,29 @@ async function processDocument(documentId: string): Promise<void> {
       .limit(1);
 
     if (textConfig && embeddingConfig) {
-      console.log(`[worker] Enqueueing wiki ingestion for document ${documentId}`);
-      await db.update(document).set({ status: "INGESTING" }).where(eq(document.id, documentId));
+      console.log(
+        `[worker] Enqueueing wiki ingestion for document ${documentId}`
+      );
+      await db
+        .update(document)
+        .set({ status: "INGESTING" })
+        .where(eq(document.id, documentId));
       await wikiIngestionQueue.add("ingest", { documentId });
     }
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown error during conversion";
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Unknown error during conversion";
 
     console.error(`[worker] Document ${documentId} failed:`, errorMessage);
 
     await db
       .update(document)
-      .set({ status: "FAILED", errorMessage })
+      .set({ errorMessage, status: "FAILED" })
       .where(eq(document.id, documentId));
 
-    throw err;
+    throw error;
   } finally {
     try {
       await unlink(tempPath);
@@ -97,7 +114,11 @@ async function processDocument(documentId: string): Promise<void> {
 }
 
 async function processWikiIngestion(documentId: string): Promise<void> {
-  const [doc] = await db.select().from(document).where(eq(document.id, documentId)).limit(1);
+  const [doc] = await db
+    .select()
+    .from(document)
+    .where(eq(document.id, documentId))
+    .limit(1);
 
   if (!doc) {
     console.log(`[wiki-worker] Document ${documentId} not found — skipping`);
@@ -105,7 +126,9 @@ async function processWikiIngestion(documentId: string): Promise<void> {
   }
 
   if (doc.status !== "INGESTING") {
-    console.log(`[wiki-worker] Document ${documentId} not in INGESTING state — skipping`);
+    console.log(
+      `[wiki-worker] Document ${documentId} not in INGESTING state — skipping`
+    );
     return;
   }
 
@@ -114,34 +137,40 @@ async function processWikiIngestion(documentId: string): Promise<void> {
 
     await db
       .update(document)
-      .set({ status: "INGESTED", errorMessage: null })
+      .set({ errorMessage: null, status: "INGESTED" })
       .where(eq(document.id, documentId));
 
     console.log(`[wiki-worker] Document ${documentId} ingested successfully`);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown ingestion error";
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown ingestion error";
 
-    console.error(`[wiki-worker] Document ${documentId} ingestion failed:`, errorMessage);
+    console.error(
+      `[wiki-worker] Document ${documentId} ingestion failed:`,
+      errorMessage
+    );
 
     await db
       .update(document)
-      .set({ status: "INGEST_FAILED", errorMessage })
+      .set({ errorMessage, status: "INGEST_FAILED" })
       .where(eq(document.id, documentId));
 
-    throw err;
+    throw error;
   }
 }
 
 const documentWorker = new Worker<DocumentJobData>(
   DOCUMENT_QUEUE_NAME,
   async (job) => {
-    console.log(`[worker] Processing job ${job.id} — document ${job.data.documentId}`);
+    console.log(
+      `[worker] Processing job ${job.id} — document ${job.data.documentId}`
+    );
     await processDocument(job.data.documentId);
   },
   {
-    connection: redisConnection,
     concurrency: 2,
-  },
+    connection: redisConnection,
+  }
 );
 
 documentWorker.on("completed", (job) => {
@@ -155,13 +184,15 @@ documentWorker.on("failed", (job, err) => {
 const wikiWorker = new Worker<WikiIngestionJobData>(
   WIKI_INGESTION_QUEUE_NAME,
   async (job) => {
-    console.log(`[wiki-worker] Processing job ${job.id} — document ${job.data.documentId}`);
+    console.log(
+      `[wiki-worker] Processing job ${job.id} — document ${job.data.documentId}`
+    );
     await processWikiIngestion(job.data.documentId);
   },
   {
-    connection: redisConnection,
     concurrency: 1,
-  },
+    connection: redisConnection,
+  }
 );
 
 wikiWorker.on("completed", (job) => {

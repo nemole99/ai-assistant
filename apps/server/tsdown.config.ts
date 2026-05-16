@@ -1,9 +1,10 @@
+// oxlint-disable require-unicode-regexp
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
+  clean: true,
   entry: "./src/index.ts",
   format: "esm",
-  outDir: "./dist",
-  clean: true,
   noExternal: [/@workspace\/.*/],
+  outDir: "./dist",
 });

@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { UserMinus, UserPlus } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -14,18 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { orpc } from "@/lib/orpc";
+import { UserMinus, UserPlus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { authClient } from "@/lib/auth-client";
-import { type ProjectMember } from "../data/schema";
+import { orpc } from "@/lib/orpc";
+
+import type { ProjectMember } from "../data/schema";
 import { ProjectAddMemberDialog } from "./project-add-member-dialog";
 
-type ProjectMembersTabProps = {
+interface ProjectMembersTabProps {
   projectId: string;
   managerId: string | null;
   members: ProjectMember[];
-};
+}
 
-export function ProjectMembersTab({ projectId, managerId, members }: ProjectMembersTabProps) {
+export function ProjectMembersTab({
+  projectId,
+  managerId,
+  members,
+}: ProjectMembersTabProps) {
   const [addOpen, setAddOpen] = useState(false);
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
@@ -33,22 +39,26 @@ export function ProjectMembersTab({ projectId, managerId, members }: ProjectMemb
 
   const removeMutation = useMutation(
     orpc.project.removeMember.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(
-          orpc.project.listMembers.queryOptions({ input: { projectId } }),
+          orpc.project.listMembers.queryOptions({ input: { projectId } })
         );
         queryClient.invalidateQueries(orpc.project.list.queryOptions());
         toast.success("Member removed.");
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   return (
     <div className="space-y-4">
       {isAdmin && (
         <div className="flex justify-end">
-          <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
+          <Button
+            size="sm"
+            onClick={() => setAddOpen(true)}
+            className="gap-1.5"
+          >
             <UserPlus className="size-4" />
             Add Member
           </Button>
@@ -76,17 +86,25 @@ export function ProjectMembersTab({ projectId, managerId, members }: ProjectMemb
                 <TableCell>
                   <div>
                     <p className="font-medium">{member.fullName}</p>
-                    <p className="text-muted-foreground text-xs">{member.email}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {member.email}
+                    </p>
                   </div>
                 </TableCell>
                 <TableCell>{member.position}</TableCell>
                 <TableCell>
-                  <Badge variant={member.status === "ACTIVE" ? "default" : "secondary"}>
+                  <Badge
+                    variant={
+                      member.status === "ACTIVE" ? "default" : "secondary"
+                    }
+                  >
                     {member.status}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {member.id === managerId && <Badge variant="outline">Manager</Badge>}
+                  {member.id === managerId && (
+                    <Badge variant="outline">Manager</Badge>
+                  )}
                 </TableCell>
                 {isAdmin && (
                   <TableCell>
@@ -97,8 +115,8 @@ export function ProjectMembersTab({ projectId, managerId, members }: ProjectMemb
                       disabled={removeMutation.isPending}
                       onClick={() =>
                         removeMutation.mutate({
-                          projectId,
                           employeeId: member.id,
+                          projectId,
                         })
                       }
                     >

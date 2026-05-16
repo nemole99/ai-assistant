@@ -1,5 +1,6 @@
-import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Plus } from "lucide-react";
+
 import { useDepartments } from "./departments-provider";
 
 export function DepartmentsPrimaryButtons() {

@@ -1,7 +1,11 @@
-import { CircleQuestionMark } from "lucide-react";
-import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover";
+import { cn } from "@workspace/ui/lib/utils";
+import { CircleQuestionMark } from "lucide-react";
 
 type LearnMoreProps = Omit<React.ComponentProps<typeof Popover>, "children"> & {
   children?: React.ReactNode;
@@ -9,7 +13,12 @@ type LearnMoreProps = Omit<React.ComponentProps<typeof Popover>, "children"> & {
   triggerProps?: React.ComponentProps<typeof PopoverTrigger>;
 };
 
-export function LearnMore({ children, contentProps, triggerProps, ...props }: LearnMoreProps) {
+export function LearnMore({
+  children,
+  contentProps,
+  triggerProps,
+  ...props
+}: LearnMoreProps) {
   return (
     <Popover {...props}>
       <PopoverTrigger

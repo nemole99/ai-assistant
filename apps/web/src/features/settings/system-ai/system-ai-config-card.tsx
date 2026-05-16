@@ -1,15 +1,14 @@
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
-import { orpc } from "@/lib/orpc";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@workspace/ui/components/field";
+import { Input } from "@workspace/ui/components/input";
 import {
   Select,
   SelectContent,
@@ -17,10 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Badge } from "@workspace/ui/components/badge";
-import { toast } from "sonner";
-import { useState } from "react";
 import { CheckCircle, XCircle, Loader2, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { orpc } from "@/lib/orpc";
 
 type Purpose = "pipeline_text" | "pipeline_embedding";
 
@@ -31,17 +32,17 @@ interface SystemAIConfigCardProps {
 }
 
 const PROVIDER_OPTIONS = [
-  { value: "openai", label: "OpenAI / LM Studio" },
-  { value: "anthropic", label: "Anthropic" },
-  { value: "google", label: "Google (Gemini)" },
-  { value: "ollama", label: "Ollama (local)" },
+  { label: "OpenAI / LM Studio", value: "openai" },
+  { label: "Anthropic", value: "anthropic" },
+  { label: "Google (Gemini)", value: "google" },
+  { label: "Ollama (local)", value: "ollama" },
 ];
 
 const configFormSchema = z.object({
-  providerType: z.string().min(1, "Provider is required."),
-  modelId: z.string().min(1, "Model ID is required."),
   apiKey: z.string(),
   baseUrl: z.string(),
+  modelId: z.string().min(1, "Model ID is required."),
+  providerType: z.string().min(1, "Provider is required."),
 });
 
 type ConfigFormValues = z.infer<typeof configFormSchema>;
@@ -61,36 +62,39 @@ export function SystemAIConfigCard({
 
   const upsertMutation = useMutation(
     orpc.systemAiConfig.upsert.mutationOptions({
-      onSuccess: () => {
-        toast.success(`${title} configuration saved`);
-        queryClient.invalidateQueries(
-          orpc.systemAiConfig.get.queryOptions({ input: { purpose } }),
-        );
-        setEditing(false);
-      },
       onError: (err) => {
         toast.error(`Failed to save: ${err.message}`);
       },
-    }),
+      onSuccess: () => {
+        toast.success(`${title} configuration saved`);
+        queryClient.invalidateQueries(
+          orpc.systemAiConfig.get.queryOptions({ input: { purpose } })
+        );
+        setEditing(false);
+      },
+    })
   );
 
   const deleteMutation = useMutation(
     orpc.systemAiConfig.delete.mutationOptions({
-      onSuccess: () => {
-        toast.success(`${title} configuration removed`);
-        queryClient.invalidateQueries(
-          orpc.systemAiConfig.get.queryOptions({ input: { purpose } }),
-        );
-        setEditing(false);
-      },
       onError: (err) => {
         toast.error(`Failed to delete: ${err.message}`);
       },
-    }),
+      onSuccess: () => {
+        toast.success(`${title} configuration removed`);
+        queryClient.invalidateQueries(
+          orpc.systemAiConfig.get.queryOptions({ input: { purpose } })
+        );
+        setEditing(false);
+      },
+    })
   );
 
   const testMutation = useMutation(
     orpc.systemAiConfig.testConnection.mutationOptions({
+      onError: (err) => {
+        toast.error(`Test failed: ${err.message}`);
+      },
       onSuccess: (result) => {
         if (result.ok) {
           toast.success("Connection successful!");
@@ -98,19 +102,30 @@ export function SystemAIConfigCard({
           toast.error(`Connection failed: ${result.error}`);
         }
       },
-      onError: (err) => {
-        toast.error(`Test failed: ${err.message}`);
-      },
-    }),
+    })
   );
 
   const form = useForm({
     defaultValues: {
-      providerType: config?.providerType ?? "openai",
-      modelId: config?.modelId ?? "",
       apiKey: "",
       baseUrl: config?.baseUrl ?? "",
+      modelId: config?.modelId ?? "",
+      providerType: config?.providerType ?? "openai",
     } satisfies ConfigFormValues,
+    onSubmit: ({ value }) => {
+      upsertMutation.mutate({
+        apiKey:
+          value.apiKey ||
+          (value.providerType === "ollama" ? "local" : "KEEP_EXISTING"),
+        baseUrl:
+          value.providerType === "ollama"
+            ? value.baseUrl || "http://localhost:11434/"
+            : null,
+        modelId: value.modelId,
+        providerType: value.providerType,
+        purpose,
+      });
+    },
     validators: {
       onSubmit: configFormSchema.superRefine((data, ctx) => {
         if (!data.apiKey && !config && data.providerType !== "ollama") {
@@ -122,28 +137,14 @@ export function SystemAIConfigCard({
         }
       }),
     },
-    onSubmit: async ({ value }) => {
-      upsertMutation.mutate({
-        purpose,
-        providerType: value.providerType,
-        apiKey:
-          value.apiKey ||
-          (value.providerType === "ollama" ? "local" : "KEEP_EXISTING"),
-        modelId: value.modelId,
-        baseUrl:
-          value.providerType === "ollama"
-            ? value.baseUrl || "http://localhost:11434/"
-            : null,
-      });
-    },
   });
 
   const handleStartEdit = () => {
     form.reset({
-      providerType: config?.providerType ?? "openai",
-      modelId: config?.modelId ?? "",
       apiKey: "",
       baseUrl: config?.baseUrl ?? "",
+      modelId: config?.modelId ?? "",
+      providerType: config?.providerType ?? "openai",
     });
     setEditing(true);
   };
@@ -259,7 +260,7 @@ export function SystemAIConfigCard({
                           ) {
                             form.setFieldValue(
                               "baseUrl",
-                              "http://localhost:11434/",
+                              "http://localhost:11434/"
                             );
                           }
                         }
@@ -320,8 +321,7 @@ export function SystemAIConfigCard({
                     name="apiKey"
                     children={(field) => {
                       const isInvalid =
-                        field.state.meta.isTouched &&
-                        !field.state.meta.isValid;
+                        field.state.meta.isTouched && !field.state.meta.isValid;
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel>
@@ -343,9 +343,7 @@ export function SystemAIConfigCard({
                             }
                             value={field.state.value}
                             onBlur={field.handleBlur}
-                            onChange={(e) =>
-                              field.handleChange(e.target.value)
-                            }
+                            onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={isInvalid}
                           />
                           {isInvalid && (

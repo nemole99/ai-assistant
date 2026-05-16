@@ -1,13 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Tag, FileText } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
+import { Plus, Tag, FileText } from "lucide-react";
+
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { orpc } from "@/lib/orpc";
+
 import { DocumentsDialogs } from "./components/documents-dialogs";
 import { DocumentsEmptyState } from "./components/documents-empty-state";
-import { DocumentsProvider, useDocuments } from "./components/documents-provider";
+import {
+  DocumentsProvider,
+  useDocuments,
+} from "./components/documents-provider";
 import { DocumentsTable } from "./components/documents-table";
 
 function AdminDocumentsInner() {
@@ -16,7 +21,7 @@ function AdminDocumentsInner() {
     ...orpc.document.list.queryOptions(),
     refetchInterval: (query) => {
       const hasProcessing = query.state.data?.some(
-        (doc) => doc.status === "PENDING" || doc.status === "INGESTING",
+        (doc) => doc.status === "PENDING" || doc.status === "INGESTING"
       );
       return hasProcessing ? 5000 : false;
     },
@@ -30,7 +35,9 @@ function AdminDocumentsInner() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Documents</h2>
-            <p className="text-muted-foreground">Upload and manage company documents.</p>
+            <p className="text-muted-foreground">
+              Upload and manage company documents.
+            </p>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => setOpen("upload")}>
@@ -69,7 +76,7 @@ function AdminDocumentsInner() {
 
         {isLoading ? (
           <Loader />
-        ) : documents.length === 0 ? (
+        ) : (documents.length === 0 ? (
           <DocumentsEmptyState
             icon={<FileText />}
             title="No documents yet"
@@ -83,7 +90,7 @@ function AdminDocumentsInner() {
           />
         ) : (
           <DocumentsTable data={documents} />
-        )}
+        ))}
 
         <DocumentsDialogs />
       </div>

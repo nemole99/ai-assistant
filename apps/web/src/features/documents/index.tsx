@@ -1,9 +1,5 @@
-import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { format } from "date-fns";
-import { BookOpen, Search } from "lucide-react";
-import { Input } from "@workspace/ui/components/input";
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Empty,
@@ -13,18 +9,27 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
+import { Input } from "@workspace/ui/components/input";
+import { cn } from "@workspace/ui/lib/utils";
+import { format } from "date-fns";
+import { BookOpen, Search } from "lucide-react";
+import { useRef, useState } from "react";
+
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { orpc } from "@/lib/orpc";
-import { cn } from "@workspace/ui/lib/utils";
 
 export function Documents() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
-  const { data: categories = [] } = useQuery(orpc.documentCategory.list.queryOptions());
+  const { data: categories = [] } = useQuery(
+    orpc.documentCategory.list.queryOptions()
+  );
 
   const { data: documents = [], isLoading } = useQuery(
     orpc.document.list.queryOptions({
@@ -32,7 +37,7 @@ export function Documents() {
         categoryId: selectedCategoryId ?? undefined,
         query: debouncedSearch || undefined,
       },
-    }),
+    })
   );
 
   function handleSearchChange(value: string) {
@@ -45,7 +50,9 @@ export function Documents() {
     <ContentLayout>
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Documents</h2>
-        <p className="text-muted-foreground">Company-wide documents, policies, and guidelines.</p>
+        <p className="text-muted-foreground">
+          Company-wide documents, policies, and guidelines.
+        </p>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -68,7 +75,7 @@ export function Documents() {
             "rounded-full border px-3 py-1 text-sm transition-colors",
             selectedCategoryId === null
               ? "bg-primary text-primary-foreground border-transparent"
-              : "hover:bg-accent",
+              : "hover:bg-accent"
           )}
         >
           All
@@ -77,18 +84,29 @@ export function Documents() {
           <button
             key={cat.id}
             type="button"
-            onClick={() => setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)}
+            onClick={() =>
+              setSelectedCategoryId(
+                selectedCategoryId === cat.id ? null : cat.id
+              )
+            }
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors",
-              selectedCategoryId === cat.id ? "border-transparent" : "hover:bg-accent",
+              selectedCategoryId === cat.id
+                ? "border-transparent"
+                : "hover:bg-accent"
             )}
             style={
-              selectedCategoryId === cat.id ? { backgroundColor: cat.color, color: "white" } : {}
+              selectedCategoryId === cat.id
+                ? { backgroundColor: cat.color, color: "white" }
+                : {}
             }
           >
             <span
               className="size-2 rounded-full"
-              style={{ backgroundColor: selectedCategoryId === cat.id ? "white" : cat.color }}
+              style={{
+                backgroundColor:
+                  selectedCategoryId === cat.id ? "white" : cat.color,
+              }}
             />
             {cat.name}
           </button>
@@ -97,7 +115,7 @@ export function Documents() {
 
       {isLoading ? (
         <Loader />
-      ) : documents.length === 0 ? (
+      ) : (documents.length === 0 ? (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -136,7 +154,9 @@ export function Documents() {
               className="hover:bg-accent group border p-4 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
-                <h3 className="font-medium leading-tight group-hover:underline">{doc.title}</h3>
+                <h3 className="font-medium leading-tight group-hover:underline">
+                  {doc.title}
+                </h3>
                 <span
                   className="mt-0.5 size-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: doc.category.color }}
@@ -144,7 +164,9 @@ export function Documents() {
                 />
               </div>
               {doc.description && (
-                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">{doc.description}</p>
+                <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+                  {doc.description}
+                </p>
               )}
               <div className="text-muted-foreground mt-3 flex items-center gap-2 text-xs">
                 <Badge variant="outline" className="text-xs">
@@ -155,7 +177,7 @@ export function Documents() {
             </Link>
           ))}
         </div>
-      )}
+      ))}
     </ContentLayout>
   );
 }

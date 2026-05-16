@@ -1,13 +1,15 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import { Markdown } from "@workspace/ui/components/markdown";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import { format } from "date-fns";
 import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@workspace/ui/components/button";
-import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Markdown } from "@workspace/ui/components/markdown";
+
 import { ContentLayout } from "@/components/layout/content-layout";
 import { orpc } from "@/lib/orpc";
+
 import { DocumentCategoryBadge } from "./components/document-category-badge";
 
 function DocumentReaderSkeleton() {
@@ -35,14 +37,16 @@ export function DocumentReader({ id }: { id: string }) {
 
   const downloadUrlMutation = useMutation(
     orpc.document.getDownloadUrl.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: ({ url }) => {
         window.location.assign(url);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
-  if (isLoading) return <DocumentReaderSkeleton />;
+  if (isLoading) {
+    return <DocumentReaderSkeleton />;
+  }
 
   if (isError || !doc) {
     return (
@@ -73,7 +77,9 @@ export function DocumentReader({ id }: { id: string }) {
             <DocumentCategoryBadge category={doc.category} />
             <span>{format(new Date(doc.createdAt), "dd MMM yyyy")}</span>
           </div>
-          {doc.description && <p className="text-muted-foreground text-sm">{doc.description}</p>}
+          {doc.description && (
+            <p className="text-muted-foreground text-sm">{doc.description}</p>
+          )}
         </div>
         <Button
           variant="outline"

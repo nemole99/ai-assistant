@@ -1,13 +1,13 @@
-import { db } from "@workspace/db";
-import { aiProvider } from "@workspace/db/schema/auth";
-import { encrypt, decrypt } from "@workspace/db/crypto";
-import { env } from "@workspace/env/server";
 import { ORPCError } from "@orpc/server";
+import { db } from "@workspace/db";
+import { encrypt, decrypt } from "@workspace/db/crypto";
+import { aiProvider } from "@workspace/db/schema/auth";
+import { env } from "@workspace/env/server";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
-import { protectedProcedure } from "../index";
 import { getCopilotSession } from "../copilot-session-cache";
+import { protectedProcedure } from "../index";
 
 const DEVICE_CODE_URL = "https://github.com/login/device/code";
 const ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
@@ -18,12 +18,12 @@ const GITHUB_USER_URL = "https://api.github.com/user";
 export const startDeviceFlow = protectedProcedure
   .output(
     z.object({
-      userCode: z.string(),
-      verificationUri: z.string(),
       deviceCode: z.string(),
       expiresIn: z.number(),
       interval: z.number(),
-    }),
+      userCode: z.string(),
+      verificationUri: z.string(),
+    })
   )
   .handler(async () => {
     const body = new URLSearchParams({
@@ -32,12 +32,12 @@ export const startDeviceFlow = protectedProcedure
     });
 
     const res = await fetch(DEVICE_CODE_URL, {
-      method: "POST",
+      body,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body,
+      method: "POST",
     });
 
     const data = (await res.json()) as {
@@ -52,16 +52,19 @@ export const startDeviceFlow = protectedProcedure
 
     if (!res.ok || data.error || !data.device_code) {
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: data.error_description ?? data.error ?? "Failed to start GitHub device flow",
+        message:
+          data.error_description ??
+          data.error ??
+          "Failed to start GitHub device flow",
       });
     }
 
     return {
       deviceCode: data.device_code,
-      userCode: data.user_code!,
-      verificationUri: data.verification_uri!,
       expiresIn: data.expires_in!,
       interval: data.interval!,
+      userCode: data.user_code!,
+      verificationUri: data.verification_uri!,
     };
   });
 
@@ -73,12 +76,12 @@ export const pollDeviceFlow = protectedProcedure
     z.discriminatedUnion("status", [
       z.object({ status: z.literal("pending") }),
       z.object({
+        avatarUrl: z.string(),
         status: z.literal("success"),
         username: z.string(),
-        avatarUrl: z.string(),
       }),
-      z.object({ status: z.literal("error"), message: z.string() }),
-    ]),
+      z.object({ message: z.string(), status: z.literal("error") }),
+    ])
   )
   .handler(async ({ input, context }) => {
     const body = new URLSearchParams({
@@ -88,16 +91,16 @@ export const pollDeviceFlow = protectedProcedure
     });
 
     const res = await fetch(ACCESS_TOKEN_URL, {
-      method: "POST",
+      body,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body,
+      method: "POST",
     });
 
     if (!res.ok) {
-      return { status: "error" as const, message: "Failed to poll GitHub" };
+      return { message: "Failed to poll GitHub", status: "error" as const };
     }
 
     const data = (await res.json()) as {
@@ -111,23 +114,23 @@ export const pollDeviceFlow = protectedProcedure
 
     if (data.error || !data.access_token) {
       return {
-        status: "error" as const,
         message: data.error ?? "Unknown error",
+        status: "error" as const,
       };
     }
 
     // Fetch GitHub user info
     const userRes = await fetch(GITHUB_USER_URL, {
       headers: {
-        Authorization: `Bearer ${data.access_token}`,
         Accept: "application/json",
+        Authorization: `Bearer ${data.access_token}`,
       },
     });
 
     if (!userRes.ok) {
       return {
-        status: "error" as const,
         message: "Failed to fetch GitHub user info",
+        status: "error" as const,
       };
     }
 
@@ -143,33 +146,33 @@ export const pollDeviceFlow = protectedProcedure
     await db
       .insert(aiProvider)
       .values({
-        id: crypto.randomUUID(),
-        userId,
-        provider: "github_copilot",
-        encryptedToken,
-        metadata: {
-          username: githubUser.login,
-          avatarUrl: githubUser.avatar_url,
-        },
         createdAt: now,
+        encryptedToken,
+        id: crypto.randomUUID(),
+        metadata: {
+          avatarUrl: githubUser.avatar_url,
+          username: githubUser.login,
+        },
+        provider: "github_copilot",
         updatedAt: now,
+        userId,
       })
       .onConflictDoUpdate({
-        target: [aiProvider.userId, aiProvider.provider],
         set: {
           encryptedToken,
           metadata: {
-            username: githubUser.login,
             avatarUrl: githubUser.avatar_url,
+            username: githubUser.login,
           },
           updatedAt: now,
         },
+        target: [aiProvider.userId, aiProvider.provider],
       });
 
     return {
+      avatarUrl: githubUser.avatar_url,
       status: "success" as const,
       username: githubUser.login,
-      avatarUrl: githubUser.avatar_url,
     };
   });
 
@@ -179,7 +182,7 @@ export const disconnect = protectedProcedure
   .input(
     z.object({
       provider: z.enum(["github_copilot", "openai", "google", "anthropic"]),
-    }),
+    })
   )
   .handler(async ({ input, context }) => {
     await db
@@ -187,8 +190,8 @@ export const disconnect = protectedProcedure
       .where(
         and(
           eq(aiProvider.userId, context.session.user.id),
-          eq(aiProvider.provider, input.provider),
-        ),
+          eq(aiProvider.provider, input.provider)
+        )
       );
     return { success: true };
   });
@@ -196,11 +199,11 @@ export const disconnect = protectedProcedure
 // --- List ---
 
 const aiProviderPublicSchema = z.object({
+  avatarUrl: z.string().nullable(),
+  connectedAt: z.string(),
   id: z.string(),
   provider: z.enum(["github_copilot", "openai", "google", "anthropic"]),
   username: z.string().nullable(),
-  avatarUrl: z.string().nullable(),
-  connectedAt: z.string(),
 });
 
 export const list = protectedProcedure
@@ -212,11 +215,11 @@ export const list = protectedProcedure
       .where(eq(aiProvider.userId, context.session.user.id));
 
     return rows.map((row) => ({
+      avatarUrl: row.metadata?.avatarUrl ?? null,
+      connectedAt: row.createdAt.toISOString(),
       id: row.id,
       provider: row.provider,
       username: row.metadata?.username ?? null,
-      avatarUrl: row.metadata?.avatarUrl ?? null,
-      connectedAt: row.createdAt.toISOString(),
     }));
   });
 
@@ -226,10 +229,17 @@ export async function getGitHubToken(userId: string): Promise<string | null> {
   const rows = await db
     .select({ encryptedToken: aiProvider.encryptedToken })
     .from(aiProvider)
-    .where(and(eq(aiProvider.userId, userId), eq(aiProvider.provider, "github_copilot")))
+    .where(
+      and(
+        eq(aiProvider.userId, userId),
+        eq(aiProvider.provider, "github_copilot")
+      )
+    )
     .limit(1);
 
-  if (!rows[0]) return null;
+  if (!rows[0]) {
+    return null;
+  }
   return decrypt(rows[0].encryptedToken);
 }
 
@@ -249,7 +259,8 @@ export const listModels = protectedProcedure
 
     // Fetch Local AI models if configured
     if (env.OLLAMA_BASE_URL) {
-      let fetchedModels: { id: string; name: string; provider: string }[] = [];
+      const fetchedModels: { id: string; name: string; provider: string }[] =
+        [];
       try {
         const res = await fetch(`${env.OLLAMA_BASE_URL}/api/tags`);
         if (res.ok) {
@@ -260,11 +271,11 @@ export const listModels = protectedProcedure
                 id: `ollama:${m.name}`,
                 name: m.name,
                 provider: "Local AI",
-              })),
+              }))
             );
           }
         }
-      } catch (err) {
+      } catch {
         // Ignore and try fallback
       }
 
@@ -279,12 +290,12 @@ export const listModels = protectedProcedure
                   id: `ollama:${m.id}`,
                   name: m.id,
                   provider: "Local AI",
-                })),
+                }))
               );
             }
           }
-        } catch (err) {
-          console.error("Failed to fetch local AI models:", err);
+        } catch (error) {
+          console.error("Failed to fetch local AI models:", error);
         }
       }
 
@@ -301,9 +312,9 @@ export const listModels = protectedProcedure
     if (session) {
       const res = await fetch(`${session.endpoint}/models`, {
         headers: {
+          Accept: "application/json",
           Authorization: `Bearer ${session.token}`,
           "Copilot-Integration-Id": "vscode-chat",
-          Accept: "application/json",
         },
       });
 
@@ -333,9 +344,9 @@ export const listModels = protectedProcedure
   });
 
 export const aiProviderRouter = {
-  startDeviceFlow,
-  pollDeviceFlow,
   disconnect,
   list,
   listModels,
+  pollDeviceFlow,
+  startDeviceFlow,
 };

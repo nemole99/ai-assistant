@@ -1,17 +1,21 @@
-import { useState, useEffect, useRef } from "react";
-import { type Table } from "@tanstack/react-table";
-import { X } from "lucide-react";
-import { cn } from "@workspace/ui/lib/utils";
+import type { Table } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import { cn } from "@workspace/ui/lib/utils";
+import { X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
-type DataTableBulkActionsProps<TData> = {
+interface DataTableBulkActionsProps<TData> {
   table: Table<TData>;
   entityName: string;
   children: React.ReactNode;
-};
+}
 
 /**
  * A modular toolbar for displaying bulk actions when table rows are selected.
@@ -55,10 +59,12 @@ export function DataTableBulkActions<TData>({
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const buttons = toolbarRef.current?.querySelectorAll("button");
-    if (!buttons) return;
+    if (!buttons) {
+      return;
+    }
 
-    const currentIndex = Array.from(buttons).findIndex(
-      (button) => button === document.activeElement,
+    const currentIndex = [...buttons].indexOf(
+      document.activeElement as HTMLButtonElement
     );
 
     switch (event.key) {
@@ -70,18 +76,21 @@ export function DataTableBulkActions<TData>({
       }
       case "ArrowLeft": {
         event.preventDefault();
-        const prevIndex = currentIndex === 0 ? buttons.length - 1 : currentIndex - 1;
+        const prevIndex =
+          currentIndex === 0 ? buttons.length - 1 : currentIndex - 1;
         buttons[prevIndex]?.focus();
         break;
       }
-      case "Home":
+      case "Home": {
         event.preventDefault();
         buttons[0]?.focus();
         break;
-      case "End":
+      }
+      case "End": {
         event.preventDefault();
-        buttons[buttons.length - 1]?.focus();
+        [...buttons].at(-1)?.focus();
         break;
+      }
       case "Escape": {
         // Check if the Escape key came from a dropdown trigger or content
         // We can't check dropdown state because Radix UI closes it before our handler runs
@@ -90,8 +99,8 @@ export function DataTableBulkActions<TData>({
 
         // Check if the event target or currently focused element is a dropdown trigger
         const isFromDropdownTrigger =
-          target?.getAttribute("data-slot") === "dropdown-menu-trigger" ||
-          activeElement?.getAttribute("data-slot") === "dropdown-menu-trigger" ||
+          target.dataset.slot === "dropdown-menu-trigger" ||
+          activeElement.dataset.slot === "dropdown-menu-trigger" ||
           target?.closest('[data-slot="dropdown-menu-trigger"]') ||
           activeElement?.closest('[data-slot="dropdown-menu-trigger"]');
 
@@ -120,7 +129,12 @@ export function DataTableBulkActions<TData>({
   return (
     <>
       {/* Live region for screen reader announcements */}
-      <div aria-live="polite" aria-atomic="true" className="sr-only" role="status">
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        role="status"
+      >
         {announcement}
       </div>
 
@@ -134,7 +148,7 @@ export function DataTableBulkActions<TData>({
         className={cn(
           "fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl",
           "transition-all delay-100 duration-300 ease-out hover:scale-105",
-          "focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+          "focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
         )}
       >
         <div
@@ -142,7 +156,7 @@ export function DataTableBulkActions<TData>({
             "p-2 shadow-xl",
             "rounded-xl border",
             "bg-background/95 backdrop-blur-lg supports-backdrop-filter:bg-background/60",
-            "flex items-center gap-x-2",
+            "flex items-center gap-x-2"
           )}
         >
           <Tooltip>
@@ -166,9 +180,16 @@ export function DataTableBulkActions<TData>({
             </TooltipContent>
           </Tooltip>
 
-          <Separator className="h-5" orientation="vertical" aria-hidden="true" />
+          <Separator
+            className="h-5"
+            orientation="vertical"
+            aria-hidden="true"
+          />
 
-          <div className="flex items-center gap-x-1 text-sm" id="bulk-actions-description">
+          <div
+            className="flex items-center gap-x-1 text-sm"
+            id="bulk-actions-description"
+          >
             <Badge
               variant="default"
               className="min-w-8 rounded-lg"
@@ -183,7 +204,11 @@ export function DataTableBulkActions<TData>({
             selected
           </div>
 
-          <Separator className="h-5" orientation="vertical" aria-hidden="true" />
+          <Separator
+            className="h-5"
+            orientation="vertical"
+            aria-hidden="true"
+          />
 
           {children}
         </div>

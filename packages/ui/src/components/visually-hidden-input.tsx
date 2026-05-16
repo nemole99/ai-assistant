@@ -14,12 +14,22 @@ interface VisuallyHiddenInputProps<T = InputValue> extends Omit<
   bubbles?: boolean;
 }
 
-function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>) {
-  const { control, value, checked, bubbles = true, type = "hidden", style, ...inputProps } = props;
+function VisuallyHiddenInput<T = InputValue>(
+  props: VisuallyHiddenInputProps<T>
+) {
+  const {
+    control,
+    value,
+    checked,
+    bubbles = true,
+    type = "hidden",
+    style,
+    ...inputProps
+  } = props;
 
   const isCheckInput = React.useMemo(
     () => type === "checkbox" || type === "radio" || type === "switch",
-    [type],
+    [type]
   );
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -27,8 +37,8 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
     value: T | boolean | undefined;
     previous: T | boolean | undefined;
   }>({
-    value: isCheckInput ? checked : value,
     previous: isCheckInput ? checked : value,
+    value: isCheckInput ? checked : value,
   });
 
   const prevValue = React.useMemo(() => {
@@ -52,24 +62,32 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
     }
 
     setControlSize({
-      width: control.offsetWidth,
       height: control.offsetHeight,
+      width: control.offsetWidth,
     });
 
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     const resizeObserver = new ResizeObserver((entries) => {
-      if (!Array.isArray(entries) || !entries.length) return;
+      if (!Array.isArray(entries) || !entries.length) {
+        return;
+      }
 
       const entry = entries[0];
-      if (!entry) return;
+      if (!entry) {
+        return;
+      }
 
       let width: number;
       let height: number;
 
       if ("borderBoxSize" in entry) {
         const borderSizeEntry = entry.borderBoxSize;
-        const borderSize = Array.isArray(borderSizeEntry) ? borderSizeEntry[0] : borderSizeEntry;
+        const borderSize = Array.isArray(borderSizeEntry)
+          ? borderSizeEntry[0]
+          : borderSizeEntry;
         width = borderSize.inlineSize;
         height = borderSize.blockSize;
       } else {
@@ -77,7 +95,7 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
         height = control.offsetHeight;
       }
 
-      setControlSize({ width, height });
+      setControlSize({ height, width });
     });
 
     resizeObserver.observe(control, { box: "border-box" });
@@ -88,7 +106,9 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
 
   React.useEffect(() => {
     const input = inputRef.current;
-    if (!input) return;
+    if (!input) {
+      return;
+    }
 
     const inputProto = window.HTMLInputElement.prototype;
     const propertyKey = isCheckInput ? "checked" : "value";
@@ -97,9 +117,9 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
 
     const serializedCurrentValue = isCheckInput
       ? checked
-      : typeof value === "object" && value !== null
+      : (typeof value === "object" && value !== null
         ? JSON.stringify(value)
-        : value;
+        : value);
 
     const descriptor = Object.getOwnPropertyDescriptor(inputProto, propertyKey);
 
@@ -112,10 +132,12 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
     }
   }, [prevValue, value, checked, bubbles, isCheckInput]);
 
-  const composedStyle = React.useMemo<React.CSSProperties>(() => {
-    return {
+  const composedStyle = React.useMemo<React.CSSProperties>(
+    () => ({
       ...style,
-      ...(controlSize.width !== undefined && controlSize.height !== undefined ? controlSize : {}),
+      ...(controlSize.width !== undefined && controlSize.height !== undefined
+        ? controlSize
+        : {}),
       border: 0,
       clip: "rect(0 0 0 0)",
       clipPath: "inset(50%)",
@@ -126,8 +148,9 @@ function VisuallyHiddenInput<T = InputValue>(props: VisuallyHiddenInputProps<T>)
       position: "absolute",
       whiteSpace: "nowrap",
       width: "1px",
-    };
-  }, [style, controlSize]);
+    }),
+    [style, controlSize]
+  );
 
   return (
     <input

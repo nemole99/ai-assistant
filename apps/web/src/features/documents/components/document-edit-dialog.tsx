@@ -1,7 +1,5 @@
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -11,24 +9,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { SelectDropdown } from "@/components/select-dropdown";
 import { orpc } from "@/lib/orpc";
-import { type Document } from "../data/schema";
+
+import type { Document } from "../data/schema";
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string(),
   categoryId: z.string().min(1, "Category is required"),
+  description: z.string(),
+  title: z.string().min(1, "Title is required"),
 });
 
-type Props = {
+interface Props {
   document: Document;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
 export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
   const queryClient = useQueryClient();
@@ -40,30 +47,30 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
 
   const updateMutation = useMutation(
     orpc.document.update.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.document.list.queryOptions());
         toast.success("Document updated.");
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const form = useForm({
     defaultValues: {
-      title: document.title,
-      description: document.description ?? "",
       categoryId: document.categoryId,
+      description: document.description ?? "",
+      title: document.title,
     },
-    validators: { onSubmit: formSchema },
     onSubmit: ({ value }) => {
       updateMutation.mutate({
+        categoryId: value.categoryId,
+        description: value.description || undefined,
         id: document.id,
         title: value.title,
-        description: value.description || undefined,
-        categoryId: value.categoryId,
       });
     },
+    validators: { onSubmit: formSchema },
   });
 
   const categoryOptions = categories.map((c) => ({
@@ -97,7 +104,8 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
             <form.Field
               name="title"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Title</FieldLabel>
@@ -108,7 +116,9 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
                       onChange={(e) => field.handleChange(e.target.value)}
                       autoComplete="off"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -116,7 +126,8 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
             <form.Field
               name="categoryId"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel>Category</FieldLabel>
@@ -126,7 +137,9 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
                       placeholder="Select a category"
                       items={categoryOptions}
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -137,7 +150,9 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
                 <Field>
                   <FieldLabel>
                     Description{" "}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
+                    <span className="text-muted-foreground font-normal">
+                      (optional)
+                    </span>
                   </FieldLabel>
                   <Textarea
                     value={field.state.value}
@@ -155,7 +170,11 @@ export function DocumentEditDialog({ document, open, onOpenChange }: Props) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="submit" form="edit-doc-form" disabled={updateMutation.isPending}>
+          <Button
+            type="submit"
+            form="edit-doc-form"
+            disabled={updateMutation.isPending}
+          >
             {updateMutation.isPending ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>

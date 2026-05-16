@@ -1,6 +1,7 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { Loader2 } from "lucide-react";
-import { type DocumentStatus } from "../data/schema";
+
+import type { DocumentStatus } from "../data/schema";
 
 const statusConfig: Record<
   DocumentStatus,
@@ -10,16 +11,19 @@ const statusConfig: Record<
     spinning?: boolean;
   }
 > = {
-  PENDING: { label: "Processing", variant: "secondary", spinning: true },
   COMPLETED: { label: "Ready", variant: "default" },
   FAILED: { label: "Failed", variant: "destructive" },
-  INGESTING: { label: "Ingesting", variant: "secondary", spinning: true },
   INGESTED: { label: "Ingested", variant: "default" },
+  INGESTING: { label: "Ingesting", spinning: true, variant: "secondary" },
   INGEST_FAILED: { label: "Ingest Failed", variant: "destructive" },
+  PENDING: { label: "Processing", spinning: true, variant: "secondary" },
 };
 
 export function DocumentStatusBadge({ status }: { status: DocumentStatus }) {
-  const config = statusConfig[status] ?? { label: status, variant: "outline" as const };
+  const config = statusConfig[status] ?? {
+    label: status,
+    variant: "outline" as const,
+  };
   return (
     <Badge variant={config.variant} className="gap-1">
       {config.spinning && <Loader2 size={10} className="animate-spin" />}

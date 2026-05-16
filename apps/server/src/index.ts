@@ -8,11 +8,12 @@ import { appRouter } from "@workspace/api/routers/index";
 import { auth } from "@workspace/auth";
 import { db } from "@workspace/db";
 import { user } from "@workspace/db/schema/auth";
-import { eq } from "drizzle-orm";
 import { env } from "@workspace/env/server";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+
 import { aiRoutes } from "./routes/ai";
 
 const app = new Hono();
@@ -21,25 +22,25 @@ app.use(logger());
 app.use(
   "/*",
   cors({
-    origin: env.CORS_ORIGIN,
-    allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["X-Wiki-Citations"],
+    allowMethods: ["GET", "POST", "OPTIONS"],
     credentials: true,
-  }),
+    exposeHeaders: ["X-Wiki-Citations"],
+    origin: env.CORS_ORIGIN,
+  })
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
-  plugins: [
-    new OpenAPIReferencePlugin({
-      schemaConverters: [new ZodToJsonSchemaConverter()],
-    }),
-  ],
   interceptors: [
     onError((error) => {
       console.error(error);
+    }),
+  ],
+  plugins: [
+    new OpenAPIReferencePlugin({
+      schemaConverters: [new ZodToJsonSchemaConverter()],
     }),
   ],
 });
@@ -56,8 +57,8 @@ app.use("/*", async (c, next) => {
   const context = await createContext({ context: c });
 
   const rpcResult = await rpcHandler.handle(c.req.raw, {
+    context,
     prefix: "/rpc",
-    context: context,
   });
 
   if (rpcResult.matched) {
@@ -65,8 +66,8 @@ app.use("/*", async (c, next) => {
   }
 
   const apiResult = await apiHandler.handle(c.req.raw, {
+    context,
     prefix: "/api-reference",
-    context: context,
   });
 
   if (apiResult.matched) {
@@ -78,9 +79,7 @@ app.use("/*", async (c, next) => {
 
 app.route("/ai", aiRoutes);
 
-app.get("/", (c) => {
-  return c.text("OK");
-});
+app.get("/", (c) => c.text("OK"));
 
 // Auto-seed admin account on startup if none exists
 async function ensureAdminExists() {
@@ -90,13 +89,15 @@ async function ensureAdminExists() {
     .where(eq(user.role, "ADMIN"))
     .limit(1);
 
-  if (existing.length > 0) return;
+  if (existing.length > 0) {
+    return;
+  }
 
   const result = await auth.api.signUpEmail({
     body: {
       email: env.ADMIN_EMAIL,
-      password: env.ADMIN_PASSWORD,
       name: "Admin",
+      password: env.ADMIN_PASSWORD,
     },
   });
 
@@ -107,13 +108,15 @@ async function ensureAdminExists() {
 
   await db
     .update(user)
-    .set({ role: "ADMIN", mustChangePassword: false })
+    .set({ mustChangePassword: false, role: "ADMIN" })
     .where(eq(user.id, result.user.id));
 
   console.log(`✅ Admin account created: ${env.ADMIN_EMAIL}`);
 }
 
-ensureAdminExists().catch((err) => console.error("❌ ensureAdminExists failed:", err));
+ensureAdminExists().catch((error) =>
+  console.error("❌ ensureAdminExists failed:", error)
+);
 
 export default {
   fetch: app.fetch,

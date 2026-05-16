@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+
 import { getCookie, setCookie } from "@/lib/cookies";
 
 export type Collapsible = "offcanvas" | "icon" | "none";
@@ -13,7 +14,7 @@ const LAYOUT_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 const DEFAULT_VARIANT = "inset";
 const DEFAULT_COLLAPSIBLE = "icon";
 
-type LayoutContextType = {
+interface LayoutContextType {
   resetLayout: () => void;
 
   defaultCollapsible: Collapsible;
@@ -23,13 +24,13 @@ type LayoutContextType = {
   defaultVariant: Variant;
   variant: Variant;
   setVariant: (variant: Variant) => void;
-};
+}
 
 const LayoutContext = createContext<LayoutContextType | null>(null);
 
-type LayoutProviderProps = {
+interface LayoutProviderProps {
   children: React.ReactNode;
-};
+}
 
 export function LayoutProvider({ children }: LayoutProviderProps) {
   const [collapsible, _setCollapsible] = useState<Collapsible>(() => {
@@ -44,7 +45,11 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
 
   const setCollapsible = (newCollapsible: Collapsible) => {
     _setCollapsible(newCollapsible);
-    setCookie(LAYOUT_COLLAPSIBLE_COOKIE_NAME, newCollapsible, LAYOUT_COOKIE_MAX_AGE);
+    setCookie(
+      LAYOUT_COLLAPSIBLE_COOKIE_NAME,
+      newCollapsible,
+      LAYOUT_COOKIE_MAX_AGE
+    );
   };
 
   const setVariant = (newVariant: Variant) => {
@@ -58,13 +63,13 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
   };
 
   const contextValue: LayoutContextType = {
-    resetLayout,
-    defaultCollapsible: DEFAULT_COLLAPSIBLE,
     collapsible,
-    setCollapsible,
+    defaultCollapsible: DEFAULT_COLLAPSIBLE,
     defaultVariant: DEFAULT_VARIANT,
-    variant,
+    resetLayout,
+    setCollapsible,
     setVariant,
+    variant,
   };
 
   return <LayoutContext value={contextValue}>{children}</LayoutContext>;

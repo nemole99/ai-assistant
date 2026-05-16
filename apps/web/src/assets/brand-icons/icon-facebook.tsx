@@ -1,5 +1,5 @@
-import { type SVGProps } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import type { SVGProps } from "react";
 
 export function IconFacebook({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (

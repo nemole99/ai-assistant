@@ -1,4 +1,3 @@
-import { FolderKanban, Pencil, Trash2, Users, CheckCircle2, Clock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -10,13 +9,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import {
+  FolderKanban,
+  Pencil,
+  Trash2,
+  Users,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
+
 import { authClient } from "@/lib/auth-client";
-import { type Project } from "../data/schema";
+
+import type { Project } from "../data/schema";
 import { useProjects } from "./projects-provider";
 
-type ProjectCardProps = {
+interface ProjectCardProps {
   project: Project;
-};
+}
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const { setOpen, setCurrentRow } = useProjects();
@@ -24,7 +33,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const isAdmin = session?.user?.role === "ADMIN";
 
   return (
-    <Link to="/projects/$projectId" params={{ projectId: project.id }} className="group block">
+    <Link
+      to="/projects/$projectId"
+      params={{ projectId: project.id }}
+      className="group block"
+    >
       <Card className="flex flex-col cursor-pointer transition-all group-hover:border-primary/50 group-hover:shadow-md">
         <CardHeader className="flex-row items-start gap-3 space-y-0">
           <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
@@ -32,7 +45,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <CardTitle className="text-lg leading-tight">{project.name}</CardTitle>
+              <CardTitle className="text-lg leading-tight">
+                {project.name}
+              </CardTitle>
               <Badge
                 variant={project.status === "ACTIVE" ? "default" : "secondary"}
                 className="shrink-0"
@@ -49,14 +64,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <Users className="size-3.5" />
               {project.memberCount} member{project.memberCount !== 1 ? "s" : ""}
               {project.managerName && (
-                <span className="text-muted-foreground">· {project.managerName}</span>
+                <span className="text-muted-foreground">
+                  · {project.managerName}
+                </span>
               )}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="flex-1">
           {project.description && (
-            <p className="text-muted-foreground text-sm line-clamp-2">{project.description}</p>
+            <p className="text-muted-foreground text-sm line-clamp-2">
+              {project.description}
+            </p>
           )}
         </CardContent>
         {isAdmin && (

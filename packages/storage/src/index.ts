@@ -1,14 +1,14 @@
-import { Client } from "minio";
 import { env } from "@workspace/env/server";
+import { Client } from "minio";
 
 // Internal client — connects to MinIO via Docker service name (e.g. "minio").
 // Used for bucket ops, getObject, deleteObject, etc.
 export const storageClient = new Client({
+  accessKey: env.MINIO_ACCESS_KEY,
   endPoint: env.MINIO_ENDPOINT,
   port: env.MINIO_PORT,
-  useSSL: env.MINIO_USE_SSL,
-  accessKey: env.MINIO_ACCESS_KEY,
   secretKey: env.MINIO_SECRET_KEY,
+  useSSL: env.MINIO_USE_SSL,
 });
 
 // Presign client — signs URLs with the public hostname so browsers can reach
@@ -19,12 +19,12 @@ export const storageClient = new Client({
 // since the public hostname isn't reachable from within the container).
 const presignEndpoint = env.MINIO_PUBLIC_ENDPOINT ?? env.MINIO_ENDPOINT;
 const presignClient = new Client({
+  accessKey: env.MINIO_ACCESS_KEY,
   endPoint: presignEndpoint,
   port: env.MINIO_PORT,
-  useSSL: env.MINIO_USE_SSL,
-  accessKey: env.MINIO_ACCESS_KEY,
-  secretKey: env.MINIO_SECRET_KEY,
   region: "us-east-1",
+  secretKey: env.MINIO_SECRET_KEY,
+  useSSL: env.MINIO_USE_SSL,
 });
 
 const BUCKET = env.MINIO_BUCKET;
@@ -36,19 +36,27 @@ export async function ensureBucketExists(): Promise<void> {
   }
 }
 
-export async function presignedPutUrl(objectKey: string, ttlSeconds = 300): Promise<string> {
+export function presignedPutUrl(
+  objectKey: string,
+  ttlSeconds = 300
+): Promise<string> {
   return presignClient.presignedPutObject(BUCKET, objectKey, ttlSeconds);
 }
 
-export async function presignedGetUrl(
+export function presignedGetUrl(
   objectKey: string,
   ttlSeconds = 300,
-  filename?: string,
+  filename?: string
 ): Promise<string> {
   const reqParams = filename
     ? { "response-content-disposition": `attachment; filename="${filename}"` }
     : undefined;
-  return presignClient.presignedGetObject(BUCKET, objectKey, ttlSeconds, reqParams);
+  return presignClient.presignedGetObject(
+    BUCKET,
+    objectKey,
+    ttlSeconds,
+    reqParams
+  );
 }
 
 export async function deleteObject(objectKey: string): Promise<void> {
@@ -78,6 +86,9 @@ export function documentObjectKey(documentId: string): string {
   return `global/${documentId}/original.pdf`;
 }
 
-export function projectDocumentObjectKey(projectId: string, documentId: string): string {
+export function projectDocumentObjectKey(
+  projectId: string,
+  documentId: string
+): string {
   return `projects/${projectId}/${documentId}/original.pdf`;
 }

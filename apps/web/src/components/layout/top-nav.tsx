@@ -1,6 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
-import { cn } from "@workspace/ui/lib/utils";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -8,6 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { cn } from "@workspace/ui/lib/utils";
+import { Menu } from "lucide-react";
 
 type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   links: {
@@ -53,7 +53,10 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
       </DropdownMenu>
 
       <nav
-        className={cn("hidden items-center space-x-4 lg:flex lg:space-x-4 xl:space-x-6", className)}
+        className={cn(
+          "hidden items-center space-x-4 lg:flex lg:space-x-4 xl:space-x-6",
+          className
+        )}
         {...props}
       >
         {links.map(({ title, href, isActive, disabled }) => (

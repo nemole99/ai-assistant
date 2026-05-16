@@ -11,9 +11,7 @@ const PROJECTS: {
   memberEmails: string[];
 }[] = [
   {
-    name: "WeClever",
     description: "WeClever platform project.",
-    status: "ACTIVE",
     managerEmail: "alan.dao@ewoosoft.com",
     memberEmails: [
       "nemo.le@ewoosoft.com",
@@ -23,11 +21,11 @@ const PROJECTS: {
       "mark.phan@ewoosoft.com",
       "joy.luu@ewoosoft.com",
     ],
+    name: "WeClever",
+    status: "ACTIVE",
   },
   {
-    name: "CleverDent",
     description: "CleverDent platform project",
-    status: "ACTIVE",
     managerEmail: "chris.hoang@ewoosoft.com",
     memberEmails: [
       "joe.vu@ewoosoft.com",
@@ -37,13 +35,19 @@ const PROJECTS: {
       "helen.dao@ewoosoft.com",
       "hayden.hoang@ewoosoft.com",
     ],
+    name: "CleverDent",
+    status: "ACTIVE",
   },
   {
-    name: "GPP",
     description: "GPP internal project.",
-    status: "COMPLETED",
     managerEmail: "nemo.le@ewoosoft.com",
-    memberEmails: ["nemo.le@ewoosoft.com", "lotus.duong@ewoosoft.com", "helen.dao@ewoosoft.com"],
+    memberEmails: [
+      "nemo.le@ewoosoft.com",
+      "lotus.duong@ewoosoft.com",
+      "helen.dao@ewoosoft.com",
+    ],
+    name: "GPP",
+    status: "COMPLETED",
   },
 ];
 
@@ -51,10 +55,12 @@ export async function seedProjects() {
   console.log("🌱 Seeding projects...");
 
   // Load all employees indexed by email for fast lookup
-  const allEmails = [...new Set(PROJECTS.flatMap((p) => [p.managerEmail, ...p.memberEmails]))];
+  const allEmails = [
+    ...new Set(PROJECTS.flatMap((p) => [p.managerEmail, ...p.memberEmails])),
+  ];
 
   const employees = await db
-    .select({ id: employee.id, email: employee.email })
+    .select({ email: employee.email, id: employee.id })
     .from(employee)
     .where(inArray(employee.email, allEmails));
 
@@ -76,18 +82,18 @@ export async function seedProjects() {
     const managerId = employeeByEmail.get(proj.managerEmail);
     if (!managerId) {
       console.warn(
-        `  ⚠ Manager employee not found for email "${proj.managerEmail}", skipping project "${proj.name}".`,
+        `  ⚠ Manager employee not found for email "${proj.managerEmail}", skipping project "${proj.name}".`
       );
       continue;
     }
 
     const projectId = crypto.randomUUID();
     await db.insert(project).values({
-      id: projectId,
-      name: proj.name,
       description: proj.description,
-      status: proj.status,
+      id: projectId,
       managerId,
+      name: proj.name,
+      status: proj.status,
     });
 
     // Add members
@@ -95,10 +101,12 @@ export async function seedProjects() {
     for (const email of proj.memberEmails) {
       const empId = employeeByEmail.get(email);
       if (!empId) {
-        console.warn(`  ⚠ Member employee not found for email "${email}", skipping.`);
+        console.warn(
+          `  ⚠ Member employee not found for email "${email}", skipping.`
+        );
         continue;
       }
-      memberRows.push({ projectId, employeeId: empId });
+      memberRows.push({ employeeId: empId, projectId });
     }
 
     if (memberRows.length > 0) {
@@ -106,7 +114,7 @@ export async function seedProjects() {
     }
 
     console.log(
-      `  ✅ [${proj.status}] "${proj.name}" — manager: ${proj.managerEmail} — ${memberRows.length} member(s)`,
+      `  ✅ [${proj.status}] "${proj.name}" — manager: ${proj.managerEmail} — ${memberRows.length} member(s)`
     );
   }
 

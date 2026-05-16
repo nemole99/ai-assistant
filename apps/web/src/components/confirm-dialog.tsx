@@ -1,4 +1,3 @@
-import { cn } from "@workspace/ui/lib/utils";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -9,6 +8,7 @@ import {
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
 import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -22,7 +22,10 @@ type ConfirmDialogProps = {
   isLoading?: boolean;
   className?: string;
   children?: React.ReactNode;
-} & ({ form: string; handleConfirm?: undefined } | { form?: undefined; handleConfirm: () => void });
+} & (
+  | { form: string; handleConfirm?: undefined }
+  | { form?: undefined; handleConfirm: () => void }
+);
 
 export function ConfirmDialog(props: ConfirmDialogProps) {
   const {
@@ -41,14 +44,18 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   } = props;
   return (
     <AlertDialog {...actions}>
-      <AlertDialogContent className={cn(className && className)}>
+      <AlertDialogContent className={cn(className)}>
         <AlertDialogHeader className="text-start">
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription render={<div />}>{desc}</AlertDialogDescription>
+          <AlertDialogDescription render={<div />}>
+            {desc}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         {children}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelBtnText ?? "Cancel"}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>
+            {cancelBtnText ?? "Cancel"}
+          </AlertDialogCancel>
           <Button
             type={form ? "submit" : "button"}
             form={form}

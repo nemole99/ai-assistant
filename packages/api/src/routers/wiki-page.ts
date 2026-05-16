@@ -1,32 +1,37 @@
 import { ORPCError } from "@orpc/server";
 import { db } from "@workspace/db";
-import { systemAiConfig, wikiPage, wikiPageChunk, wikiPageSource } from "@workspace/db/schema/auth";
 import { decrypt } from "@workspace/db/crypto";
+import {
+  systemAiConfig,
+  wikiPage,
+  wikiPageChunk,
+  wikiPageSource,
+} from "@workspace/db/schema/auth";
 import { cosineDistance, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { adminProcedure, protectedProcedure } from "..";
 
 const wikiPageSummarySchema = z.object({
+  createdAt: z.date(),
   id: z.string(),
-  title: z.string(),
   slug: z.string(),
   sourceCount: z.number(),
-  createdAt: z.date(),
+  title: z.string(),
   updatedAt: z.date(),
 });
 
 const wikiPageDetailSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  slug: z.string(),
   content: z.string(),
+  createdAt: z.date(),
+  id: z.string(),
+  slug: z.string(),
   sources: z.array(
     z.object({
       documentId: z.string().nullable(),
-    }),
+    })
   ),
-  createdAt: z.date(),
+  title: z.string(),
   updatedAt: z.date(),
 });
 
@@ -36,8 +41,8 @@ const wikiSearchResultSchema = z.object({
   similarity: z.number(),
   wikiPage: z.object({
     id: z.string(),
-    title: z.string(),
     slug: z.string(),
+    title: z.string(),
   }),
 });
 
@@ -63,12 +68,12 @@ async function embedQuery(query: string): Promise<number[]> {
   if (config.providerType === "openai") {
     const baseUrl = config.baseUrl ?? "https://api.openai.com/v1";
     const res = await fetch(`${baseUrl}/embeddings`, {
-      method: "POST",
+      body: JSON.stringify({ input: query, model: config.modelId }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ model: config.modelId, input: query }),
+      method: "POST",
     });
 
     if (!res.ok) {
@@ -84,9 +89,9 @@ async function embedQuery(query: string): Promise<number[]> {
   if (config.providerType === "ollama") {
     const baseUrl = config.baseUrl ?? "http://localhost:11434";
     const res = await fetch(`${baseUrl}/api/embed`, {
-      method: "POST",
+      body: JSON.stringify({ input: query, model: config.modelId }),
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: config.modelId, input: query }),
+      method: "POST",
     });
 
     if (!res.ok) {
@@ -100,20 +105,21 @@ async function embedQuery(query: string): Promise<number[]> {
   }
 
   if (config.providerType === "google") {
-    const baseUrl = config.baseUrl ?? "https://generativelanguage.googleapis.com/v1beta";
+    const baseUrl =
+      config.baseUrl ?? "https://generativelanguage.googleapis.com/v1beta";
     const model = config.modelId.startsWith("models/")
       ? config.modelId
       : `models/${config.modelId}`;
     const res = await fetch(`${baseUrl}/${model}:embedContent`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
       body: JSON.stringify({
         content: { parts: [{ text: query }] },
         outputDimensionality: 1536,
       }),
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      method: "POST",
     });
 
     if (!res.ok) {
@@ -132,50 +138,32 @@ async function embedQuery(query: string): Promise<number[]> {
 }
 
 export const wikiPageRouter = {
-  list: protectedProcedure
-    .input(
-      z
-        .object({
-          page: z.number().int().min(1).default(1),
-          limit: z.number().int().min(1).max(100).default(20),
-        })
-        .optional(),
-    )
-    .output(z.object({ items: z.array(wikiPageSummarySchema), total: z.number() }))
+  delete: adminProcedure
+    .input(z.object({ id: z.string() }))
     .handler(async ({ input }) => {
-      const page = input?.page ?? 1;
-      const limit = input?.limit ?? 20;
-      const offset = (page - 1) * limit;
-
-      const [countRow] = await db.select({ count: sql<number>`count(*)::int` }).from(wikiPage);
-
-      const rows = await db
-        .select({
-          id: wikiPage.id,
-          title: wikiPage.title,
-          slug: wikiPage.slug,
-          createdAt: wikiPage.createdAt,
-          updatedAt: wikiPage.updatedAt,
-          sourceCount: sql<number>`count(${wikiPageSource.wikiPageId})::int`,
-        })
+      const [row] = await db
+        .select({ id: wikiPage.id })
         .from(wikiPage)
-        .leftJoin(wikiPageSource, eq(wikiPage.id, wikiPageSource.wikiPageId))
-        .groupBy(wikiPage.id)
-        .orderBy(desc(wikiPage.updatedAt))
-        .limit(limit)
-        .offset(offset);
+        .where(eq(wikiPage.id, input.id))
+        .limit(1);
 
-      return {
-        items: rows,
-        total: countRow?.count ?? 0,
-      };
+      if (!row) {
+        throw new ORPCError("NOT_FOUND", { message: "WikiPage not found" });
+      }
+
+      await db.delete(wikiPage).where(eq(wikiPage.id, input.id));
+      return { success: true };
     }),
 
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .output(wikiPageDetailSchema)
     .handler(async ({ input }) => {
-      const [row] = await db.select().from(wikiPage).where(eq(wikiPage.id, input.id)).limit(1);
+      const [row] = await db
+        .select()
+        .from(wikiPage)
+        .where(eq(wikiPage.id, input.id))
+        .limit(1);
 
       if (!row) {
         throw new ORPCError("NOT_FOUND", { message: "WikiPage not found" });
@@ -193,7 +181,11 @@ export const wikiPageRouter = {
     .input(z.object({ slug: z.string() }))
     .output(wikiPageDetailSchema)
     .handler(async ({ input }) => {
-      const [row] = await db.select().from(wikiPage).where(eq(wikiPage.slug, input.slug)).limit(1);
+      const [row] = await db
+        .select()
+        .from(wikiPage)
+        .where(eq(wikiPage.slug, input.slug))
+        .limit(1);
 
       if (!row) {
         throw new ORPCError("NOT_FOUND", { message: "WikiPage not found" });
@@ -207,29 +199,62 @@ export const wikiPageRouter = {
       return { ...row, sources };
     }),
 
-  delete: adminProcedure.input(z.object({ id: z.string() })).handler(async ({ input }) => {
-    const [row] = await db
-      .select({ id: wikiPage.id })
-      .from(wikiPage)
-      .where(eq(wikiPage.id, input.id))
-      .limit(1);
+  list: protectedProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().int().min(1).max(100).default(20),
+          page: z.number().int().min(1).default(1),
+        })
+        .optional()
+    )
+    .output(
+      z.object({ items: z.array(wikiPageSummarySchema), total: z.number() })
+    )
+    .handler(async ({ input }) => {
+      const page = input?.page ?? 1;
+      const limit = input?.limit ?? 20;
+      const offset = (page - 1) * limit;
 
-    if (!row) {
-      throw new ORPCError("NOT_FOUND", { message: "WikiPage not found" });
-    }
+      const [countRow] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(wikiPage);
 
-    await db.delete(wikiPage).where(eq(wikiPage.id, input.id));
-    return { success: true };
-  }),
+      const rows = await db
+        .select({
+          createdAt: wikiPage.createdAt,
+          id: wikiPage.id,
+          slug: wikiPage.slug,
+          sourceCount: sql<number>`count(${wikiPageSource.wikiPageId})::int`,
+          title: wikiPage.title,
+          updatedAt: wikiPage.updatedAt,
+        })
+        .from(wikiPage)
+        .leftJoin(wikiPageSource, eq(wikiPage.id, wikiPageSource.wikiPageId))
+        .groupBy(wikiPage.id)
+        .orderBy(desc(wikiPage.updatedAt))
+        .limit(limit)
+        .offset(offset);
+
+      return {
+        items: rows,
+        total: countRow?.count ?? 0,
+      };
+    }),
 
   search: protectedProcedure
     .input(
-      z.object({ query: z.string().min(1), limit: z.number().int().min(1).max(20).default(5) }),
+      z.object({
+        limit: z.number().int().min(1).max(20).default(5),
+        query: z.string().min(1),
+      })
     )
     .output(z.array(wikiSearchResultSchema))
     .handler(async ({ input }) => {
       const embeddingConfig = await getEmbeddingConfig();
-      if (!embeddingConfig) return [];
+      if (!embeddingConfig) {
+        return [];
+      }
 
       let queryVector: number[];
       try {
@@ -246,8 +271,8 @@ export const wikiPageRouter = {
           content: wikiPageChunk.content,
           similarity,
           wikiPageId: wikiPage.id,
-          wikiPageTitle: wikiPage.title,
           wikiPageSlug: wikiPage.slug,
+          wikiPageTitle: wikiPage.title,
         })
         .from(wikiPageChunk)
         .innerJoin(wikiPage, eq(wikiPageChunk.wikiPageId, wikiPage.id))
@@ -258,7 +283,11 @@ export const wikiPageRouter = {
         chunkId: r.chunkId,
         content: r.content,
         similarity: r.similarity,
-        wikiPage: { id: r.wikiPageId, title: r.wikiPageTitle, slug: r.wikiPageSlug },
+        wikiPage: {
+          id: r.wikiPageId,
+          slug: r.wikiPageSlug,
+          title: r.wikiPageTitle,
+        },
       }));
     }),
 };

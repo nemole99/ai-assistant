@@ -1,7 +1,9 @@
 import { env } from "@workspace/env/server";
 
 export async function resolveOllamaModelId(modelId: string): Promise<string> {
-  if (!env.OLLAMA_BASE_URL) return modelId;
+  if (!env.OLLAMA_BASE_URL) {
+    return modelId;
+  }
 
   try {
     const tagsRes = await fetch(`${env.OLLAMA_BASE_URL}/api/tags`);
@@ -10,14 +12,20 @@ export async function resolveOllamaModelId(modelId: string): Promise<string> {
       if (tags.models && Array.isArray(tags.models)) {
         const modelNames = tags.models
           .map((m) => m.name)
-          .filter((name): name is string => Boolean(name));
+          .filter(Boolean) as string[];
 
-        if (modelNames.includes(modelId)) return modelId;
+        if (modelNames.includes(modelId)) {
+          return modelId;
+        }
 
-        const prefixedMatches = modelNames.filter((name) => name.startsWith(`${modelId}:`));
+        const prefixedMatches = modelNames.filter((name) =>
+          name.startsWith(`${modelId}:`)
+        );
 
         if (prefixedMatches.length > 0) {
-          const latestMatch = prefixedMatches.find((name) => name.endsWith(":latest"));
+          const latestMatch = prefixedMatches.find((name) =>
+            name.endsWith(":latest")
+          );
           return latestMatch ?? prefixedMatches[0]!;
         }
       }
@@ -33,9 +41,11 @@ export async function resolveOllamaModelId(modelId: string): Promise<string> {
       if (data.data && Array.isArray(data.data)) {
         const modelNames = data.data
           .map((m) => m.id)
-          .filter((id): id is string => Boolean(id));
+          .filter(Boolean) as string[];
 
-        if (modelNames.includes(modelId)) return modelId;
+        if (modelNames.includes(modelId)) {
+          return modelId;
+        }
       }
     }
   } catch {

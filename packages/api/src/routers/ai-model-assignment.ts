@@ -1,6 +1,6 @@
+import { ORPCError } from "@orpc/server";
 import { db } from "@workspace/db";
 import { aiModelAssignment, aiProvider } from "@workspace/db/schema/auth";
-import { ORPCError } from "@orpc/server";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
@@ -16,7 +16,7 @@ export const get = protectedProcedure
         model: z.string(),
         providerId: z.string().nullable(),
       })
-      .nullable(),
+      .nullable()
   )
   .handler(async ({ input, context }) => {
     const userId = context.session.user.id;
@@ -28,21 +28,26 @@ export const get = protectedProcedure
       })
       .from(aiModelAssignment)
       .where(
-        and(eq(aiModelAssignment.userId, userId), eq(aiModelAssignment.purpose, input.purpose)),
+        and(
+          eq(aiModelAssignment.userId, userId),
+          eq(aiModelAssignment.purpose, input.purpose)
+        )
       )
       .limit(1);
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {
+      return null;
+    }
     return rows[0];
   });
 
 export const set = protectedProcedure
   .input(
     z.object({
-      purpose: purposeSchema,
       model: z.string().min(1),
       providerId: z.string().min(1).nullable(),
-    }),
+      purpose: purposeSchema,
+    })
   )
   .handler(async ({ input, context }) => {
     const userId = context.session.user.id;
@@ -52,7 +57,12 @@ export const set = protectedProcedure
       const providerRows = await db
         .select({ id: aiProvider.id })
         .from(aiProvider)
-        .where(and(eq(aiProvider.id, input.providerId), eq(aiProvider.userId, userId)))
+        .where(
+          and(
+            eq(aiProvider.id, input.providerId),
+            eq(aiProvider.userId, userId)
+          )
+        )
         .limit(1);
 
       if (!providerRows[0]) {
@@ -66,21 +76,21 @@ export const set = protectedProcedure
     await db
       .insert(aiModelAssignment)
       .values({
+        createdAt: now,
         id: crypto.randomUUID(),
-        userId,
+        model: input.model,
         providerId: input.providerId,
         purpose: input.purpose,
-        model: input.model,
-        createdAt: now,
         updatedAt: now,
+        userId,
       })
       .onConflictDoUpdate({
-        target: [aiModelAssignment.userId, aiModelAssignment.purpose],
         set: {
           model: input.model,
           providerId: input.providerId,
           updatedAt: now,
         },
+        target: [aiModelAssignment.userId, aiModelAssignment.purpose],
       });
 
     return { success: true };

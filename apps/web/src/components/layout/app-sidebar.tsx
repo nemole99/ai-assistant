@@ -1,5 +1,3 @@
-import { useLayout } from "@/context/layout-provider";
-import { authClient } from "@/lib/auth-client";
 import {
   Sidebar,
   SidebarContent,
@@ -7,6 +5,10 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
+
+import { useLayout } from "@/context/layout-provider";
+import { authClient } from "@/lib/auth-client";
+
 import { AppTitle } from "./app-title";
 import { sidebarData } from "./data/sidebar-data";
 import { NavGroup } from "./nav-group";
@@ -25,14 +27,20 @@ export function AppSidebar() {
     .map((g) => {
       const filtered = g.items
         .filter((item) => {
-          if (isEmployee && "url" in item && EMPLOYEE_HIDDEN_ITEMS.has(item.url as string)) {
+          if (
+            isEmployee &&
+            "url" in item &&
+            EMPLOYEE_HIDDEN_ITEMS.has(item.url as string)
+          ) {
             return false;
           }
           return true;
         })
         .map((item) => {
           if ("items" in item && item.items) {
-            const subFiltered = item.items.filter((sub) => !sub.adminOnly || isAdmin);
+            const subFiltered = item.items.filter(
+              (sub) => !sub.adminOnly || isAdmin
+            );
             return { ...item, items: subFiltered };
           }
           return item;

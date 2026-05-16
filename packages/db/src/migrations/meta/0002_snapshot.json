@@ -1431,7 +1431,14 @@
     "public.document_status": {
       "name": "document_status",
       "schema": "public",
-      "values": ["PENDING", "COMPLETED", "FAILED", "INGESTING", "INGESTED", "INGEST_FAILED"]
+      "values": [
+        "PENDING",
+        "COMPLETED",
+        "FAILED",
+        "INGESTING",
+        "INGESTED",
+        "INGEST_FAILED"
+      ]
     },
     "public.employee_status": {
       "name": "employee_status",

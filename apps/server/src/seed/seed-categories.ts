@@ -4,24 +4,25 @@ import { eq } from "drizzle-orm";
 
 const CATEGORIES = [
   {
-    name: "HR & Policies",
     color: "#3b82f6", // blue-500
     description: "Company policies, employee handbook, and HR guidelines",
+    name: "HR & Policies",
   },
   {
-    name: "Engineering",
     color: "#10b981", // blue-500 -> no, emerald-500
-    description: "Technical specifications, architecture docs, and coding standards",
+    description:
+      "Technical specifications, architecture docs, and coding standards",
+    name: "Engineering",
   },
   {
-    name: "Product",
     color: "#8b5cf6", // purple-500
     description: "PRDs, product roadmaps, and requirements",
+    name: "Product",
   },
   {
-    name: "Design",
     color: "#ec4899", // pink-500
     description: "Design systems, wireframes, and UI/UX assets",
+    name: "Design",
   },
 ];
 
@@ -43,10 +44,10 @@ export async function seedCategories() {
     }
 
     await db.insert(documentCategory).values({
-      id: crypto.randomUUID(),
-      name: cat.name,
       color: cat.color,
       description: cat.description,
+      id: crypto.randomUUID(),
+      name: cat.name,
     });
 
     console.log(`  ✅ Inserted category: ${cat.name}`);

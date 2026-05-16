@@ -6,11 +6,11 @@ import { ThemeSwitch } from "../theme-switch";
 import { Header } from "./header";
 import { Main } from "./main";
 
-type ContentLayoutProps = {
+interface ContentLayoutProps {
   children?: React.ReactNode;
   title?: string;
   hrefBack?: string;
-};
+}
 
 export function ContentLayout({ children }: ContentLayoutProps) {
   return (

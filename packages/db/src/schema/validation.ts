@@ -23,8 +23,8 @@ export const insertUserSchema = createInsertSchema(user);
 
 export const selectDepartmentSchema = createSelectSchema(department);
 export const insertDepartmentSchema = createInsertSchema(department).omit({
-  id: true,
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 export const updateDepartmentSchema = insertDepartmentSchema.partial();
@@ -34,11 +34,11 @@ export const updateDepartmentSchema = insertDepartmentSchema.partial();
 export const selectEmployeeSchema = createSelectSchema(employee);
 export const insertEmployeeSchema = createInsertSchema(employee)
   .omit({
-    id: true,
-    userId: true,
-    status: true,
     createdAt: true,
+    id: true,
+    status: true,
     updatedAt: true,
+    userId: true,
   })
   .extend({
     employeeCode: createInsertSchema(employee).shape.employeeCode.optional(),
@@ -55,8 +55,8 @@ export const updateEmployeeSchema = insertEmployeeSchema
 
 export const selectProjectSchema = createSelectSchema(project);
 export const insertProjectSchema = createInsertSchema(project).omit({
-  id: true,
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 export const updateProjectSchema = insertProjectSchema.partial();
@@ -65,35 +65,41 @@ export const selectProjectMemberSchema = createSelectSchema(projectMember);
 
 // --- DocumentCategory ---
 
-export const selectDocumentCategorySchema = createSelectSchema(documentCategory);
-export const insertDocumentCategorySchema = createInsertSchema(documentCategory).omit({
-  id: true,
+export const selectDocumentCategorySchema =
+  createSelectSchema(documentCategory);
+export const insertDocumentCategorySchema = createInsertSchema(
+  documentCategory
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
-export const updateDocumentCategorySchema = insertDocumentCategorySchema.partial();
+export const updateDocumentCategorySchema =
+  insertDocumentCategorySchema.partial();
 
 // --- Document ---
 
 export const selectDocumentSchema = createSelectSchema(document);
 export const insertDocumentSchema = createInsertSchema(document).omit({
-  id: true,
-  status: true,
-  markdownContent: true,
-  errorMessage: true,
   createdAt: true,
+  errorMessage: true,
+  id: true,
+  markdownContent: true,
+  status: true,
   updatedAt: true,
 });
 export const updateDocumentSchema = insertDocumentSchema
-  .pick({ title: true, description: true, categoryId: true })
+  .pick({ categoryId: true, description: true, title: true })
   .partial();
 
 // --- SystemAIConfig ---
 
 export const selectSystemAiConfigSchema = createSelectSchema(systemAiConfig);
-export const insertSystemAiConfigSchema = createInsertSchema(systemAiConfig).omit({
-  id: true,
+export const insertSystemAiConfigSchema = createInsertSchema(
+  systemAiConfig
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 
@@ -101,8 +107,8 @@ export const insertSystemAiConfigSchema = createInsertSchema(systemAiConfig).omi
 
 export const selectWikiPageSchema = createSelectSchema(wikiPage);
 export const insertWikiPageSchema = createInsertSchema(wikiPage).omit({
-  id: true,
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 

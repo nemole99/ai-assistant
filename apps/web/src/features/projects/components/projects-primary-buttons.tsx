@@ -1,5 +1,6 @@
-import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Plus } from "lucide-react";
+
 import { useProjects } from "./projects-provider";
 
 export function ProjectsPrimaryButtons() {

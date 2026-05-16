@@ -1,23 +1,27 @@
+// oxlint-disable no-nested-ternary
+// oxlint-disable no-negated-condition
 import { useQuery } from "@tanstack/react-query";
-import { orpc } from "@/lib/orpc";
-import { ContentLayout } from "@/components/layout/content-layout";
-import { Input } from "@workspace/ui/components/input";
 import { Badge } from "@workspace/ui/components/badge";
+import { Input } from "@workspace/ui/components/input";
+import { formatDistanceToNow } from "date-fns";
 import { Loader2, BookOpen, Search } from "lucide-react";
 import { useState } from "react";
+
+import { ContentLayout } from "@/components/layout/content-layout";
+import { orpc } from "@/lib/orpc";
+
 import { WikiPageDrawer } from "./wiki-page-drawer";
-import { formatDistanceToNow } from "date-fns";
 
 export function WikiPage() {
   const [viewingPageId, setViewingPageId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   const { data, isPending } = useQuery({
-    ...orpc.wikiPage.list.queryOptions({ input: { page: 1, limit: 100 } }),
+    ...orpc.wikiPage.list.queryOptions({ input: { limit: 100, page: 1 } }),
   });
 
   const items = (data?.items ?? []).filter(
-    (p) => !search || p.title.toLowerCase().includes(search.toLowerCase()),
+    (p) => !search || p.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -72,7 +76,9 @@ export function WikiPage() {
                 <p className="font-medium line-clamp-2">{page.title}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(page.updatedAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(page.updatedAt), {
+                      addSuffix: true,
+                    })}
                   </span>
                   <Badge variant="outline" className="text-xs">
                     {page.sourceCount} source{page.sourceCount !== 1 ? "s" : ""}
@@ -85,7 +91,10 @@ export function WikiPage() {
       </div>
 
       {viewingPageId && (
-        <WikiPageDrawer pageId={viewingPageId} onClose={() => setViewingPageId(null)} />
+        <WikiPageDrawer
+          pageId={viewingPageId}
+          onClose={() => setViewingPageId(null)}
+        />
       )}
     </ContentLayout>
   );

@@ -1,37 +1,47 @@
-import { sleep } from "@/lib/utils";
+import { useForm } from "@tanstack/react-form";
 import { Button } from "@workspace/ui/components/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
-import { useForm } from "@tanstack/react-form";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-export function ForgotPasswordForm({ className, ...props }: React.HTMLAttributes<HTMLFormElement>) {
+import { sleep } from "@/lib/utils";
+
+export function ForgotPasswordForm({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLFormElement>) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     defaultValues: { email: "" },
-    validators: {
-      onSubmit: z.object({
-        email: z.email({
-          error: (iss) => (iss.input === "" ? "Please enter your email." : undefined),
-        }),
-      }),
-    },
     onSubmit: ({ value }) => {
       setIsLoading(true);
       toast.promise(sleep(2000), {
+        error: "Error",
         loading: "Sending email...",
         success: () => {
           setIsLoading(false);
           form.reset();
           return `Email sent to ${value.email}`;
         },
-        error: "Error",
       });
+    },
+    validators: {
+      onSubmit: z.object({
+        email: z.email({
+          error: (iss) =>
+            iss.input === "" ? "Please enter your email." : undefined,
+        }),
+      }),
     },
   });
 
@@ -48,7 +58,8 @@ export function ForgotPasswordForm({ className, ...props }: React.HTMLAttributes
         <form.Field
           name="email"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>

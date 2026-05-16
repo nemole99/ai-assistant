@@ -1,4 +1,3 @@
-import { cn } from "@workspace/ui/lib/utils";
 import {
   Select,
   SelectContent,
@@ -7,8 +6,9 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { cn } from "@workspace/ui/lib/utils";
 
-type SelectDropdownProps = {
+interface SelectDropdownProps {
   onValueChange?: (value: string) => void;
   defaultValue: string | undefined;
   placeholder?: string;
@@ -17,7 +17,7 @@ type SelectDropdownProps = {
   disabled?: boolean;
   className?: string;
   isControlled?: boolean;
-};
+}
 
 export function SelectDropdown({
   defaultValue,
@@ -31,11 +31,13 @@ export function SelectDropdown({
 }: SelectDropdownProps) {
   const handleValueChange = onValueChange
     ? (value: string | null | undefined) => {
-        if (value != null) onValueChange(value);
+        if (value !== null && value !== undefined) {
+          onValueChange(value);
+        }
       }
     : undefined;
   const defaultState = isControlled
-    ? { value: defaultValue, onValueChange: handleValueChange }
+    ? { onValueChange: handleValueChange, value: defaultValue }
     : { defaultValue, onValueChange: handleValueChange };
   return (
     <Select items={items} {...defaultState}>

@@ -1,10 +1,12 @@
+// oxlint-disable vitest/require-mock-type-parameters
 import type { SubmitEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { userEvent } from "vitest/browser";
+
 import { ConfirmDialog } from "./confirm-dialog";
 
-describe("ConfirmDialog", () => {
+describe(ConfirmDialog, () => {
   it("renders title, description, and default buttons", async () => {
     const { getByRole, getByText } = await render(
       <ConfirmDialog
@@ -13,13 +15,21 @@ describe("ConfirmDialog", () => {
         title="Delete item"
         desc="This action cannot be undone."
         handleConfirm={vi.fn()}
-      />,
+      />
     );
 
-    await expect.element(getByRole("heading", { name: "Delete item" })).toBeInTheDocument();
-    await expect.element(getByText("This action cannot be undone.")).toBeInTheDocument();
-    await expect.element(getByRole("button", { name: "Cancel" })).toBeInTheDocument();
-    await expect.element(getByRole("button", { name: "Continue" })).toBeInTheDocument();
+    await expect
+      .element(getByRole("heading", { name: "Delete item" }))
+      .toBeInTheDocument();
+    await expect
+      .element(getByText("This action cannot be undone."))
+      .toBeInTheDocument();
+    await expect
+      .element(getByRole("button", { name: "Cancel" }))
+      .toBeInTheDocument();
+    await expect
+      .element(getByRole("button", { name: "Continue" }))
+      .toBeInTheDocument();
   });
 
   it("calls handleConfirm when the confirm button is clicked", async () => {
@@ -32,7 +42,7 @@ describe("ConfirmDialog", () => {
         desc="Are you sure?"
         confirmText="Sign out"
         handleConfirm={handleConfirm}
-      />,
+      />
     );
 
     await userEvent.click(getByRole("button", { name: "Sign out" }));
@@ -49,7 +59,7 @@ describe("ConfirmDialog", () => {
         desc="..."
         disabled
         handleConfirm={handleConfirm}
-      />,
+      />
     );
 
     const confirm = getByRole("button", { name: "Continue" });
@@ -67,11 +77,15 @@ describe("ConfirmDialog", () => {
         desc="..."
         isLoading
         handleConfirm={handleConfirm}
-      />,
+      />
     );
 
-    await expect.element(getByRole("button", { name: "Cancel" })).toBeDisabled();
-    await expect.element(getByRole("button", { name: "Continue" })).toBeDisabled();
+    await expect
+      .element(getByRole("button", { name: "Cancel" }))
+      .toBeDisabled();
+    await expect
+      .element(getByRole("button", { name: "Continue" }))
+      .toBeDisabled();
   });
 
   it("supports custom button texts", async () => {
@@ -84,11 +98,15 @@ describe("ConfirmDialog", () => {
         cancelBtnText="No"
         confirmText="Yes"
         handleConfirm={vi.fn()}
-      />,
+      />
     );
 
-    await expect.element(getByRole("button", { name: "No" })).toBeInTheDocument();
-    await expect.element(getByRole("button", { name: "Yes" })).toBeInTheDocument();
+    await expect
+      .element(getByRole("button", { name: "No" }))
+      .toBeInTheDocument();
+    await expect
+      .element(getByRole("button", { name: "Yes" }))
+      .toBeInTheDocument();
   });
 
   it("renders confirm as submit button linked to desc form when `form` is set", async () => {
@@ -105,12 +123,14 @@ describe("ConfirmDialog", () => {
         }
         confirmText="Delete"
         destructive
-      />,
+      />
     );
 
     const deleteBtn = getByRole("button", { name: "Delete" });
     await expect.element(deleteBtn).toHaveAttribute("type", "submit");
-    await expect.element(deleteBtn).toHaveAttribute("form", "tasks-multi-delete-form");
+    await expect
+      .element(deleteBtn)
+      .toHaveAttribute("form", "tasks-multi-delete-form");
   });
 
   it("submits the desc form when confirm is clicked (form prop, no handleConfirm)", async () => {
@@ -125,13 +145,17 @@ describe("ConfirmDialog", () => {
         title="Delete"
         form="users-delete-form"
         desc={
-          <form id="users-delete-form" onSubmit={handleFormSubmit} className="space-y-4">
+          <form
+            id="users-delete-form"
+            onSubmit={handleFormSubmit}
+            className="space-y-4"
+          >
             <p>Confirm deletion.</p>
           </form>
         }
         confirmText="Delete"
         destructive
-      />,
+      />
     );
 
     await userEvent.click(getByRole("button", { name: "Delete" }));
@@ -151,13 +175,17 @@ describe("ConfirmDialog", () => {
         title="Delete"
         form="users-delete-form"
         desc={
-          <form id="users-delete-form" onSubmit={handleFormSubmit} className="space-y-4">
+          <form
+            id="users-delete-form"
+            onSubmit={handleFormSubmit}
+            className="space-y-4"
+          >
             <input type="text" name="username" placeholder="username" />
           </form>
         }
         confirmText="Delete"
         destructive
-      />,
+      />
     );
 
     await userEvent.fill(getByPlaceholder("username"), "test");
@@ -184,7 +212,7 @@ describe("ConfirmDialog", () => {
         }
         confirmText="Delete"
         destructive
-      />,
+      />
     );
 
     const deleteBtn = getByRole("button", { name: "Delete" });

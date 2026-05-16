@@ -1,60 +1,70 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
+import { Input } from "@workspace/ui/components/input";
+import { PasswordInput } from "@workspace/ui/components/password-input";
 import { Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
+
 import { IconFacebook, IconGithub } from "@/assets/brand-icons";
-import { Button } from "@workspace/ui/components/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
-import { Input } from "@workspace/ui/components/input";
-import { PasswordInput } from "@workspace/ui/components/password-input";
 import { authClient } from "@/lib/auth-client";
 
 const formSchema = z
   .object({
+    confirmPassword: z.string().min(1, "Please confirm your password."),
     email: z.email({
-      error: (iss) => (iss.input === "" ? "Please enter your email." : undefined),
+      error: (iss) =>
+        iss.input === "" ? "Please enter your email." : undefined,
     }),
     password: z
       .string()
       .min(1, "Please enter your password.")
       .min(7, "Password must be at least 7 characters long."),
-    confirmPassword: z.string().min(1, "Please confirm your password."),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match.",
     path: ["confirmPassword"],
   });
 
-export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFormElement>) {
+export function SignUpForm({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLFormElement>) {
   const navigate = useNavigate();
 
   const form = useForm({
     defaultValues: {
+      confirmPassword: "",
       email: "",
       password: "",
-      confirmPassword: "",
-    },
-    validators: {
-      onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
       await authClient.signUp.email(
         {
           email: value.email,
-          password: value.password,
           name: value.email,
+          password: value.password,
         },
         {
+          onError: (error) => {
+            toast.error(error.error.message || error.error.statusText);
+          },
           onSuccess: () => {
             navigate({ to: "/" });
             toast.success("Account created successfully");
           },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        },
+        }
       );
+    },
+    validators: {
+      onSubmit: formSchema,
     },
   });
 
@@ -73,7 +83,8 @@ export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFor
         <form.Field
           name="email"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
@@ -95,7 +106,8 @@ export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFor
         <form.Field
           name="password"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>
@@ -116,7 +128,8 @@ export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFor
         <form.Field
           name="confirmPassword"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
@@ -137,7 +150,10 @@ export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFor
       </FieldGroup>
 
       <form.Subscribe
-        selector={(state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting })}
+        selector={(state) => ({
+          canSubmit: state.canSubmit,
+          isSubmitting: state.isSubmitting,
+        })}
         children={({ canSubmit, isSubmitting }) => (
           <>
             <Button
@@ -146,7 +162,11 @@ export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFor
               className="mt-2 w-full"
               disabled={!canSubmit || isSubmitting}
             >
-              {isSubmitting ? <Loader2 className="animate-spin" /> : <UserPlus />}
+              {isSubmitting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <UserPlus />
+              )}
               Create Account
             </Button>
 
@@ -155,15 +175,27 @@ export function SignUpForm({ className, ...props }: React.HTMLAttributes<HTMLFor
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="w-full" type="button" disabled={isSubmitting}>
+              <Button
+                variant="outline"
+                className="w-full"
+                type="button"
+                disabled={isSubmitting}
+              >
                 <IconGithub className="h-4 w-4" /> GitHub
               </Button>
-              <Button variant="outline" className="w-full" type="button" disabled={isSubmitting}>
+              <Button
+                variant="outline"
+                className="w-full"
+                type="button"
+                disabled={isSubmitting}
+              >
                 <IconFacebook className="h-4 w-4" /> Facebook
               </Button>
             </div>

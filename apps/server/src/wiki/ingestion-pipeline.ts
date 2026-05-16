@@ -1,4 +1,11 @@
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import {
+  createOpenAI,
+  createOpenAI as createOllamaCompat,
+} from "@ai-sdk/openai";
 import { db } from "@workspace/db";
+import { decrypt } from "@workspace/db/crypto";
 import {
   document,
   systemAiConfig,
@@ -6,24 +13,19 @@ import {
   wikiPageChunk,
   wikiPageSource,
 } from "@workspace/db/schema/auth";
-import { decrypt } from "@workspace/db/crypto";
-import { eq } from "drizzle-orm";
 import { generateObject, generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createOpenAI as createOllamaCompat } from "@ai-sdk/openai";
-import { z } from "zod";
 import type { LanguageModel } from "ai";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function slugify(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replaceAll(/[^\w\s-]/g, "")
+    .replaceAll(/[\s_]+/g, "-")
+    .replaceAll(/^-+|-+$/g, "")
     .slice(0, 80);
 }
 
@@ -40,7 +42,7 @@ function buildLanguageModel(
   providerType: string,
   modelId: string,
   apiKey: string,
-  baseUrl: string | null,
+  baseUrl: string | null
 ): LanguageModel {
   if (providerType === "openai") {
     const provider = createOpenAI({ apiKey, baseURL: baseUrl ?? undefined });
@@ -59,8 +61,8 @@ function buildLanguageModel(
   }
   if (providerType === "ollama") {
     const provider = createOllamaCompat({
-      baseURL: `${baseUrl ?? "http://localhost:11434"}/v1`,
       apiKey: "ollama",
+      baseURL: `${baseUrl ?? "http://localhost:11434"}/v1`,
     });
     return provider(modelId);
   }
@@ -69,20 +71,29 @@ function buildLanguageModel(
 
 async function embedTexts(texts: string[]): Promise<number[][]> {
   const config = await getConfig("pipeline_embedding");
-  if (!config) throw new Error("Embedding model not configured");
+  if (!config) {
+    throw new Error("Embedding model not configured");
+  }
 
   const apiKey = decrypt(config.apiKey);
 
   if (config.providerType === "openai") {
     const baseUrl = config.baseUrl ?? "https://api.openai.com/v1";
     const res = await fetch(`${baseUrl}/embeddings`, {
+      body: JSON.stringify({ input: texts, model: config.modelId }),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: config.modelId, input: texts }),
     });
-    if (!res.ok) throw new Error(`Embedding API ${res.status}: ${await res.text()}`);
-    const data = (await res.json()) as { data: { embedding: number[]; index: number }[] };
-    const sorted = data.data.sort((a, b) => a.index - b.index);
+    if (!res.ok) {
+      throw new Error(`Embedding API ${res.status}: ${await res.text()}`);
+    }
+    const data = (await res.json()) as {
+      data: { embedding: number[]; index: number }[];
+    };
+    const sorted = data.data.toSorted((a, b) => a.index - b.index);
     return sorted.map((d) => d.embedding);
   }
 
@@ -91,11 +102,13 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
     const embeddings: number[][] = [];
     for (const text of texts) {
       const res = await fetch(`${baseUrl}/api/embed`, {
-        method: "POST",
+        body: JSON.stringify({ input: text, model: config.modelId }),
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: config.modelId, input: text }),
+        method: "POST",
       });
-      if (!res.ok) throw new Error(`Ollama embed ${res.status}`);
+      if (!res.ok) {
+        throw new Error(`Ollama embed ${res.status}`);
+      }
       const data = (await res.json()) as { embeddings: number[][] };
       embeddings.push(data.embeddings[0]!);
     }
@@ -103,24 +116,27 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
   }
 
   if (config.providerType === "google") {
-    const baseUrl = config.baseUrl ?? "https://generativelanguage.googleapis.com/v1beta";
+    const baseUrl =
+      config.baseUrl ?? "https://generativelanguage.googleapis.com/v1beta";
     const model = config.modelId.startsWith("models/")
       ? config.modelId
       : `models/${config.modelId}`;
     const embeddings: number[][] = [];
     for (const text of texts) {
       const res = await fetch(`${baseUrl}/${model}:embedContent`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
         body: JSON.stringify({
           content: { parts: [{ text }] },
           outputDimensionality: 1536,
         }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
+        },
+        method: "POST",
       });
-      if (!res.ok) throw new Error(`Gemini embed ${res.status}: ${await res.text()}`);
+      if (!res.ok) {
+        throw new Error(`Gemini embed ${res.status}: ${await res.text()}`);
+      }
       const data = (await res.json()) as { embedding: { values: number[] } };
       embeddings.push(data.embedding.values);
     }
@@ -140,7 +156,9 @@ function chunkByHeadings(markdown: string): string[] {
   for (const line of lines) {
     if (/^#{1,3}\s/.test(line) && current.length > 0) {
       const chunk = current.join("\n").trim();
-      if (chunk) chunks.push(chunk);
+      if (chunk) {
+        chunks.push(chunk);
+      }
       current = [line];
     } else {
       current.push(line);
@@ -148,7 +166,9 @@ function chunkByHeadings(markdown: string): string[] {
   }
   if (current.length > 0) {
     const chunk = current.join("\n").trim();
-    if (chunk) chunks.push(chunk);
+    if (chunk) {
+      chunks.push(chunk);
+    }
   }
 
   // Fallback: no headings → group by paragraphs to target ~2000 chars per chunk
@@ -189,9 +209,9 @@ function chunkByParagraphs(content: string): string[] {
 // ── extraction schema ─────────────────────────────────────────────────────────
 
 const extractionSchema = z.object({
-  entities: z.array(z.string()),
-  concepts: z.array(z.string()),
   claims: z.array(z.string()),
+  concepts: z.array(z.string()),
+  entities: z.array(z.string()),
   summary: z.string(),
 });
 
@@ -202,17 +222,17 @@ type Extraction = z.infer<typeof extractionSchema>;
 const planSchema = z.object({
   create: z.array(
     z.object({
-      title: z.string(),
-      slug: z.string(),
       relevantChunkIndices: z.array(z.number()),
-    }),
+      slug: z.string(),
+      title: z.string(),
+    })
   ),
   update: z.array(
     z.object({
       pageId: z.string(),
-      title: z.string(),
       relevantChunkIndices: z.array(z.number()),
-    }),
+      title: z.string(),
+    })
   ),
 });
 
@@ -220,21 +240,29 @@ const planSchema = z.object({
 
 export async function runIngestionPipeline(documentId: string): Promise<void> {
   // Load document
-  const [doc] = await db.select().from(document).where(eq(document.id, documentId)).limit(1);
+  const [doc] = await db
+    .select()
+    .from(document)
+    .where(eq(document.id, documentId))
+    .limit(1);
   if (!doc || !doc.markdownContent) {
-    throw new Error(`Document ${documentId} not found or has no markdown content`);
+    throw new Error(
+      `Document ${documentId} not found or has no markdown content`
+    );
   }
 
   // Load text config
   const textConfig = await getConfig("pipeline_text");
-  if (!textConfig) throw new Error("Pipeline text model not configured");
+  if (!textConfig) {
+    throw new Error("Pipeline text model not configured");
+  }
 
   const apiKey = decrypt(textConfig.apiKey);
   const model = buildLanguageModel(
     textConfig.providerType,
     textConfig.modelId,
     apiKey,
-    textConfig.baseUrl,
+    textConfig.baseUrl
   );
 
   // ── PHASE 1: EXTRACT ──────────────────────────────────────────────────────
@@ -245,15 +273,17 @@ export async function runIngestionPipeline(documentId: string): Promise<void> {
   const BATCH_SIZE = 3;
   for (let i = 0; i < sourceChunks.length; i += BATCH_SIZE) {
     const batch = sourceChunks.slice(i, i + BATCH_SIZE);
-    console.log(`[wiki] EXTRACT batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(sourceChunks.length / BATCH_SIZE)}`);
+    console.log(
+      `[wiki] EXTRACT batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(sourceChunks.length / BATCH_SIZE)}`
+    );
 
     const results = await Promise.all(
       batch.map(async (chunk) => {
         try {
           const { object } = await generateObject({
             model,
-            schema: extractionSchema,
             prompt: `Extract structured knowledge from the following document section. Return entities (named things), concepts (important ideas/terms), claims (facts/statements), and a brief summary.\n\nDocument section:\n${chunk.slice(0, 3000)}`,
+            schema: extractionSchema,
           });
           return { ...object, sourceText: chunk };
         } catch (error) {
@@ -264,15 +294,21 @@ export async function runIngestionPipeline(documentId: string): Promise<void> {
     );
 
     for (const res of results) {
-      if (res) extractions.push(res);
+      if (res) {
+        extractions.push(res);
+      }
     }
   }
 
   // ── PHASE 2: PLAN ─────────────────────────────────────────────────────────
   console.log(`[wiki] PLAN phase for document ${documentId}`);
-  const existingPages = await db.select({ id: wikiPage.id, title: wikiPage.title }).from(wikiPage);
+  const existingPages = await db
+    .select({ id: wikiPage.id, title: wikiPage.title })
+    .from(wikiPage);
 
-  const aggregatedSummary = extractions.map((e, i) => `[${i}] ${e.summary}`).join("\n");
+  const aggregatedSummary = extractions
+    .map((e, i) => `[${i}] ${e.summary}`)
+    .join("\n");
   const existingPagesList =
     existingPages.length > 0
       ? existingPages.map((p) => `- id:${p.id} title:${p.title}`).join("\n")
@@ -280,7 +316,6 @@ export async function runIngestionPipeline(documentId: string): Promise<void> {
 
   const { object: plan } = await generateObject({
     model,
-    schema: planSchema,
     prompt: `You are a wiki editor. Given extracted knowledge from a new document and the list of existing wiki pages, produce a plan:
 - "create": new wiki pages to create (with title, slug, and which chunk indices [0-based] are relevant)
 - "update": existing pages to update (with pageId, title, and which chunk indices are relevant)
@@ -293,18 +328,21 @@ ${aggregatedSummary}
 
 Existing wiki pages:
 ${existingPagesList}`,
+    schema: planSchema,
   });
 
   // ── PHASE 3: COMMIT ───────────────────────────────────────────────────────
   console.log(`[wiki] COMMIT phase for document ${documentId}`);
 
   for (const pageSpec of plan.create) {
-    const relevantChunks = pageSpec.relevantChunkIndices.map((i) => extractions[i]).filter(Boolean);
+    const relevantChunks = pageSpec.relevantChunkIndices
+      .map((i) => extractions[i])
+      .filter(Boolean);
 
     const context = relevantChunks
       .map(
         (e) =>
-          `Source chunk:\n${e!.sourceText}\n\nExtracted:\n${JSON.stringify({ entities: e!.entities, concepts: e!.concepts, claims: e!.claims })}`,
+          `Source chunk:\n${e!.sourceText}\n\nExtracted:\n${JSON.stringify({ claims: e!.claims, concepts: e!.concepts, entities: e!.entities })}`
       )
       .join("\n\n---\n\n");
 
@@ -318,14 +356,14 @@ ${existingPagesList}`,
     const [upsertedPage] = await db
       .insert(wikiPage)
       .values({
-        id: crypto.randomUUID(),
-        title: pageSpec.title,
-        slug,
         content,
+        id: crypto.randomUUID(),
+        slug,
+        title: pageSpec.title,
       })
       .onConflictDoUpdate({
+        set: { content, title: pageSpec.title },
         target: wikiPage.slug,
-        set: { title: pageSpec.title, content },
       })
       .returning({ id: wikiPage.id });
 
@@ -334,7 +372,7 @@ ${existingPagesList}`,
     // Upsert source link
     await db
       .insert(wikiPageSource)
-      .values({ wikiPageId: actualPageId, documentId })
+      .values({ documentId, wikiPageId: actualPageId })
       .onConflictDoNothing();
 
     // Embed and store chunks
@@ -347,9 +385,13 @@ ${existingPagesList}`,
       .from(wikiPage)
       .where(eq(wikiPage.id, pageSpec.pageId))
       .limit(1);
-    if (!existing) continue;
+    if (!existing) {
+      continue;
+    }
 
-    const relevantChunks = pageSpec.relevantChunkIndices.map((i) => extractions[i]).filter(Boolean);
+    const relevantChunks = pageSpec.relevantChunkIndices
+      .map((i) => extractions[i])
+      .filter(Boolean);
 
     const newContext = relevantChunks
       .map((e) => `Source chunk:\n${e!.sourceText}`)
@@ -368,7 +410,7 @@ ${existingPagesList}`,
     // Add source link if not already present
     await db
       .insert(wikiPageSource)
-      .values({ wikiPageId: pageSpec.pageId, documentId })
+      .values({ documentId, wikiPageId: pageSpec.pageId })
       .onConflictDoNothing();
 
     // Re-embed
@@ -376,9 +418,14 @@ ${existingPagesList}`,
   }
 }
 
-async function embedAndStoreChunks(pageId: string, content: string): Promise<void> {
+async function embedAndStoreChunks(
+  pageId: string,
+  content: string
+): Promise<void> {
   const paragraphs = chunkByParagraphs(content);
-  if (paragraphs.length === 0) return;
+  if (paragraphs.length === 0) {
+    return;
+  }
 
   // Delete old chunks
   await db.delete(wikiPageChunk).where(eq(wikiPageChunk.wikiPageId, pageId));
@@ -388,11 +435,11 @@ async function embedAndStoreChunks(pageId: string, content: string): Promise<voi
 
   // Insert new chunks
   const chunkRows = paragraphs.map((text, i) => ({
+    chunkIndex: i,
+    content: text,
+    embedding: embeddings[i]!,
     id: crypto.randomUUID(),
     wikiPageId: pageId,
-    content: text,
-    chunkIndex: i,
-    embedding: embeddings[i]!,
   }));
 
   await db.insert(wikiPageChunk).values(chunkRows);

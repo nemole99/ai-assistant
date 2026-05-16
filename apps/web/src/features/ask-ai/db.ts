@@ -1,4 +1,5 @@
-import Dexie, { type EntityTable } from "dexie";
+import Dexie from "dexie";
+import type { EntityTable } from "dexie";
 
 export interface Conversation {
   id: string;

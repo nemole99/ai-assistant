@@ -16,7 +16,9 @@ const cache = new Map<string, CopilotSession>();
  * Returns a valid short-lived Copilot session token + endpoint for the given user.
  * Refreshes automatically when within 60 seconds of expiry.
  */
-export async function getCopilotSession(userId: string): Promise<CopilotSession> {
+export async function getCopilotSession(
+  userId: string
+): Promise<CopilotSession> {
   const cached = cache.get(userId);
   if (cached && cached.expiresAt - Date.now() > 60_000) {
     return cached;
@@ -29,9 +31,9 @@ export async function getCopilotSession(userId: string): Promise<CopilotSession>
 
   const res = await fetch(COPILOT_TOKEN_URL, {
     headers: {
+      Accept: "application/json",
       Authorization: `Bearer ${githubToken}`,
       "Copilot-Integration-Id": COPILOT_INTEGRATION_ID,
-      Accept: "application/json",
     },
   });
 
@@ -51,9 +53,11 @@ export async function getCopilotSession(userId: string): Promise<CopilotSession>
   }
 
   const session: CopilotSession = {
-    token: data.token,
     endpoint: data.endpoints?.api ?? "https://api.githubcopilot.com",
-    expiresAt: data.expires_at ? data.expires_at * 1000 : Date.now() + 30 * 60 * 1000, // default 30 min
+    expiresAt: data.expires_at
+      ? data.expires_at * 1000
+      : Date.now() + 30 * 60 * 1000, // default 30 min
+    token: data.token,
   };
 
   cache.set(userId, session);

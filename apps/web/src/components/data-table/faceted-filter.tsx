@@ -1,4 +1,4 @@
-import { type Column } from "@tanstack/react-table";
+import type { Column } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
@@ -11,12 +11,16 @@ import {
   CommandList,
   CommandSeparator,
 } from "@workspace/ui/components/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover";
 import { Separator } from "@workspace/ui/components/separator";
 import { PlusCircle } from "lucide-react";
 import * as React from "react";
 
-type DataTableFacetedFilterProps<TData, TValue> = {
+interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
   options: {
@@ -24,7 +28,7 @@ type DataTableFacetedFilterProps<TData, TValue> = {
     value: string;
     icon?: React.ComponentType<{ className?: string }>;
   }[];
-};
+}
 
 export function DataTableFacetedFilter<TData, TValue>({
   column,
@@ -36,18 +40,28 @@ export function DataTableFacetedFilter<TData, TValue>({
 
   return (
     <Popover>
-      <PopoverTrigger render={<Button variant="outline" size="sm" className="h-8 border-dashed" />}>
+      <PopoverTrigger
+        render={
+          <Button variant="outline" size="sm" className="h-8 border-dashed" />
+        }
+      >
         <PlusCircle className="size-4" />
         {title}
         {selectedValues?.size > 0 && (
           <>
             <Separator orientation="vertical" className="mx-2 h-4" />
-            <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+            <Badge
+              variant="secondary"
+              className="rounded-sm px-1 font-normal lg:hidden"
+            >
               {selectedValues.size}
             </Badge>
             <div className="hidden space-x-1 lg:flex">
               {selectedValues.size > 2 ? (
-                <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-1 font-normal"
+                >
                   {selectedValues.size} selected
                 </Badge>
               ) : (
@@ -85,12 +99,16 @@ export function DataTableFacetedFilter<TData, TValue>({
                       } else {
                         selectedValues.add(option.value);
                       }
-                      const filterValues = Array.from(selectedValues);
-                      column?.setFilterValue(filterValues.length ? filterValues : undefined);
+                      const filterValues = [...selectedValues];
+                      column?.setFilterValue(
+                        filterValues.length ? filterValues : undefined
+                      );
                     }}
                   >
                     <Checkbox checked={isSelected} tabIndex={-1} />
-                    {option.icon && <option.icon className="size-4 text-muted-foreground" />}
+                    {option.icon && (
+                      <option.icon className="size-4 text-muted-foreground" />
+                    )}
                     <span className="flex flex-1 items-center justify-between">
                       <span>{option.label}</span>
                       {facets?.get(option.value) && (

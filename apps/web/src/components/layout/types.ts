@@ -1,23 +1,17 @@
-import { type LinkProps } from "@tanstack/react-router";
+import type { LinkProps } from "@tanstack/react-router";
 
-type User = {
-  name: string;
-  email: string;
-  avatar: string;
-};
-
-type Team = {
+interface Team {
   name: string;
   logo: React.ElementType;
   plan: string;
-};
+}
 
-type BaseNavItem = {
+interface BaseNavItem {
   title: string;
   badge?: string;
   icon?: React.ElementType;
   adminOnly?: boolean;
-};
+}
 
 type NavLink = BaseNavItem & {
   url: LinkProps["to"] | (string & {});
@@ -31,14 +25,14 @@ type NavCollapsible = BaseNavItem & {
 
 type NavItem = NavCollapsible | NavLink;
 
-type NavGroup = {
+interface NavGroup {
   title: string;
   items: NavItem[];
-};
+}
 
-type SidebarData = {
+interface SidebarData {
   teams: Team[];
   navGroups: NavGroup[];
-};
+}
 
 export type { SidebarData, NavGroup, NavItem, NavCollapsible, NavLink };

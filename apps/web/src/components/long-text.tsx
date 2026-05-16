@@ -1,20 +1,28 @@
-import { useRef, useState } from "react";
-import { cn } from "@workspace/ui/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import { cn } from "@workspace/ui/lib/utils";
+import { useRef, useState } from "react";
 
-type LongTextProps = {
+interface LongTextProps {
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
-};
+}
 
-export function LongText({ children, className = "", contentClassName = "" }: LongTextProps) {
+export function LongText({
+  children,
+  className = "",
+  contentClassName = "",
+}: LongTextProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isOverflown, setIsOverflown] = useState(false);
 
@@ -26,12 +34,13 @@ export function LongText({ children, className = "", contentClassName = "" }: Lo
     }
   };
 
-  if (!isOverflown)
+  if (!isOverflown) {
     return (
       <div ref={refCallback} className={cn("truncate", className)}>
         {children}
       </div>
     );
+  }
 
   return (
     <>
@@ -39,7 +48,9 @@ export function LongText({ children, className = "", contentClassName = "" }: Lo
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
-              render={<div ref={refCallback} className={cn("truncate", className)} />}
+              render={
+                <div ref={refCallback} className={cn("truncate", className)} />
+              }
             >
               {children}
             </TooltipTrigger>
@@ -51,7 +62,11 @@ export function LongText({ children, className = "", contentClassName = "" }: Lo
       </div>
       <div className="sm:hidden">
         <Popover>
-          <PopoverTrigger render={<div ref={refCallback} className={cn("truncate", className)} />}>
+          <PopoverTrigger
+            render={
+              <div ref={refCallback} className={cn("truncate", className)} />
+            }
+          >
             {children}
           </PopoverTrigger>
           <PopoverContent className={cn("w-fit", contentClassName)}>

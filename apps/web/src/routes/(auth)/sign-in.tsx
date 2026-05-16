@@ -1,14 +1,14 @@
-import { z } from "zod";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth-client";
+import { z } from "zod";
+
 import { SignIn } from "@/features/auth/sign-in";
+import { authClient } from "@/lib/auth-client";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
 });
 
 export const Route = createFileRoute("/(auth)/sign-in")({
-  validateSearch: searchSchema,
   beforeLoad: async ({ search }) => {
     const { data: session } = await authClient.getSession();
     if (session) {
@@ -16,4 +16,5 @@ export const Route = createFileRoute("/(auth)/sign-in")({
     }
   },
   component: SignIn,
+  validateSearch: searchSchema,
 });
