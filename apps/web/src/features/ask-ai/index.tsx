@@ -59,7 +59,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 
 import { PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react";
 import { ChatHistorySidebar } from "./components/chat-history-sidebar";
-import { WikiPageModal } from "@/features/wiki/wiki-page-modal";
+import { WikiPageDrawer } from "@/features/wiki/wiki-page-drawer";
 
 interface WikiCitation {
   id: string;
@@ -449,7 +449,7 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
       )}
 
       {viewingWikiPageId && (
-        <WikiPageModal pageId={viewingWikiPageId} onClose={() => setViewingWikiPageId(null)} />
+        <WikiPageDrawer pageId={viewingWikiPageId} onClose={() => setViewingWikiPageId(null)} />
       )}
     </div>
   );

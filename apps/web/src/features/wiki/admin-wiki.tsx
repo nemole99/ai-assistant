@@ -13,7 +13,7 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 import { Trash2, Eye, Loader2, BookOpen } from "lucide-react";
-import { WikiPageModal } from "./wiki-page-modal";
+import { WikiPageDrawer } from "./wiki-page-drawer";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { formatDistanceToNow } from "date-fns";
 
@@ -70,7 +70,6 @@ export function AdminWiki() {
             </p>
           </div>
         ) : (
-          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -122,12 +121,11 @@ export function AdminWiki() {
                 ))}
               </TableBody>
             </Table>
-          </div>
         )}
       </div>
 
       {viewingPageId && (
-        <WikiPageModal pageId={viewingPageId} onClose={() => setViewingPageId(null)} />
+        <WikiPageDrawer pageId={viewingPageId} onClose={() => setViewingPageId(null)} />
       )}
 
       <ConfirmDialog

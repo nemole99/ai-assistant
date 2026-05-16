@@ -5,7 +5,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Badge } from "@workspace/ui/components/badge";
 import { Loader2, BookOpen, Search } from "lucide-react";
 import { useState } from "react";
-import { WikiPageModal } from "./wiki-page-modal";
+import { WikiPageDrawer } from "./wiki-page-drawer";
 import { formatDistanceToNow } from "date-fns";
 
 export function WikiPage() {
@@ -85,7 +85,7 @@ export function WikiPage() {
       </div>
 
       {viewingPageId && (
-        <WikiPageModal pageId={viewingPageId} onClose={() => setViewingPageId(null)} />
+        <WikiPageDrawer pageId={viewingPageId} onClose={() => setViewingPageId(null)} />
       )}
     </ContentLayout>
   );

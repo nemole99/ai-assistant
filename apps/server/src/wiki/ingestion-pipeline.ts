@@ -151,12 +151,29 @@ function chunkByHeadings(markdown: string): string[] {
     if (chunk) chunks.push(chunk);
   }
 
-  // Fallback: no headings → split on double newlines with max ~2000 chars
+  // Fallback: no headings → group by paragraphs to target ~2000 chars per chunk
   if (chunks.length <= 1 && markdown.length > 500) {
-    return markdown
+    const paragraphs = markdown
       .split(/\n\n+/)
       .map((c) => c.trim())
       .filter((c) => c.length > 0);
+
+    const groupedChunks: string[] = [];
+    let currentChunk = "";
+
+    for (const p of paragraphs) {
+      if (currentChunk.length + p.length > 2000 && currentChunk.length > 0) {
+        groupedChunks.push(currentChunk.trim());
+        currentChunk = p;
+      } else {
+        currentChunk += (currentChunk ? "\n\n" : "") + p;
+      }
+    }
+    if (currentChunk) {
+      groupedChunks.push(currentChunk.trim());
+    }
+
+    return groupedChunks;
   }
 
   return chunks.filter((c) => c.length > 0);
@@ -225,13 +242,30 @@ export async function runIngestionPipeline(documentId: string): Promise<void> {
   const sourceChunks = chunkByHeadings(doc.markdownContent);
   const extractions: (Extraction & { sourceText: string })[] = [];
 
-  for (const chunk of sourceChunks) {
-    const { object } = await generateObject({
-      model,
-      schema: extractionSchema,
-      prompt: `Extract structured knowledge from the following document section. Return entities (named things), concepts (important ideas/terms), claims (facts/statements), and a brief summary.\n\nDocument section:\n${chunk.slice(0, 3000)}`,
-    });
-    extractions.push({ ...object, sourceText: chunk });
+  const BATCH_SIZE = 3;
+  for (let i = 0; i < sourceChunks.length; i += BATCH_SIZE) {
+    const batch = sourceChunks.slice(i, i + BATCH_SIZE);
+    console.log(`[wiki] EXTRACT batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(sourceChunks.length / BATCH_SIZE)}`);
+
+    const results = await Promise.all(
+      batch.map(async (chunk) => {
+        try {
+          const { object } = await generateObject({
+            model,
+            schema: extractionSchema,
+            prompt: `Extract structured knowledge from the following document section. Return entities (named things), concepts (important ideas/terms), claims (facts/statements), and a brief summary.\n\nDocument section:\n${chunk.slice(0, 3000)}`,
+          });
+          return { ...object, sourceText: chunk };
+        } catch (error) {
+          console.error(`[wiki] EXTRACT error on chunk:`, error);
+          return null;
+        }
+      })
+    );
+
+    for (const res of results) {
+      if (res) extractions.push(res);
+    }
   }
 
   // ── PHASE 2: PLAN ─────────────────────────────────────────────────────────

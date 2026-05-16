@@ -131,10 +131,9 @@ export function SystemAIConfigCard({
           (value.providerType === "ollama" ? "local" : "KEEP_EXISTING"),
         modelId: value.modelId,
         baseUrl:
-          value.baseUrl ||
-          (value.providerType === "ollama"
-            ? "http://localhost:11434/"
-            : null),
+          value.providerType === "ollama"
+            ? value.baseUrl || "http://localhost:11434/"
+            : null,
       });
     },
   });
@@ -221,7 +220,7 @@ export function SystemAIConfigCard({
             <span className="font-medium text-foreground">API Key:</span>{" "}
             {config.apiKeyMasked}
           </div>
-          {config.baseUrl && (
+          {config.providerType === "ollama" && config.baseUrl && (
             <div>
               <span className="font-medium text-foreground">Base URL:</span>{" "}
               {config.baseUrl}
@@ -363,7 +362,7 @@ export function SystemAIConfigCard({
             <form.Subscribe
               selector={(state) => state.values.providerType}
               children={(providerType) =>
-                providerType === "ollama" || providerType === "openai" ? (
+                providerType === "ollama" ? (
                   <form.Field
                     name="baseUrl"
                     children={(field) => (
@@ -376,11 +375,7 @@ export function SystemAIConfigCard({
                         </FieldLabel>
                         <Input
                           id={field.name}
-                          placeholder={
-                            providerType === "ollama"
-                              ? "http://localhost:11434"
-                              : "https://api.openai.com/v1"
-                          }
+                          placeholder="http://localhost:11434"
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}

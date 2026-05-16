@@ -5,7 +5,7 @@ import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Markdown } from "@workspace/ui/components/ui/markdown";
+import { Markdown } from "@workspace/ui/components/markdown";
 import { ContentLayout } from "@/components/layout/content-layout";
 import { orpc } from "@/lib/orpc";
 import { DocumentCategoryBadge } from "./components/document-category-badge";
