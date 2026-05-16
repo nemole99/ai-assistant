@@ -5,6 +5,7 @@ import { ArrowLeft, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Markdown } from "@workspace/ui/components/ui/markdown";
 import { ContentLayout } from "@/components/layout/content-layout";
 import { orpc } from "@/lib/orpc";
 import { DocumentCategoryBadge } from "./components/document-category-badge";
@@ -89,10 +90,9 @@ export function DocumentReader({ id }: { id: string }) {
       </div>
 
       {doc.markdownContent ? (
-        <article
-          className="prose dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(doc.markdownContent) }}
-        />
+        <Markdown className="prose dark:prose-invert max-w-none" id={doc.id}>
+          {doc.markdownContent}
+        </Markdown>
       ) : (
         <div className="text-muted-foreground py-8 text-center text-sm">
           Content is still being processed…
@@ -100,29 +100,4 @@ export function DocumentReader({ id }: { id: string }) {
       )}
     </ContentLayout>
   );
-}
-
-function renderMarkdown(md: string): string {
-  return md
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/^#{6} (.+)/gm, "<h6>$1</h6>")
-    .replace(/^#{5} (.+)/gm, "<h5>$1</h5>")
-    .replace(/^#{4} (.+)/gm, "<h4>$1</h4>")
-    .replace(/^### (.+)/gm, "<h3>$1</h3>")
-    .replace(/^## (.+)/gm, "<h2>$1</h2>")
-    .replace(/^# (.+)/gm, "<h1>$1</h1>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/```[\s\S]*?```/g, (block) => {
-      const code = block.replace(/```\w*\n?/, "").replace(/```$/, "");
-      return `<pre><code>${code}</code></pre>`;
-    })
-    .replace(/^[-*] (.+)/gm, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>")
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/^(?!<[h|u|p|l|p|c])(.+)/gm, "<p>$1</p>");
 }
