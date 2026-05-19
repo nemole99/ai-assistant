@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 import { defineConfig } from "drizzle-kit";
 
-dotenv.config({
-  path: "../../apps/server/.env",
-});
+// Local dev: apps/server/.env. Docker: DATABASE_URL from container env (.env.docker).
+if (!process.env.DATABASE_URL) {
+  dotenv.config({ path: "../../apps/server/.env" });
+}
 
 export default defineConfig({
   dbCredentials: {
