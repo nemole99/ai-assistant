@@ -8,6 +8,7 @@
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "bun run --hot src/index.ts",
     "dev:worker": "bun run --hot src/worker.ts",
+    "create-admin": "bun src/scripts/create-admin.ts",
     "db:seed": "bun src/seed/index.ts",
     "start": "bun run dist/index.mjs"
   },

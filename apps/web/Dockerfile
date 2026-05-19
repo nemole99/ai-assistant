@@ -4,6 +4,13 @@ WORKDIR /app
 ARG VITE_SERVER_URL
 ENV VITE_SERVER_URL=$VITE_SERVER_URL
 
+# Fail fast with a clear message instead of "Invalid environment variables" in the browser
+RUN test -n "$VITE_SERVER_URL" || ( \
+  echo "ERROR: VITE_SERVER_URL build arg is empty." && \
+  echo "Set it in .env.docker and run: docker compose --env-file .env.docker build web" && \
+  exit 1 \
+)
+
 # Copy manifests first for better layer caching
 COPY package.json bun.lock* bun.lockb* turbo.json ./
 COPY apps/web/package.json apps/web/

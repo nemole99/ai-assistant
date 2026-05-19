@@ -110,7 +110,8 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        VITE_SERVER_URL: ${VITE_SERVER_URL}
+        # Baked into the JS bundle at build time. Override via .env.docker / --env-file.
+        VITE_SERVER_URL: ${VITE_SERVER_URL:-http://localhost:2103}
     image: ai-assistant-web:latest
     container_name: ai_assistant_web
     restart: always

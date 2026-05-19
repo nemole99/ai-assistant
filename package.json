@@ -37,6 +37,7 @@
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
     "db:push": "turbo -F @workspace/db db:push",
+    "create-admin": "turbo -F server create-admin",
     "db:seed": "turbo -F @workspace/db db:seed",
     "db:studio": "turbo -F @workspace/db db:studio",
     "db:generate": "turbo -F @workspace/db db:generate",

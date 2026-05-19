@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Git Bash / Linux / macOS entry point (do not use create-admin.ps1 here)
+exec "$(dirname "$0")/create-admin.sh" "$@"
