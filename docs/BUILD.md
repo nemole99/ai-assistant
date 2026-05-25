@@ -6,6 +6,18 @@ Always pass `--env-file .env.docker` — without it, `VITE_SERVER_URL` will be e
 docker compose --env-file .env.docker up -d --build
 ```
 
+If PostgreSQL and MinIO already run outside Docker and `.env.docker` points to those external services, the app containers will use them directly. The bundled `postgres` and `minio` services are now optional behind the `bundled-infra` profile:
+
+```bash
+docker compose --env-file .env.docker up -d --build
+```
+
+To run the bundled Postgres + MinIO as well:
+
+```bash
+docker compose --env-file .env.docker --profile bundled-infra up -d --build
+```
+
 ## Resetting the database volume
 
 > **Warning:** this removes all PostgreSQL data. You will need to seed again afterwards.

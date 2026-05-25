@@ -7,8 +7,6 @@ x-backend: &backend
   env_file: [.env.docker]
   restart: always
   depends_on:
-    postgres:
-      condition: service_healthy
     redis:
       condition: service_healthy
 
@@ -16,6 +14,7 @@ services:
   # ── Infrastructure ────────────────────────────────────────────
 
   postgres:
+    profiles: ["bundled-infra"]
     image: pgvector/pgvector:pg17
     container_name: ai_assistant_postgres
     restart: always
@@ -42,6 +41,7 @@ services:
       retries: 10
 
   minio:
+    profiles: ["bundled-infra"]
     image: minio/minio
     container_name: ai_assistant_minio
     restart: always
@@ -69,10 +69,12 @@ services:
     container_name: ai_assistant_migrate
     env_file: [.env.docker]
     restart: "no"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: ["sh", "-c", "cd /app/packages/db && bun run db:push"]
+    command:
+      [
+        "sh",
+        "-c",
+        "bun /app/apps/server/src/scripts/wait-for-db.ts && cd /app/packages/db && bun run db:push",
+      ]
 
   # ── Application ───────────────────────────────────────────────
 
@@ -80,11 +82,7 @@ services:
     <<: *backend
     container_name: ai_assistant_server
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
-        condition: service_healthy
-      minio:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
@@ -96,11 +94,7 @@ services:
     container_name: ai_assistant_worker
     command: ["/app/worker-bin"]
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
-        condition: service_healthy
-      minio:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
