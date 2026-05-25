@@ -183,7 +183,7 @@ export function AskAi({ conversationId }: { conversationId?: string }) {
         const citations = pendingCitationsRef.current;
         if (citations.length > 0) {
           const lastAssistant = [...updatedMessages]
-            .toReversed()
+            .reverse()
             .find((m) => m.role === "assistant");
           if (lastAssistant) {
             setCitationsByMessage((prev) => ({

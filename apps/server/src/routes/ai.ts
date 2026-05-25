@@ -8,6 +8,7 @@ import { db } from "@workspace/db";
 import { decrypt } from "@workspace/db/crypto";
 import {
   systemAiConfig,
+  WIKI_EMBEDDING_DIMENSIONS,
   wikiPage,
   wikiPageChunk,
 } from "@workspace/db/schema/auth";
@@ -89,7 +90,7 @@ async function embedQuery(query: string): Promise<number[] | null> {
       const res = await fetch(`${baseUrl}/${model}:embedContent`, {
         body: JSON.stringify({
           content: { parts: [{ text: query }] },
-          outputDimensionality: 1536,
+          outputDimensionality: WIKI_EMBEDDING_DIMENSIONS,
         }),
         headers: {
           "Content-Type": "application/json",

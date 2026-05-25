@@ -9,6 +9,7 @@ import { decrypt } from "@workspace/db/crypto";
 import {
   document,
   systemAiConfig,
+  WIKI_EMBEDDING_DIMENSIONS,
   wikiPage,
   wikiPageChunk,
   wikiPageSource,
@@ -126,7 +127,7 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
       const res = await fetch(`${baseUrl}/${model}:embedContent`, {
         body: JSON.stringify({
           content: { parts: [{ text }] },
-          outputDimensionality: 1536,
+          outputDimensionality: WIKI_EMBEDDING_DIMENSIONS,
         }),
         headers: {
           "Content-Type": "application/json",

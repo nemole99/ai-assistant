@@ -1,7 +1,10 @@
 import { ORPCError } from "@orpc/server";
 import { db } from "@workspace/db";
 import { decrypt, encrypt } from "@workspace/db/crypto";
-import { systemAiConfig } from "@workspace/db/schema/auth";
+import {
+  systemAiConfig,
+  WIKI_EMBEDDING_DIMENSIONS,
+} from "@workspace/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -140,7 +143,7 @@ export const systemAiConfigRouter = {
             const res = await fetch(`${baseUrl}/${model}:embedContent`, {
               body: JSON.stringify({
                 content: { parts: [{ text: "ping" }] },
-                outputDimensionality: 1536,
+                outputDimensionality: WIKI_EMBEDDING_DIMENSIONS,
               }),
               headers: {
                 "Content-Type": "application/json",

@@ -428,6 +428,8 @@ export const systemPurposeEnum = pgEnum("system_purpose", [
   "pipeline_embedding",
 ]);
 
+export const WIKI_EMBEDDING_DIMENSIONS = 4096;
+
 export const systemAiConfig = pgTable("system_ai_config", {
   apiKey: text("api_key").notNull(),
   baseUrl: text("base_url"),
@@ -472,7 +474,9 @@ export const wikiPageChunk = pgTable(
   {
     chunkIndex: integer("chunk_index").notNull(),
     content: text("content").notNull(),
-    embedding: vector("embedding", { dimensions: 1536 }),
+    embedding: vector("embedding", {
+      dimensions: WIKI_EMBEDDING_DIMENSIONS,
+    }),
     id: text("id").primaryKey(),
     wikiPageId: text("wiki_page_id")
       .notNull()

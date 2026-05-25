@@ -31,7 +31,7 @@ CREATE TABLE "wiki_page_chunk" (
 	"wiki_page_id" text NOT NULL,
 	"content" text NOT NULL,
 	"chunk_index" integer NOT NULL,
-	"embedding" vector(1536)
+	"embedding" vector(4096)
 );
 --> statement-breakpoint
 CREATE TABLE "wiki_page_source" (
