@@ -13,7 +13,9 @@ export function createAuth() {
 
       schema: schema,
     }),
-    trustedOrigins: [env.CORS_ORIGIN],
+    trustedOrigins: env.NODE_ENV === "development"
+      ? ["http://localhost:3001", "http://localhost:3002", "http://localhost:5173"]
+      : [env.CORS_ORIGIN],
     emailAndPassword: {
       enabled: true,
     },

@@ -1,0 +1,81 @@
+{
+  "month": "2026-05",
+  "data": [
+    {
+      "developer": "Joe",
+      "count": 55
+    },
+    {
+      "developer": "Billy",
+      "count": 30
+    },
+    {
+      "developer": "Lotus",
+      "count": 29
+    },
+    {
+      "developer": "Hayden",
+      "count": 28
+    },
+    {
+      "developer": "Ethan",
+      "count": 27
+    },
+    {
+      "developer": "Joy",
+      "count": 24
+    },
+    {
+      "developer": "Janis",
+      "count": 23
+    },
+    {
+      "developer": "Peter",
+      "count": 21
+    },
+    {
+      "developer": "John",
+      "count": 18
+    },
+    {
+      "developer": "Lucas",
+      "count": 16
+    },
+    {
+      "developer": "Helen",
+      "count": 16
+    },
+    {
+      "developer": "Mike",
+      "count": 14
+    },
+    {
+      "developer": "Dante",
+      "count": 13
+    },
+    {
+      "developer": "Alan",
+      "count": 12
+    },
+    {
+      "developer": "Nemo",
+      "count": 12
+    },
+    {
+      "developer": "Brian",
+      "count": 8
+    },
+    {
+      "developer": "Ceuli",
+      "count": 8
+    },
+    {
+      "developer": "Mark",
+      "count": 6
+    },
+    {
+      "developer": "Daryl",
+      "count": 5
+    }
+  ]
+}

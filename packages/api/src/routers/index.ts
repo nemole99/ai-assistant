@@ -7,6 +7,7 @@ import { aiModelAssignmentRouter } from "./ai-model-assignment";
 import { projectRouter } from "./project";
 import { documentCategoryRouter } from "./document-category";
 import { documentRouter } from "./document";
+import { copilotEvaluationRouter } from "./copilot-evaluation";
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -25,6 +26,7 @@ export const appRouter = {
   project: projectRouter,
   documentCategory: documentCategoryRouter,
   document: documentRouter,
+  copilotEvaluation: copilotEvaluationRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

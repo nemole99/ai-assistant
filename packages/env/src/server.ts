@@ -29,6 +29,11 @@ export const env = createEnv({
     // In dev: leave unset — MINIO_ENDPOINT is used as-is.
     MINIO_PUBLIC_ENDPOINT: z.string().optional(),
     REDIS_URL: z.string().url(),
+    // Jira integration (Copilot Evaluation)
+    JIRA_BASE_URL: z.string().url().optional(),
+    JIRA_TOKEN: z.string().optional(),
+    JIRA_PROJECT: z.string().optional(),
+    JIRA_DEVELOPERS: z.string().optional(), // "email1:Name1,email2:Name2"
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

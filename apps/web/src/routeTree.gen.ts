@@ -23,6 +23,7 @@ import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
 import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
+import { Route as AuthenticatedCopilotEvaluationIndexRouteImport } from './routes/_authenticated/copilot-evaluation/index'
 import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
 import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
@@ -30,6 +31,9 @@ import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_au
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedDocumentsCategoriesRouteImport } from './routes/_authenticated/documents/categories'
 import { Route as AuthenticatedDocumentsIdRouteImport } from './routes/_authenticated/documents/$id'
+import { Route as AuthenticatedCopilotEvaluationTimesheetRouteImport } from './routes/_authenticated/copilot-evaluation/timesheet'
+import { Route as AuthenticatedCopilotEvaluationStatsRouteImport } from './routes/_authenticated/copilot-evaluation/stats'
+import { Route as AuthenticatedCopilotEvaluationKpiRouteImport } from './routes/_authenticated/copilot-evaluation/kpi'
 import { Route as AuthenticatedAskAiConversationIdRouteImport } from './routes/_authenticated/ask-ai/$conversationId'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -107,6 +111,12 @@ const AuthenticatedDepartmentsIndexRoute =
     path: '/departments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCopilotEvaluationIndexRoute =
+  AuthenticatedCopilotEvaluationIndexRouteImport.update({
+    id: '/copilot-evaluation/',
+    path: '/copilot-evaluation/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAskAiIndexRoute = AuthenticatedAskAiIndexRouteImport.update({
   id: '/ask-ai/',
   path: '/ask-ai/',
@@ -148,6 +158,24 @@ const AuthenticatedDocumentsIdRoute =
     path: '/documents/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCopilotEvaluationTimesheetRoute =
+  AuthenticatedCopilotEvaluationTimesheetRouteImport.update({
+    id: '/copilot-evaluation/timesheet',
+    path: '/copilot-evaluation/timesheet',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCopilotEvaluationStatsRoute =
+  AuthenticatedCopilotEvaluationStatsRouteImport.update({
+    id: '/copilot-evaluation/stats',
+    path: '/copilot-evaluation/stats',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCopilotEvaluationKpiRoute =
+  AuthenticatedCopilotEvaluationKpiRouteImport.update({
+    id: '/copilot-evaluation/kpi',
+    path: '/copilot-evaluation/kpi',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAskAiConversationIdRoute =
   AuthenticatedAskAiConversationIdRouteImport.update({
     id: '/ask-ai/$conversationId',
@@ -165,6 +193,9 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
+  '/copilot-evaluation/kpi': typeof AuthenticatedCopilotEvaluationKpiRoute
+  '/copilot-evaluation/stats': typeof AuthenticatedCopilotEvaluationStatsRoute
+  '/copilot-evaluation/timesheet': typeof AuthenticatedCopilotEvaluationTimesheetRoute
   '/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -172,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
+  '/copilot-evaluation/': typeof AuthenticatedCopilotEvaluationIndexRoute
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
@@ -187,6 +219,9 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
   '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
+  '/copilot-evaluation/kpi': typeof AuthenticatedCopilotEvaluationKpiRoute
+  '/copilot-evaluation/stats': typeof AuthenticatedCopilotEvaluationStatsRoute
+  '/copilot-evaluation/timesheet': typeof AuthenticatedCopilotEvaluationTimesheetRoute
   '/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -194,6 +229,7 @@ export interface FileRoutesByTo {
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/ask-ai': typeof AuthenticatedAskAiIndexRoute
+  '/copilot-evaluation': typeof AuthenticatedCopilotEvaluationIndexRoute
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
   '/documents': typeof AuthenticatedDocumentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
@@ -212,6 +248,9 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
+  '/_authenticated/copilot-evaluation/kpi': typeof AuthenticatedCopilotEvaluationKpiRoute
+  '/_authenticated/copilot-evaluation/stats': typeof AuthenticatedCopilotEvaluationStatsRoute
+  '/_authenticated/copilot-evaluation/timesheet': typeof AuthenticatedCopilotEvaluationTimesheetRoute
   '/_authenticated/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/_authenticated/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -219,6 +258,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
+  '/_authenticated/copilot-evaluation/': typeof AuthenticatedCopilotEvaluationIndexRoute
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
@@ -237,6 +277,9 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/ask-ai/$conversationId'
+    | '/copilot-evaluation/kpi'
+    | '/copilot-evaluation/stats'
+    | '/copilot-evaluation/timesheet'
     | '/documents/$id'
     | '/documents/categories'
     | '/errors/$error'
@@ -244,6 +287,7 @@ export interface FileRouteTypes {
     | '/settings/ai-providers'
     | '/settings/password'
     | '/ask-ai/'
+    | '/copilot-evaluation/'
     | '/departments/'
     | '/documents/'
     | '/employees/'
@@ -259,6 +303,9 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/ask-ai/$conversationId'
+    | '/copilot-evaluation/kpi'
+    | '/copilot-evaluation/stats'
+    | '/copilot-evaluation/timesheet'
     | '/documents/$id'
     | '/documents/categories'
     | '/errors/$error'
@@ -266,6 +313,7 @@ export interface FileRouteTypes {
     | '/settings/ai-providers'
     | '/settings/password'
     | '/ask-ai'
+    | '/copilot-evaluation'
     | '/departments'
     | '/documents'
     | '/employees'
@@ -283,6 +331,9 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/ask-ai/$conversationId'
+    | '/_authenticated/copilot-evaluation/kpi'
+    | '/_authenticated/copilot-evaluation/stats'
+    | '/_authenticated/copilot-evaluation/timesheet'
     | '/_authenticated/documents/$id'
     | '/_authenticated/documents/categories'
     | '/_authenticated/errors/$error'
@@ -290,6 +341,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/ai-providers'
     | '/_authenticated/settings/password'
     | '/_authenticated/ask-ai/'
+    | '/_authenticated/copilot-evaluation/'
     | '/_authenticated/departments/'
     | '/_authenticated/documents/'
     | '/_authenticated/employees/'
@@ -407,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDepartmentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/copilot-evaluation/': {
+      id: '/_authenticated/copilot-evaluation/'
+      path: '/copilot-evaluation'
+      fullPath: '/copilot-evaluation/'
+      preLoaderRoute: typeof AuthenticatedCopilotEvaluationIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ask-ai/': {
       id: '/_authenticated/ask-ai/'
       path: '/ask-ai'
@@ -456,6 +515,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/copilot-evaluation/timesheet': {
+      id: '/_authenticated/copilot-evaluation/timesheet'
+      path: '/copilot-evaluation/timesheet'
+      fullPath: '/copilot-evaluation/timesheet'
+      preLoaderRoute: typeof AuthenticatedCopilotEvaluationTimesheetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/copilot-evaluation/stats': {
+      id: '/_authenticated/copilot-evaluation/stats'
+      path: '/copilot-evaluation/stats'
+      fullPath: '/copilot-evaluation/stats'
+      preLoaderRoute: typeof AuthenticatedCopilotEvaluationStatsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/copilot-evaluation/kpi': {
+      id: '/_authenticated/copilot-evaluation/kpi'
+      path: '/copilot-evaluation/kpi'
+      fullPath: '/copilot-evaluation/kpi'
+      preLoaderRoute: typeof AuthenticatedCopilotEvaluationKpiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ask-ai/$conversationId': {
       id: '/_authenticated/ask-ai/$conversationId'
       path: '/ask-ai/$conversationId'
@@ -489,11 +569,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAskAiConversationIdRoute: typeof AuthenticatedAskAiConversationIdRoute
+  AuthenticatedCopilotEvaluationKpiRoute: typeof AuthenticatedCopilotEvaluationKpiRoute
+  AuthenticatedCopilotEvaluationStatsRoute: typeof AuthenticatedCopilotEvaluationStatsRoute
+  AuthenticatedCopilotEvaluationTimesheetRoute: typeof AuthenticatedCopilotEvaluationTimesheetRoute
   AuthenticatedDocumentsIdRoute: typeof AuthenticatedDocumentsIdRoute
   AuthenticatedDocumentsCategoriesRoute: typeof AuthenticatedDocumentsCategoriesRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
+  AuthenticatedCopilotEvaluationIndexRoute: typeof AuthenticatedCopilotEvaluationIndexRoute
   AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
   AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
   AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
@@ -504,11 +588,19 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAskAiConversationIdRoute: AuthenticatedAskAiConversationIdRoute,
+  AuthenticatedCopilotEvaluationKpiRoute:
+    AuthenticatedCopilotEvaluationKpiRoute,
+  AuthenticatedCopilotEvaluationStatsRoute:
+    AuthenticatedCopilotEvaluationStatsRoute,
+  AuthenticatedCopilotEvaluationTimesheetRoute:
+    AuthenticatedCopilotEvaluationTimesheetRoute,
   AuthenticatedDocumentsIdRoute: AuthenticatedDocumentsIdRoute,
   AuthenticatedDocumentsCategoriesRoute: AuthenticatedDocumentsCategoriesRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,
+  AuthenticatedCopilotEvaluationIndexRoute:
+    AuthenticatedCopilotEvaluationIndexRoute,
   AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
   AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
   AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,

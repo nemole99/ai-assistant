@@ -9,6 +9,16 @@ import {
   projectMember,
   user,
 } from "./auth";
+import {
+  copilotTicket,
+  copilotTimesheetEntry,
+  copilotTimesheetHoliday,
+  copilotKpiProductivity,
+  copilotKpiSharing,
+  copilotKpiQuality,
+  copilotKpiSummary,
+  copilotAuditLog,
+} from "./copilot-evaluation";
 
 // --- User ---
 
@@ -83,3 +93,72 @@ export const insertDocumentSchema = createInsertSchema(document).omit({
 export const updateDocumentSchema = insertDocumentSchema
   .pick({ title: true, description: true, categoryId: true })
   .partial();
+
+// --- Copilot Ticket ---
+
+export const selectCopilotTicketSchema = createSelectSchema(copilotTicket);
+export const insertCopilotTicketSchema = createInsertSchema(copilotTicket).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateCopilotTicketSchema = insertCopilotTicketSchema.partial();
+
+// --- Copilot Timesheet ---
+
+export const selectCopilotTimesheetEntrySchema = createSelectSchema(copilotTimesheetEntry);
+export const insertCopilotTimesheetEntrySchema = createInsertSchema(copilotTimesheetEntry).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const selectCopilotTimesheetHolidaySchema = createSelectSchema(copilotTimesheetHoliday);
+export const insertCopilotTimesheetHolidaySchema = createInsertSchema(copilotTimesheetHoliday).omit(
+  {
+    id: true,
+    createdAt: true,
+  },
+);
+
+// --- Copilot KPI ---
+
+export const selectCopilotKpiProductivitySchema = createSelectSchema(copilotKpiProductivity);
+export const insertCopilotKpiProductivitySchema = createInsertSchema(copilotKpiProductivity).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateCopilotKpiProductivitySchema = insertCopilotKpiProductivitySchema.partial();
+
+export const selectCopilotKpiSharingSchema = createSelectSchema(copilotKpiSharing);
+export const insertCopilotKpiSharingSchema = createInsertSchema(copilotKpiSharing).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateCopilotKpiSharingSchema = insertCopilotKpiSharingSchema.partial();
+
+export const selectCopilotKpiQualitySchema = createSelectSchema(copilotKpiQuality);
+export const insertCopilotKpiQualitySchema = createInsertSchema(copilotKpiQuality).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateCopilotKpiQualitySchema = insertCopilotKpiQualitySchema.partial();
+
+export const selectCopilotKpiSummarySchema = createSelectSchema(copilotKpiSummary);
+export const insertCopilotKpiSummarySchema = createInsertSchema(copilotKpiSummary).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateCopilotKpiSummarySchema = insertCopilotKpiSummarySchema.partial();
+
+// --- Copilot Audit Log ---
+
+export const selectCopilotAuditLogSchema = createSelectSchema(copilotAuditLog);
+export const insertCopilotAuditLogSchema = createInsertSchema(copilotAuditLog).omit({
+  id: true,
+  createdAt: true,
+});

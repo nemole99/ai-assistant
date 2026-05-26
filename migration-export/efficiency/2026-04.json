@@ -1,0 +1,125 @@
+{
+  "month": "2026-04",
+  "data": [
+    {
+      "developer": "Alan",
+      "investigateEff": 77.2,
+      "codeEff": -47.4,
+      "reviewEff": 64.6
+    },
+    {
+      "developer": "Billy",
+      "investigateEff": 39.9,
+      "codeEff": 60.1,
+      "reviewEff": 22.9
+    },
+    {
+      "developer": "Brian",
+      "investigateEff": 100,
+      "codeEff": 100,
+      "reviewEff": 100
+    },
+    {
+      "developer": "Buddy",
+      "investigateEff": 13.7,
+      "codeEff": 13,
+      "reviewEff": 6
+    },
+    {
+      "developer": "Ceuli",
+      "investigateEff": -8.4,
+      "codeEff": -4.2,
+      "reviewEff": -20.8
+    },
+    {
+      "developer": "Dante",
+      "investigateEff": 66.3,
+      "codeEff": 71,
+      "reviewEff": 53.1
+    },
+    {
+      "developer": "Daryl",
+      "investigateEff": -153.4,
+      "codeEff": 1.8,
+      "reviewEff": 34.2
+    },
+    {
+      "developer": "Ethan",
+      "investigateEff": 28.5,
+      "codeEff": -14.9,
+      "reviewEff": 46.3
+    },
+    {
+      "developer": "Hayden",
+      "investigateEff": 10.1,
+      "codeEff": 12.8,
+      "reviewEff": 1.5
+    },
+    {
+      "developer": "Helen",
+      "investigateEff": 5.9,
+      "codeEff": 24.9,
+      "reviewEff": 12.8
+    },
+    {
+      "developer": "Janis",
+      "investigateEff": 65.8,
+      "codeEff": 98.7,
+      "reviewEff": 98.7
+    },
+    {
+      "developer": "Joe",
+      "investigateEff": 31.2,
+      "codeEff": 21.6,
+      "reviewEff": 40.4
+    },
+    {
+      "developer": "John",
+      "investigateEff": 37.2,
+      "codeEff": -25.4,
+      "reviewEff": 42.5
+    },
+    {
+      "developer": "Joy",
+      "investigateEff": -173.7,
+      "codeEff": 1.3,
+      "reviewEff": 61.4
+    },
+    {
+      "developer": "Lotus",
+      "investigateEff": 30.2,
+      "codeEff": 39.8,
+      "reviewEff": 5.3
+    },
+    {
+      "developer": "Lucas",
+      "investigateEff": 0.2,
+      "codeEff": 26.4,
+      "reviewEff": 20.2
+    },
+    {
+      "developer": "Mark",
+      "investigateEff": -7.3,
+      "codeEff": -61.6,
+      "reviewEff": 21.1
+    },
+    {
+      "developer": "Mike",
+      "investigateEff": 100,
+      "codeEff": 100,
+      "reviewEff": 100
+    },
+    {
+      "developer": "Nemo",
+      "investigateEff": 40.4,
+      "codeEff": 42.9,
+      "reviewEff": 27.8
+    },
+    {
+      "developer": "Peter",
+      "investigateEff": 21.4,
+      "codeEff": 19.1,
+      "reviewEff": 1.7
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "month": "2026-04",
+  "data": [
+    {
+      "developer": "Nemo",
+      "count": 64
+    },
+    {
+      "developer": "Lotus",
+      "count": 47
+    },
+    {
+      "developer": "Billy",
+      "count": 40
+    },
+    {
+      "developer": "Ceuli",
+      "count": 39
+    },
+    {
+      "developer": "Alan",
+      "count": 37
+    },
+    {
+      "developer": "Helen",
+      "count": 37
+    },
+    {
+      "developer": "Peter",
+      "count": 36
+    },
+    {
+      "developer": "Janis",
+      "count": 36
+    },
+    {
+      "developer": "Dante",
+      "count": 29
+    },
+    {
+      "developer": "Ethan",
+      "count": 27
+    },
+    {
+      "developer": "John",
+      "count": 26
+    },
+    {
+      "developer": "Joe",
+      "count": 26
+    },
+    {
+      "developer": "Hayden",
+      "count": 23
+    },
+    {
+      "developer": "Daryl",
+      "count": 22
+    },
+    {
+      "developer": "Lucas",
+      "count": 21
+    },
+    {
+      "developer": "Mike",
+      "count": 20
+    },
+    {
+      "developer": "Buddy",
+      "count": 16
+    },
+    {
+      "developer": "Mark",
+      "count": 14
+    },
+    {
+      "developer": "Brian",
+      "count": 8
+    },
+    {
+      "developer": "Joy",
+      "count": 5
+    }
+  ]
+}
