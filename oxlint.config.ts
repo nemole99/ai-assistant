@@ -38,6 +38,7 @@ export default defineConfig({
     "typescript/no-non-null-assertion": "warn",
     "unicorn/filename-case": "warn",
     "unicorn/no-array-reduce": "off",
+    "unicorn/no-array-reverse": "off",
     "unicorn/no-document-cookie": "warn",
     "unicorn/no-negated-condition": "off",
     "unicorn/prefer-add-event-listener": "off",
