@@ -85,17 +85,6 @@ The full `.env.docker.example` documents every available variable.
 docker compose --env-file .env.docker up -d --build
 ```
 
-If PostgreSQL and MinIO are already running outside Docker and your `.env.docker`
-points to them (for example with `DATABASE_URL` and `MINIO_ENDPOINT` using a
-server IP), the app containers will use those services directly. In that case,
-the bundled `postgres` and `minio` containers are not started by default.
-
-To start the bundled Postgres + MinIO too, add the `bundled-infra` profile:
-
-```bash
-docker compose --env-file .env.docker --profile bundled-infra up -d --build
-```
-
 This starts all containers:
 
 | Container               | Purpose                                                         |
