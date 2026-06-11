@@ -1,8 +1,8 @@
+import { auth } from "@workspace/auth";
 import { db } from "@workspace/db";
 import { department, employee, user } from "@workspace/db/schema/auth";
-import { eq, sql } from "drizzle-orm";
-import { auth } from "@workspace/auth";
 import { env } from "@workspace/env/server";
+import { eq, sql } from "drizzle-orm";
 
 const DEPARTMENT_NAME = "Dev";
 const POSITION = "Software Engineer";
@@ -31,7 +31,7 @@ const EMPLOYEES = [
   { email: "joy.luu@ewoosoft.com", fullName: "Joy Luu" },
 ];
 
-async function seedEmployees() {
+export async function seedEmployees() {
   console.log(`🌱 Seeding employees into "${DEPARTMENT_NAME}" department...`);
 
   // Find or create the Dev department
@@ -47,7 +47,9 @@ async function seedEmployees() {
       .insert(department)
       .values({ id: crypto.randomUUID(), name: DEPARTMENT_NAME })
       .returning({ id: department.id });
-    if (!created) throw new Error("Failed to create department");
+    if (!created) {
+      throw new Error("Failed to create department");
+    }
     dev = created;
   } else {
     console.log(`  Found existing "${DEPARTMENT_NAME}" department.`);
@@ -60,7 +62,9 @@ async function seedEmployees() {
     .orderBy(sql`employee_code DESC`)
     .limit(1);
 
-  let nextNum = last ? parseInt(last.code.replace(/\D/g, ""), 10) + 1 : 1;
+  let nextNum = last
+    ? Number.parseInt(last.code.replaceAll(/\D/g, ""), 10) + 1
+    : 1;
 
   const joinDate = new Date().toISOString().split("T")[0]!;
 
@@ -71,8 +75,8 @@ async function seedEmployees() {
     const result = await auth.api.signUpEmail({
       body: {
         email: emp.email,
-        password: env.DEFAULT_USER_PASSWORD,
         name: emp.fullName,
+        password: env.DEFAULT_USER_PASSWORD,
       },
     });
 
@@ -83,18 +87,18 @@ async function seedEmployees() {
 
     await db
       .update(user)
-      .set({ role: "EMPLOYEE", mustChangePassword: true })
+      .set({ mustChangePassword: true, role: "EMPLOYEE" })
       .where(eq(user.id, result.user.id));
 
     const employeeCode = `EMP-${String(nextNum).padStart(4, "0")}`;
     await db.insert(employee).values({
-      id: crypto.randomUUID(),
+      departmentId: dev.id,
+      email: emp.email,
       employeeCode,
       fullName: emp.fullName,
-      email: emp.email,
-      position: POSITION,
-      departmentId: dev.id,
+      id: crypto.randomUUID(),
       joinDate,
+      position: POSITION,
       status: "ACTIVE",
       userId: result.user.id,
     });
@@ -106,10 +110,3 @@ async function seedEmployees() {
 
   console.log(`\n✅ Done. Inserted: ${inserted}`);
 }
-
-seedEmployees()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error("❌ Seed failed:", err);
-    process.exit(1);
-  });

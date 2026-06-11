@@ -1,7 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Building2 } from "lucide-react";
-import { ContentLayout } from "@/components/layout/content-layout";
-import { orpc } from "@/lib/orpc";
 import {
   Empty,
   EmptyContent,
@@ -10,14 +7,21 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@workspace/ui/components/empty";
+import { Building2 } from "lucide-react";
+
+import { ContentLayout } from "@/components/layout/content-layout";
+import { Loader } from "@/components/loader";
+import { orpc } from "@/lib/orpc";
+
 import { DepartmentCard } from "./components/department-card";
 import { DepartmentsDialogs } from "./components/departments-dialogs";
 import { DepartmentsPrimaryButtons } from "./components/departments-primary-buttons";
 import { DepartmentsProvider } from "./components/departments-provider";
-import { Loader } from "@/components/loader";
 
 export function Departments() {
-  const { data: departments = [], isLoading } = useQuery(orpc.department.list.queryOptions());
+  const { data: departments = [], isLoading } = useQuery(
+    orpc.department.list.queryOptions()
+  );
 
   return (
     <ContentLayout>
@@ -33,7 +37,7 @@ export function Departments() {
         </div>
         {isLoading ? (
           <Loader />
-        ) : departments.length === 0 ? (
+        ) : (departments.length === 0 ? (
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -41,8 +45,8 @@ export function Departments() {
               </EmptyMedia>
               <EmptyTitle>No departments yet</EmptyTitle>
               <EmptyDescription>
-                Get started by creating your first department to organize employees and manage
-                knowledge access.
+                Get started by creating your first department to organize
+                employees and manage knowledge access.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
@@ -55,7 +59,7 @@ export function Departments() {
               <DepartmentCard key={department.id} department={department} />
             ))}
           </div>
-        )}
+        ))}
         <DepartmentsDialogs />
       </DepartmentsProvider>
     </ContentLayout>

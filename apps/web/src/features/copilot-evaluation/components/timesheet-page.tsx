@@ -1,12 +1,19 @@
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
+import { cn } from "@workspace/ui/lib/utils";
+import { Plus } from "lucide-react";
 import { useState, useMemo } from "react";
+
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
-import { Badge } from "@workspace/ui/components/badge";
-import { Plus } from "lucide-react";
-import { cn } from "@workspace/ui/lib/utils";
+
 import {
   useTimesheetMonth,
   useUpdateTimesheetCell,
@@ -29,14 +36,18 @@ function getNextCellState(current: string): CellState {
 
 function getCellDisplay(value: string) {
   switch (value) {
-    case "x":
+    case "x": {
       return { label: "✓", title: "Đã đi làm" };
-    case "L":
+    }
+    case "L": {
       return { label: "P", title: "Nghỉ phép" };
-    case "H":
+    }
+    case "H": {
       return { label: "½", title: "Nghỉ ½ phép" };
-    default:
+    }
+    default: {
       return { label: "", title: "Chưa đi làm" };
+    }
   }
 }
 
@@ -62,12 +73,14 @@ export function CopilotEvaluationTimesheet() {
     const weekends: number[] = [];
     for (let day = 1; day <= daysInMonth; day++) {
       const dayOfWeek = new Date(year, m - 1, day).getDay();
-      if (dayOfWeek === 0 || dayOfWeek === 6) weekends.push(day);
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        weekends.push(day);
+      }
     }
     return new Set(weekends);
   }, [month, daysInMonth]);
 
-  const holidaySet = useMemo(() => new Set(data?.holidays ?? []), [data?.holidays]);
+  const holidaySet = useMemo(() => new Set(data?.holidays), [data?.holidays]);
 
   const isPastMonth = useMemo(() => {
     const now = new Date();
@@ -77,26 +90,33 @@ export function CopilotEvaluationTimesheet() {
 
   const handleCellClick = (employeeName: string, day: number) => {
     // Don't allow editing past months, weekends or holidays
-    if (isPastMonth || weekendDays.has(day) || holidaySet.has(day)) return;
+    if (isPastMonth || weekendDays.has(day) || holidaySet.has(day)) {
+      return;
+    }
 
-    const currentValue = data?.employees.find((e) => e.name === employeeName)?.days[day] ?? "";
+    const currentValue =
+      data?.employees.find((e) => e.name === employeeName)?.days[day] ?? "";
     const newValue = getNextCellState(currentValue);
-    updateCell.mutate({ month, employee: employeeName, day, value: newValue });
+    updateCell.mutate({ day, employee: employeeName, month, value: newValue });
   };
 
   const handleAddEmployee = () => {
-    if (!newEmployee.trim() || isPastMonth) return;
-    addEmployee.mutate({ month, employee: newEmployee.trim() });
+    if (!newEmployee.trim() || isPastMonth) {
+      return;
+    }
+    addEmployee.mutate({ employee: newEmployee.trim(), month });
     setNewEmployee("");
   };
 
   const handleToggleHoliday = (day: number) => {
-    if (isPastMonth) return;
+    if (isPastMonth) {
+      return;
+    }
     const current = data?.holidays ?? [];
     const updated = current.includes(day)
       ? current.filter((d) => d !== day)
       : [...current, day];
-    setHolidays.mutate({ month, holidays: updated });
+    setHolidays.mutate({ holidays: updated, month });
   };
 
   return (
@@ -142,33 +162,40 @@ export function CopilotEvaluationTimesheet() {
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr>
-                  <th className="border p-1 text-left sticky left-0 bg-background min-w-28">Name</th>
-                  {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
-                    <th
-                      key={day}
-                      className={cn(
-                        "border p-1 text-center min-w-7",
-                        !isPastMonth && "cursor-pointer hover:bg-muted",
-                        isPastMonth && "cursor-default",
-                        weekendDays.has(day) && "bg-orange-100 dark:bg-orange-950",
-                        holidaySet.has(day) && "bg-red-100 dark:bg-red-950",
-                      )}
-                      onClick={() => handleToggleHoliday(day)}
-                      title={isPastMonth ? undefined : "Click to toggle holiday"}
-                    >
-                      {day}
-                    </th>
-                  ))}
+                  <th className="border p-1 text-left sticky left-0 bg-background min-w-28">
+                    Name
+                  </th>
+                  {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
+                    (day) => (
+                      <th
+                        key={day}
+                        className={cn(
+                          "border p-1 text-center min-w-7",
+                          !isPastMonth && "cursor-pointer hover:bg-muted",
+                          isPastMonth && "cursor-default",
+                          weekendDays.has(day) &&
+                            "bg-orange-100 dark:bg-orange-950",
+                          holidaySet.has(day) && "bg-red-100 dark:bg-red-950"
+                        )}
+                        onClick={() => handleToggleHoliday(day)}
+                        title={
+                          isPastMonth ? undefined : "Click to toggle holiday"
+                        }
+                      >
+                        {day}
+                      </th>
+                    )
+                  )}
                   <th className="border p-1 text-center min-w-12">Days</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.employees.map((emp) => {
                   const workingDays = Object.entries(emp.days).filter(
-                    ([, v]) => v === "x",
+                    ([, v]) => v === "x"
                   ).length;
                   const halfDays = Object.entries(emp.days).filter(
-                    ([, v]) => v === "H",
+                    ([, v]) => v === "H"
                   ).length;
                   const totalDays = workingDays + halfDays * 0.5;
                   return (
@@ -176,33 +203,49 @@ export function CopilotEvaluationTimesheet() {
                       <td className="border p-1 font-medium sticky left-0 bg-background">
                         {emp.name}
                       </td>
-                      {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                        const value = emp.days[day] ?? "";
-                        const isWeekend = weekendDays.has(day);
-                        const isHoliday = holidaySet.has(day);
-                        const isDisabled = isWeekend || isHoliday;
-                        const display = getCellDisplay(value);
-                        return (
-                          <td
-                            key={day}
-                            className={cn(
-                              "border p-1 text-center transition-colors select-none",
-                              isDisabled || isPastMonth
-                                ? "bg-muted/60 cursor-not-allowed"
-                                : "cursor-pointer hover:bg-muted/50",
-                              isWeekend && !isHoliday && "bg-orange-50 dark:bg-orange-950/50",
-                              isHoliday && "bg-red-50 dark:bg-red-950/50",
-                              !isDisabled && value === "x" && "bg-green-100 dark:bg-green-950 font-bold text-green-700 dark:text-green-400",
-                              !isDisabled && value === "L" && "bg-blue-100 dark:bg-blue-950 font-bold text-blue-700 dark:text-blue-400",
-                              !isDisabled && value === "H" && "bg-yellow-100 dark:bg-yellow-950 font-bold text-yellow-700 dark:text-yellow-400",
-                            )}
-                            onClick={() => handleCellClick(emp.name, day)}
-                            title={isDisabled ? (isHoliday ? "Nghỉ lễ" : "Cuối tuần") : display.title}
-                          >
-                            {display.label}
-                          </td>
-                        );
-                      })}
+                      {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
+                        (day) => {
+                          const value = emp.days[day] ?? "";
+                          const isWeekend = weekendDays.has(day);
+                          const isHoliday = holidaySet.has(day);
+                          const isDisabled = isWeekend || isHoliday;
+                          const display = getCellDisplay(value);
+                          return (
+                            <td
+                              key={day}
+                              className={cn(
+                                "border p-1 text-center transition-colors select-none",
+                                isDisabled || isPastMonth
+                                  ? "bg-muted/60 cursor-not-allowed"
+                                  : "cursor-pointer hover:bg-muted/50",
+                                isWeekend &&
+                                  !isHoliday &&
+                                  "bg-orange-50 dark:bg-orange-950/50",
+                                isHoliday && "bg-red-50 dark:bg-red-950/50",
+                                !isDisabled &&
+                                  value === "x" &&
+                                  "bg-green-100 dark:bg-green-950 font-bold text-green-700 dark:text-green-400",
+                                !isDisabled &&
+                                  value === "L" &&
+                                  "bg-blue-100 dark:bg-blue-950 font-bold text-blue-700 dark:text-blue-400",
+                                !isDisabled &&
+                                  value === "H" &&
+                                  "bg-yellow-100 dark:bg-yellow-950 font-bold text-yellow-700 dark:text-yellow-400"
+                              )}
+                              onClick={() => handleCellClick(emp.name, day)}
+                              title={
+                                isDisabled
+                                  ? (isHoliday
+                                    ? "Nghỉ lễ"
+                                    : "Cuối tuần")
+                                  : display.title
+                              }
+                            >
+                              {display.label}
+                            </td>
+                          );
+                        }
+                      )}
                       <td className="border p-1 text-center font-bold">
                         <Badge variant="secondary">{totalDays}</Badge>
                       </td>
@@ -219,19 +262,24 @@ export function CopilotEvaluationTimesheet() {
             {/* Legend */}
             <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-green-100 dark:bg-green-950" /> Đã đi làm (✓)
+                <span className="inline-block w-4 h-4 rounded border bg-green-100 dark:bg-green-950" />{" "}
+                Đã đi làm (✓)
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-blue-100 dark:bg-blue-950" /> Nghỉ phép (P)
+                <span className="inline-block w-4 h-4 rounded border bg-blue-100 dark:bg-blue-950" />{" "}
+                Nghỉ phép (P)
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-yellow-100 dark:bg-yellow-950" /> Nghỉ ½ phép (½)
+                <span className="inline-block w-4 h-4 rounded border bg-yellow-100 dark:bg-yellow-950" />{" "}
+                Nghỉ ½ phép (½)
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-orange-50 dark:bg-orange-950/50" /> Cuối tuần
+                <span className="inline-block w-4 h-4 rounded border bg-orange-50 dark:bg-orange-950/50" />{" "}
+                Cuối tuần
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-red-50 dark:bg-red-950/50" /> Nghỉ lễ
+                <span className="inline-block w-4 h-4 rounded border bg-red-50 dark:bg-red-950/50" />{" "}
+                Nghỉ lễ
               </span>
             </div>
           </CardContent>

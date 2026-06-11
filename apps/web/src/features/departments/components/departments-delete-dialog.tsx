@@ -1,21 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { orpc } from "@/lib/orpc";
-import { type Department } from "../data/schema";
 
-type DepartmentDeleteDialogProps = {
+import type { Department } from "../data/schema";
+
+interface DepartmentDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentRow: Department;
-};
+}
 
 export function DepartmentsDeleteDialog({
   open,
@@ -27,18 +33,20 @@ export function DepartmentsDeleteDialog({
 
   const deleteMutation = useMutation(
     orpc.department.delete.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.department.list.queryOptions());
         toast.success("Department deleted successfully.");
         setValue("");
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const handleDelete = () => {
-    if (value.trim() !== currentRow.name) return;
+    if (value.trim() !== currentRow.name) {
+      return;
+    }
     deleteMutation.mutate({ id: currentRow.id });
   };
 
@@ -50,8 +58,11 @@ export function DepartmentsDeleteDialog({
       disabled={value.trim() !== currentRow.name || deleteMutation.isPending}
       title={
         <span className="text-destructive">
-          <AlertTriangle className="me-1 inline-block stroke-destructive" size={18} /> Delete
-          Department
+          <AlertTriangle
+            className="me-1 inline-block stroke-destructive"
+            size={18}
+          />{" "}
+          Delete Department
         </span>
       }
       desc={
@@ -64,9 +75,11 @@ export function DepartmentsDeleteDialog({
           className="space-y-4"
         >
           <p className="mb-2">
-            Are you sure you want to delete <span className="font-bold">{currentRow.name}</span>?
+            Are you sure you want to delete{" "}
+            <span className="font-bold">{currentRow.name}</span>?
             <br />
-            This action will permanently remove the department and cannot be undone.
+            This action will permanently remove the department and cannot be
+            undone.
           </p>
 
           <Label className="my-2">

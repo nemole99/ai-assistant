@@ -1,5 +1,5 @@
-import { type SVGProps } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import type { SVGProps } from "react";
 
 export function IconStripe({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (

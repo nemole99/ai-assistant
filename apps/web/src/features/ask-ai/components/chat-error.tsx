@@ -1,7 +1,6 @@
-import { buttonVariants } from "@workspace/ui/components/button";
-import { Button } from "@workspace/ui/components/button";
-import { cn } from "@workspace/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
+import { Button, buttonVariants } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 
 function getErrorText(error: Error): string {
   const msg = error.message ?? "";
@@ -32,7 +31,7 @@ export function ChatError({ error, onRetry }: ChatErrorProps) {
         {isCopilotError(error) && (
           <Link
             to="/settings/ai-providers"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
           >
             Reconnect Copilot
           </Link>

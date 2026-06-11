@@ -1,22 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { type Table } from "@tanstack/react-table";
-import { AlertTriangle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import type { Table } from "@tanstack/react-table";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { orpc } from "@/lib/orpc";
-import { type Employee } from "../data/schema";
 
-type EmployeesMultiDeleteDialogProps = {
+import type { Employee } from "../data/schema";
+
+interface EmployeesMultiDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   table: Table<Employee>;
-};
+}
 
 const CONFIRM_WORD = "DELETE";
 
@@ -32,15 +38,17 @@ export function EmployeesMultiDeleteDialog({
 
   const bulkDeleteMutation = useMutation(
     orpc.employee.bulkDelete.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: ({ count }) => {
         queryClient.invalidateQueries(orpc.employee.list.queryOptions());
-        toast.success(`Deleted ${count} ${count === 1 ? "employee" : "employees"} successfully.`);
+        toast.success(
+          `Deleted ${count} ${count === 1 ? "employee" : "employees"} successfully.`
+        );
         setValue("");
         table.resetRowSelection();
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const handleDelete = () => {
@@ -61,8 +69,12 @@ export function EmployeesMultiDeleteDialog({
       disabled={value.trim() !== CONFIRM_WORD || bulkDeleteMutation.isPending}
       title={
         <span className="text-destructive">
-          <AlertTriangle className="me-1 inline-block stroke-destructive" size={18} /> Delete{" "}
-          {selectedRows.length} {selectedRows.length > 1 ? "employees" : "employee"}
+          <AlertTriangle
+            className="me-1 inline-block stroke-destructive"
+            size={18}
+          />{" "}
+          Delete {selectedRows.length}{" "}
+          {selectedRows.length > 1 ? "employees" : "employee"}
         </span>
       }
       desc={

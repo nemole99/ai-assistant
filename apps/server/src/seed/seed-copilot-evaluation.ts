@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { db } from "@workspace/db";
 import {
   copilotTicket,
@@ -8,8 +11,6 @@ import {
   copilotKpiQuality,
   copilotKpiSummary,
 } from "@workspace/db/schema/copilot-evaluation";
-import { readFileSync } from "fs";
-import { join } from "path";
 
 const MIGRATION_DIR = join(import.meta.dir, "../../../../migration-export");
 
@@ -19,7 +20,9 @@ function readJson<T>(relativePath: string): T {
 }
 
 function mapCategory(cat: string): "bug" | "feature" {
-  if (cat === "bug") return "bug";
+  if (cat === "bug") {
+    return "bug";
+  }
   return "feature"; // "feature", "Improvement", "new development", "Sub-task", "Task" → feature
 }
 
@@ -35,15 +38,15 @@ function normalizeDeveloper(raw: string): string {
 
 /** Ticket prefix → canonical project (unambiguous mappings only) */
 const PREFIX_TO_PROJECT: Record<string, string> = {
-  EVNWCL: "WeClever",
+  CONE: "Clever One",
+  EEEN: "EzSeries",
+  ETWO: "EzSeries",
   EVNCRC: "CleverRC",
   EVNGPP: "GPP",
   EVNIDP: "IDP",
   EVNL: "LMP",
-  CONE: "Clever One",
+  EVNWCL: "WeClever",
   GPMS: "CleverDent",
-  EEEN: "EzSeries",
-  ETWO: "EzSeries",
   VCTV: "EzSeries",
 };
 
@@ -56,13 +59,17 @@ const PROJECT_ALIASES: Record<string, string> = {
 /** Normalize project name using aliases and optional ticket URL prefix */
 function normalizeProject(raw: string, ticketUrl?: string): string {
   const alias = PROJECT_ALIASES[raw.toLowerCase()];
-  if (alias) return alias;
+  if (alias) {
+    return alias;
+  }
 
   if (ticketUrl) {
     const match = ticketUrl.match(/([A-Z][A-Z0-9]+)-\d+/);
     if (match) {
       const prefixProject = PREFIX_TO_PROJECT[match[1]!];
-      if (prefixProject) return prefixProject;
+      if (prefixProject) {
+        return prefixProject;
+      }
     }
   }
 
@@ -70,14 +77,20 @@ function normalizeProject(raw: string, ticketUrl?: string): string {
 }
 
 function normalizeDate(raw: string): string | null {
-  if (!raw || raw.trim() === "") return null;
+  if (!raw || raw.trim() === "") {
+    return null;
+  }
 
   // Already YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return raw;
+  }
 
   // MM/DD/YYYY HH:mm:ss or MM/DD/YYYY
   const match = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-  if (match) return `${match[3]}-${match[1]}-${match[2]}`;
+  if (match) {
+    return `${match[3]}-${match[1]}-${match[2]}`;
+  }
 
   return null;
 }
@@ -86,7 +99,7 @@ async function seedTickets() {
   console.log("🎫 Seeding tickets...");
 
   const rawTickets = readJson<
-    Array<{
+    {
       index: number;
       developer: string;
       project: string;
@@ -102,7 +115,7 @@ async function seedTickets() {
       codeReviewActual: number;
       reopenStatus: number | null;
       comment: string;
-    }>
+    }[]
   >("tickets.json");
 
   // Deduplicate by ticket URL (keep last occurrence), trim whitespace from URLs
@@ -112,10 +125,12 @@ async function seedTickets() {
     seen.set(url, { ...t, ticket: url });
   }
   // Filter out tickets with invalid dates
-  const tickets = Array.from(seen.values()).filter((t) => {
+  const tickets = [...seen.values()].filter((t) => {
     const date = normalizeDate(t.processDate);
     if (!date) {
-      console.log(`  ⚠ Skipping ticket "${t.ticket}" — invalid date: "${t.processDate}"`);
+      console.log(
+        `  ⚠ Skipping ticket "${t.ticket}" — invalid date: "${t.processDate}"`
+      );
       return false;
     }
     return true;
@@ -130,26 +145,28 @@ async function seedTickets() {
     const batch = tickets.slice(i, i + batchSize);
     await db.insert(copilotTicket).values(
       batch.map((t) => ({
-        id: crypto.randomUUID(),
-        developer: normalizeDeveloper(t.developer),
-        project: normalizeProject(t.project, t.ticket),
         category: mapCategory(t.category),
-        ticketUrl: t.ticket,
-        processDate: normalizeDate(t.processDate)!,
-        totalEffort: t.totalEffort ?? 0,
-        investigateEstimate: t.investigateEstimate ?? 0,
-        investigateActual: t.investigateActual ?? 0,
-        codeFixEstimate: t.codeFixEstimate ?? 0,
         codeFixActual: t.codeFixActual ?? 0,
-        codeReviewEstimate: t.codeReviewEstimate ?? 0,
+        codeFixEstimate: t.codeFixEstimate ?? 0,
         codeReviewActual: t.codeReviewActual ?? 0,
-        reopenStatus: t.reopenStatus ?? 0,
+        codeReviewEstimate: t.codeReviewEstimate ?? 0,
         comment: t.comment || null,
-      })),
+        developer: normalizeDeveloper(t.developer),
+        id: crypto.randomUUID(),
+        investigateActual: t.investigateActual ?? 0,
+        investigateEstimate: t.investigateEstimate ?? 0,
+        processDate: normalizeDate(t.processDate)!,
+        project: normalizeProject(t.project, t.ticket),
+        reopenStatus: t.reopenStatus ?? 0,
+        ticketUrl: t.ticket,
+        totalEffort: t.totalEffort ?? 0,
+      }))
     );
   }
 
-  console.log(`  ✅ ${tickets.length} tickets imported (${rawTickets.length - tickets.length} duplicates removed)`);
+  console.log(
+    `  ✅ ${tickets.length} tickets imported (${rawTickets.length - tickets.length} duplicates removed)`
+  );
 }
 
 async function seedTimesheet() {
@@ -166,10 +183,10 @@ async function seedTimesheet() {
   for (const month of months) {
     const data = readJson<{
       month: string;
-      employees: Array<{
+      employees: {
         name: string;
-        days: Array<{ day: number; value: string; isHoliday: boolean }>;
-      }>;
+        days: { day: number; value: string; isHoliday: boolean }[];
+      }[];
     }>(`timesheet/${month}.json`);
 
     // Extract holidays from first employee's data (holidays are shared)
@@ -177,10 +194,10 @@ async function seedTimesheet() {
     if (holidays.length > 0) {
       await db.insert(copilotTimesheetHoliday).values(
         holidays.map((h) => ({
+          day: h.day,
           id: crypto.randomUUID(),
           month: data.month,
-          day: h.day,
-        })),
+        }))
       );
       holidayCount += holidays.length;
     }
@@ -191,25 +208,29 @@ async function seedTimesheet() {
       if (presentDays.length > 0) {
         await db.insert(copilotTimesheetEntry).values(
           presentDays.map((d) => ({
+            day: d.day,
+            employeeName: emp.name,
             id: crypto.randomUUID(),
             month: data.month,
-            employeeName: emp.name,
-            day: d.day,
             value: "x",
-          })),
+          }))
         );
         entryCount += presentDays.length;
       }
     }
   }
 
-  console.log(`  ✅ ${entryCount} timesheet entries, ${holidayCount} holidays imported`);
+  console.log(
+    `  ✅ ${entryCount} timesheet entries, ${holidayCount} holidays imported`
+  );
 }
 
-function monthsToJsonb(months: Record<string, number | null>): Record<string, number> {
+function monthsToJsonb(
+  months: Record<string, number | null>
+): Record<string, number> {
   const result: Record<string, number> = {};
   for (const [key, value] of Object.entries(months)) {
-    if (value != null) {
+    if (value !== null && value !== undefined) {
       result[key] = value;
     }
   }
@@ -227,57 +248,57 @@ async function seedKpi() {
 
   // Productivity
   const productivity = readJson<{
-    developers: Array<{
+    developers: {
       developer: string;
       project: string;
       title: string;
       target: number;
       averageResult: number;
       months: Record<string, number | null>;
-    }>;
+    }[];
   }>("kpi/productivity.json");
 
   await db.insert(copilotKpiProductivity).values(
     productivity.developers.map((d) => ({
-      id: crypto.randomUUID(),
       developer: d.developer,
-      project: d.project,
-      title: d.title,
-      target: d.target,
-      result: d.averageResult,
+      id: crypto.randomUUID(),
       monthlyValues: monthsToJsonb(d.months),
-    })),
+      project: d.project,
+      result: d.averageResult,
+      target: d.target,
+      title: d.title,
+    }))
   );
   console.log(`  ✅ ${productivity.developers.length} productivity records`);
 
   // Sharing
   const sharing = readJson<{
-    developers: Array<{
+    developers: {
       developer: string;
       project: string;
       title: string;
       target: number;
       result: number;
       months: Record<string, number | null>;
-    }>;
+    }[];
   }>("kpi/sharing.json");
 
   await db.insert(copilotKpiSharing).values(
     sharing.developers.map((d) => ({
-      id: crypto.randomUUID(),
       developer: d.developer,
-      project: d.project,
-      title: d.title,
-      target: d.target,
-      result: d.result,
+      id: crypto.randomUUID(),
       monthlyValues: monthsToJsonb(d.months),
-    })),
+      project: d.project,
+      result: d.result,
+      target: d.target,
+      title: d.title,
+    }))
   );
   console.log(`  ✅ ${sharing.developers.length} sharing records`);
 
   // Quality
   const quality = readJson<{
-    developers: Array<{
+    developers: {
       developer: string;
       project: string;
       title: string;
@@ -286,27 +307,27 @@ async function seedKpi() {
       reopenNumber: number;
       result: number;
       months: Record<string, number | null>;
-    }>;
+    }[];
   }>("kpi/quality.json");
 
   await db.insert(copilotKpiQuality).values(
     quality.developers.map((d) => ({
-      id: crypto.randomUUID(),
       developer: d.developer,
-      project: d.project,
-      title: d.title,
-      reopenPercent: d.reopenPct,
-      totalByMar: d.totalByMar,
-      reopenNumber: d.reopenNumber,
-      result: d.result,
+      id: crypto.randomUUID(),
       monthlyValues: monthsToJsonb(d.months),
-    })),
+      project: d.project,
+      reopenNumber: d.reopenNumber,
+      reopenPercent: d.reopenPct,
+      result: d.result,
+      title: d.title,
+      totalByMar: d.totalByMar,
+    }))
   );
   console.log(`  ✅ ${quality.developers.length} quality records`);
 
   // Summary
   const summary = readJson<{
-    developers: Array<{
+    developers: {
       developer: string;
       project: string;
       title: string;
@@ -317,23 +338,23 @@ async function seedKpi() {
       resultReopen: number;
       resultSharing: number;
       comment: string;
-    }>;
+    }[];
   }>("kpi/summary.json");
 
   await db.insert(copilotKpiSummary).values(
     summary.developers.map((d) => ({
-      id: crypto.randomUUID(),
+      comment: d.comment || null,
       developer: d.developer,
+      id: crypto.randomUUID(),
       project: d.project,
-      title: d.title,
-      targetProductivity: d.targetProductivity,
-      targetReopen: d.targetReopen,
-      targetSharing: d.targetSharing,
       resultProductivity: d.resultProductivity,
       resultReopen: d.resultReopen,
       resultSharing: d.resultSharing,
-      comment: d.comment || null,
-    })),
+      targetProductivity: d.targetProductivity,
+      targetReopen: d.targetReopen,
+      targetSharing: d.targetSharing,
+      title: d.title,
+    }))
   );
   console.log(`  ✅ ${summary.developers.length} summary records`);
 }
@@ -350,7 +371,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((err) => {
-    console.error("❌ Seed failed:", err);
+  .catch((error) => {
+    console.error("❌ Seed failed:", error);
     process.exit(1);
   });

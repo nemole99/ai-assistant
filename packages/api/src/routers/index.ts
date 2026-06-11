@@ -1,32 +1,32 @@
 import type { RouterClient } from "@orpc/server";
 
 import { protectedProcedure, publicProcedure } from "../index";
-import { departmentRouter, employeeRouter } from "./organization";
-import { aiProviderRouter } from "./ai-provider";
 import { aiModelAssignmentRouter } from "./ai-model-assignment";
-import { projectRouter } from "./project";
-import { documentCategoryRouter } from "./document-category";
-import { documentRouter } from "./document";
+import { aiProviderRouter } from "./ai-provider";
 import { copilotEvaluationRouter } from "./copilot-evaluation";
+import { documentRouter } from "./document";
+import { documentCategoryRouter } from "./document-category";
+import { departmentRouter, employeeRouter } from "./organization";
+import { projectRouter } from "./project";
+import { systemAiConfigRouter } from "./system-ai-config";
+import { wikiPageRouter } from "./wiki-page";
 
 export const appRouter = {
-  healthCheck: publicProcedure.handler(() => {
-    return "OK";
-  }),
-  privateData: protectedProcedure.handler(({ context }) => {
-    return {
-      message: "This is private",
-      user: context.session?.user,
-    };
-  }),
-  department: departmentRouter,
-  employee: employeeRouter,
-  aiProvider: aiProviderRouter,
   aiModelAssignment: aiModelAssignmentRouter,
-  project: projectRouter,
-  documentCategory: documentCategoryRouter,
-  document: documentRouter,
+  aiProvider: aiProviderRouter,
   copilotEvaluation: copilotEvaluationRouter,
+  department: departmentRouter,
+  document: documentRouter,
+  documentCategory: documentCategoryRouter,
+  employee: employeeRouter,
+  healthCheck: publicProcedure.handler(() => "OK"),
+  privateData: protectedProcedure.handler(({ context }) => ({
+    message: "This is private",
+    user: context.session?.user,
+  })),
+  project: projectRouter,
+  systemAiConfig: systemAiConfigRouter,
+  wikiPage: wikiPageRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

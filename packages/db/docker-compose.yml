@@ -2,7 +2,7 @@ name: workspace
 
 services:
   postgres:
-    image: postgres
+    image: pgvector/pgvector:pg17
     container_name: workspace-postgres
     environment:
       POSTGRES_DB: workspace
@@ -12,6 +12,7 @@ services:
       - "5433:5432"
     volumes:
       - workspace_postgres_data:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s

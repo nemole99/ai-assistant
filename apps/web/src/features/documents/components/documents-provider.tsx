@@ -1,15 +1,17 @@
 import React, { useState } from "react";
+
 import useDialogState from "@/hooks/use-dialog-state";
-import { type Document } from "../data/schema";
+
+import type { Document } from "../data/schema";
 
 type DocumentsDialogType = "upload" | "edit" | "delete" | "retry";
 
-type DocumentsContextType = {
+interface DocumentsContextType {
   open: DocumentsDialogType | null;
   setOpen: (str: DocumentsDialogType | null) => void;
   currentRow: Document | null;
   setCurrentRow: React.Dispatch<React.SetStateAction<Document | null>>;
-};
+}
 
 const DocumentsContext = React.createContext<DocumentsContextType | null>(null);
 
@@ -18,7 +20,7 @@ export function DocumentsProvider({ children }: { children: React.ReactNode }) {
   const [currentRow, setCurrentRow] = useState<Document | null>(null);
 
   return (
-    <DocumentsContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <DocumentsContext value={{ currentRow, open, setCurrentRow, setOpen }}>
       {children}
     </DocumentsContext>
   );

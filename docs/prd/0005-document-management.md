@@ -77,7 +77,7 @@ Job handler:
 
 1. Fetch Document record from Postgres (bail if not found or not `PENDING`).
 2. Download PDF from MinIO to a temp file.
-3. Run `markitdown <tempfile>` as a subprocess (MarkItDown must be installed via `pip install 'markitdown[pdf]'` in the deployment environment).
+3. Run `markitdown <tempfile>` as a subprocess (MarkItDown must be installed via `pip install 'markitdown[pptx, pdf, docx, xlsx, xls]'` in the deployment environment).
 4. Read stdout as markdown string.
 5. Update Document: `markdownContent = <result>`, `status = COMPLETED`.
 6. On any error: update Document `status = FAILED`, `errorMessage = <error message>`.
@@ -163,7 +163,7 @@ Good tests for this feature verify observable behavior from the outside — what
 
 ## Further Notes
 
-- MarkItDown (Microsoft, MIT license, 123k GitHub stars) is the chosen PDF → Markdown tool. It is a Python CLI tool (`markitdown file.pdf`) invoked via subprocess from the BullMQ worker. Install with `pip install 'markitdown[pdf]'`. The worker Dockerfile must include Python 3.10+.
+- MarkItDown (Microsoft, MIT license, 123k GitHub stars) is the chosen PDF → Markdown tool. It is a Python CLI tool (`markitdown file.pdf`) invoked via subprocess from the BullMQ worker. Install with `pip install 'markitdown[pptx, pdf, docx, xlsx, xls]'`. The worker Dockerfile must include Python 3.10+.
 - The presigned PUT URL has a short TTL (~5 min). If the client fails to upload within that window, `confirmUpload` will fail (MinIO object won't exist). The Admin should simply retry the upload from the beginning.
 - MinIO is S3-compatible. The `minio` npm SDK is used (not `@aws-sdk/client-s3`) since we are committed to self-hosted MinIO.
 - BullMQ is backed by Redis. Redis is a new infrastructure dependency. See ADR-0006 for the rationale over pg-boss.

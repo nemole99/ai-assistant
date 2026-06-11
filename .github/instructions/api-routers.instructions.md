@@ -2,6 +2,7 @@
 description: "Use when creating or modifying oRPC API routers, procedures, or backend endpoints. Covers authorization, validation, and error patterns."
 applyTo: "packages/api/src/routers/**"
 ---
+
 # API Router Conventions
 
 - Pick the correct procedure base: `publicProcedure | protectedProcedure | managerProcedure | adminProcedure` — authorization lives here, not in the UI.

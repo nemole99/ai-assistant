@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { z } from "zod";
+import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@workspace/ui/components/dialog";
-import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -18,39 +16,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { useCreateTicket, useTicketDevelopers, useTicketProjects } from "../hooks/use-tickets";
 
-type TicketFormDialogProps = {
+import {
+  useCreateTicket,
+  useTicketDevelopers,
+  useTicketProjects,
+} from "../hooks/use-tickets";
+
+interface TicketFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
-export function TicketFormDialog({ open, onOpenChange }: TicketFormDialogProps) {
+export function TicketFormDialog({
+  open,
+  onOpenChange,
+}: TicketFormDialogProps) {
   const createTicket = useCreateTicket();
   const { data: developers = [] } = useTicketDevelopers();
   const { data: projects = [] } = useTicketProjects();
 
   const form = useForm({
     defaultValues: {
-      developer: "",
-      project: "",
       category: "" as "" | "bug" | "feature",
-      ticketUrl: "",
-      processDate: new Date().toISOString().split("T")[0],
-      totalEffort: 16,
-      investigateActual: 0,
       codeFixActual: 0,
       codeReviewActual: 0,
-      reopenStatus: 0,
       comment: "",
+      developer: "",
+      investigateActual: 0,
+      processDate: new Date().toISOString().split("T")[0],
+      project: "",
+      reopenStatus: 0,
+      ticketUrl: "",
+      totalEffort: 16,
     },
     onSubmit: async ({ value }) => {
       const data = {
         ...value,
         category: value.category as "bug" | "feature",
-        investigateEstimate: value.totalEffort * 0.2,
         codeFixEstimate: value.totalEffort * 0.4,
         codeReviewEstimate: value.totalEffort * 0.15,
+        investigateEstimate: value.totalEffort * 0.2,
       };
       await createTicket.mutateAsync(data);
       onOpenChange(false);
@@ -128,7 +134,9 @@ export function TicketFormDialog({ open, onOpenChange }: TicketFormDialogProps) 
                   <Label>Category *</Label>
                   <Select
                     value={field.state.value}
-                    onValueChange={(v) => field.handleChange(v as "bug" | "feature")}
+                    onValueChange={(v) =>
+                      field.handleChange(v as "bug" | "feature")
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="-- Chọn --" />
@@ -223,7 +231,9 @@ export function TicketFormDialog({ open, onOpenChange }: TicketFormDialogProps) 
                       step="0.5"
                       min="0"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(Number(e.target.value))}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
                     />
                   </div>
                 )}
@@ -262,7 +272,9 @@ export function TicketFormDialog({ open, onOpenChange }: TicketFormDialogProps) 
                       step="0.5"
                       min="0"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(Number(e.target.value))}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
                     />
                   </div>
                 )}
@@ -301,7 +313,9 @@ export function TicketFormDialog({ open, onOpenChange }: TicketFormDialogProps) 
                       step="0.5"
                       min="0"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(Number(e.target.value))}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
                     />
                   </div>
                 )}
@@ -341,7 +355,11 @@ export function TicketFormDialog({ open, onOpenChange }: TicketFormDialogProps) 
           </form.Field>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={createTicket.isPending}>

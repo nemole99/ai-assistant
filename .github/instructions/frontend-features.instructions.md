@@ -2,6 +2,7 @@
 description: "Use when creating or modifying frontend features, pages, components, or data hooks in the web app."
 applyTo: "apps/web/src/features/**"
 ---
+
 # Frontend Feature Conventions
 
 - Features are self-contained under `apps/web/src/features/<area>/` with `components/`, `data/` (schemas + queries), `hooks/`, and `index.tsx`.

@@ -15,6 +15,13 @@
       "when": 1778651355427,
       "tag": "0001_careless_ink",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778830719668,
+      "tag": "0002_worthless_redwing",
+      "breakpoints": true
     }
   ]
 }

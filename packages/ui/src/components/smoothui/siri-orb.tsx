@@ -102,7 +102,10 @@ const SiriOrb: React.FC<SiriOrbProps> = ({
       return CONTRAST_TINY; // Very subtle contrast for tiny sizes
     }
     if (value < SIZE_THRESHOLD_SMALL) {
-      return Math.max(contrastAmount * CONTRAST_MULTIPLIER_FINAL, CONTRAST_MIN_FINAL); // Reduced contrast for small sizes
+      return Math.max(
+        contrastAmount * CONTRAST_MULTIPLIER_FINAL,
+        CONTRAST_MIN_FINAL
+      ); // Reduced contrast for small sizes
     }
     return contrastAmount;
   };
@@ -114,18 +117,18 @@ const SiriOrb: React.FC<SiriOrbProps> = ({
       className={cn("siri-orb", className)}
       style={
         {
-          width: size,
-          height: size,
+          "--animation-duration": `${animationDuration}s`,
           "--bg": finalColors.bg,
+          "--blur-amount": `${blurAmount}px`,
           "--c1": finalColors.c1,
           "--c2": finalColors.c2,
           "--c3": finalColors.c3,
-          "--animation-duration": `${animationDuration}s`,
-          "--blur-amount": `${blurAmount}px`,
           "--contrast-amount": finalContrast,
           "--dot-size": `${dotSize}px`,
-          "--shadow-spread": `${shadowSpread}px`,
           "--mask-radius": maskRadius,
+          "--shadow-spread": `${shadowSpread}px`,
+          height: size,
+          width: size,
         } as React.CSSProperties
       }
     >

@@ -1,10 +1,5 @@
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { toast } from "sonner";
-import { z } from "zod";
-import { DatePicker } from "@/components/date-picker";
-import { orpc } from "@/lib/orpc";
 import { Button } from "@workspace/ui/components/button";
 import {
   Field,
@@ -14,12 +9,18 @@ import {
   FieldLabel,
 } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { DatePicker } from "@/components/date-picker";
+import { orpc } from "@/lib/orpc";
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
-  position: z.string().min(1, "Position is required."),
-  phone: z.string(),
   joinDate: z.string(),
+  phone: z.string(),
+  position: z.string().min(1, "Position is required."),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -27,34 +28,36 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function ProfileForm() {
   const queryClient = useQueryClient();
 
-  const { data: employee, isPending } = useQuery(orpc.employee.getSelf.queryOptions());
+  const { data: employee, isPending } = useQuery(
+    orpc.employee.getSelf.queryOptions()
+  );
 
   const mutation = useMutation(
     orpc.employee.updateSelf.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.employee.getSelf.queryOptions());
         toast.success("Profile updated successfully.");
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const form = useForm({
     defaultValues: {
       fullName: employee?.fullName ?? "",
-      position: employee?.position ?? "",
-      phone: employee?.phone ?? "",
       joinDate: employee?.joinDate ?? "",
+      phone: employee?.phone ?? "",
+      position: employee?.position ?? "",
     } satisfies ProfileFormValues,
-    validators: { onSubmit: profileFormSchema },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       mutation.mutate({
         fullName: value.fullName,
-        position: value.position,
-        phone: value.phone || null,
         joinDate: value.joinDate || undefined,
+        phone: value.phone || null,
+        position: value.position,
       });
     },
+    validators: { onSubmit: profileFormSchema },
   });
 
   if (isPending) {
@@ -82,7 +85,8 @@ export function ProfileForm() {
         <form.Field
           name="fullName"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
@@ -103,13 +107,16 @@ export function ProfileForm() {
         <Field>
           <FieldLabel>Email</FieldLabel>
           <Input value={employee.email} disabled aria-disabled="true" />
-          <FieldDescription>Email can only be changed by an administrator.</FieldDescription>
+          <FieldDescription>
+            Email can only be changed by an administrator.
+          </FieldDescription>
         </Field>
 
         <form.Field
           name="position"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Position</FieldLabel>
@@ -129,13 +136,18 @@ export function ProfileForm() {
 
         <Field>
           <FieldLabel>Department</FieldLabel>
-          <Input value={employee.departmentName ?? ""} disabled aria-disabled="true" />
+          <Input
+            value={employee.departmentName ?? ""}
+            disabled
+            aria-disabled="true"
+          />
         </Field>
 
         <form.Field
           name="phone"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Phone</FieldLabel>
@@ -157,14 +169,16 @@ export function ProfileForm() {
           name="joinDate"
           children={(field) => {
             const dateValue = field.state.value
-              ? new Date(field.state.value + "T00:00:00")
+              ? new Date(`${field.state.value}T00:00:00`)
               : undefined;
             return (
               <Field>
                 <FieldLabel>Join Date</FieldLabel>
                 <DatePicker
                   selected={dateValue}
-                  onSelect={(date) => field.handleChange(date ? format(date, "yyyy-MM-dd") : "")}
+                  onSelect={(date) =>
+                    field.handleChange(date ? format(date, "yyyy-MM-dd") : "")
+                  }
                   placeholder="Pick a date"
                 />
               </Field>
@@ -179,8 +193,13 @@ export function ProfileForm() {
           isSubmitting: state.isSubmitting,
         })}
         children={({ canSubmit, isSubmitting }) => (
-          <Button type="submit" disabled={!canSubmit || isSubmitting || mutation.isPending}>
-            {isSubmitting || mutation.isPending ? "Saving..." : "Update profile"}
+          <Button
+            type="submit"
+            disabled={!canSubmit || isSubmitting || mutation.isPending}
+          >
+            {isSubmitting || mutation.isPending
+              ? "Saving..."
+              : "Update profile"}
           </Button>
         )}
       />

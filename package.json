@@ -38,8 +38,6 @@
     "dev:server": "turbo -F server dev",
     "db:push": "turbo -F @workspace/db db:push",
     "db:seed": "turbo -F @workspace/db db:seed",
-    "db:seed-employees": "turbo -F @workspace/db db:seed-employees",
-    "db:seed-projects": "turbo -F @workspace/db db:seed-projects",
     "db:studio": "turbo -F @workspace/db db:studio",
     "db:generate": "turbo -F @workspace/db db:generate",
     "db:migrate": "turbo -F @workspace/db db:migrate",
@@ -47,23 +45,27 @@
     "db:watch": "turbo -F @workspace/db db:watch",
     "db:stop": "turbo -F @workspace/db db:stop",
     "db:down": "turbo -F @workspace/db db:down",
-    "check": "oxlint && oxfmt --write",
+    "check": "ultracite check",
     "lint": "oxlint",
-    "format": "oxfmt --write"
+    "format": "oxfmt --write",
+    "fix": "ultracite fix",
+    "prepare": "lefthook install"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans": "^5.2.10",
     "@workspace/env": "workspace:*",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
+    "dotenv": "^17.4.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/bun": "catalog:",
+    "@types/bun": "^1.3.14",
     "@workspace/config": "workspace:*",
-    "oxfmt": "^0.46.0",
-    "oxlint": "^1.63.0",
-    "turbo": "^2.9.12",
-    "typescript": "catalog:"
+    "lefthook": "^2.1.6",
+    "oxfmt": "^0.50.0",
+    "oxlint": "^1.65.0",
+    "turbo": "^2.9.14",
+    "typescript": "^6.0.3",
+    "ultracite": "7.7.0"
   },
   "packageManager": "bun@1.3.13"
 }

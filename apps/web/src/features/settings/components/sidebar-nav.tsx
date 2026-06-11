@@ -9,7 +9,8 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
-import { useState, type JSX } from "react";
+import { useState } from "react";
+import type { JSX } from "react";
 
 type SidebarNavProps = React.HTMLAttributes<HTMLElement> & {
   items: {
@@ -25,7 +26,9 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
   const [val, setVal] = useState(pathname ?? "/settings");
 
   const handleSelect = (e: string | null) => {
-    if (!e) return;
+    if (!e) {
+      return;
+    }
     setVal(e);
     navigate({ to: e });
   };
@@ -52,7 +55,10 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
 
       <ScrollArea className="hidden w-full min-w-40 bg-background px-1 py-2 md:block">
         <nav
-          className={cn("flex space-x-2 py-1 lg:flex-col lg:space-y-1 lg:space-x-0", className)}
+          className={cn(
+            "flex space-x-2 py-1 lg:flex-col lg:space-y-1 lg:space-x-0",
+            className
+          )}
           {...props}
         >
           {items.map((item) => (
@@ -64,7 +70,7 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
                 pathname === item.href
                   ? "bg-muted hover:bg-accent"
                   : "hover:bg-accent hover:underline",
-                "justify-start",
+                "justify-start"
               )}
             >
               <span className="me-2">{item.icon}</span>

@@ -2,6 +2,7 @@
 description: "Use when writing or modifying tests, test utilities, or test setup files."
 applyTo: "apps/web/src/**/*.test.{ts,tsx}"
 ---
+
 # Testing Conventions
 
 - Framework: Vitest + `vitest-browser-react` + Playwright. Run: `cd apps/web && bunx vitest` (watch) or `bunx vitest run` (single).

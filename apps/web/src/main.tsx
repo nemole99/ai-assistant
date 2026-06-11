@@ -3,6 +3,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
+
 import { Loader } from "./components/loader";
 import { DirectionProvider } from "./context/direction-provider";
 import { ThemeProvider } from "./context/theme-provider";
@@ -10,14 +11,16 @@ import { orpc, queryClient } from "./lib/orpc";
 import { routeTree } from "./routeTree.gen";
 
 const router = createRouter({
-  routeTree,
-  defaultPreload: "intent",
-  scrollRestoration: true,
-  defaultPendingComponent: () => <Loader />,
-  context: { orpc, queryClient },
   Wrap: function WrapComponent({ children }: { children: React.ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   },
+  context: { orpc, queryClient },
+  defaultPendingComponent: () => <Loader />,
+  defaultPreload: "intent",
+  routeTree,
+  scrollRestoration: true,
 });
 
 declare module "@tanstack/react-router" {
@@ -26,7 +29,7 @@ declare module "@tanstack/react-router" {
   }
 }
 
-const rootElement = document.getElementById("app");
+const rootElement = document.querySelector("#app");
 
 if (!rootElement) {
   throw new Error("Root element not found");
@@ -43,6 +46,6 @@ if (!rootElement.innerHTML) {
           </DirectionProvider>
         </TooltipProvider>
       </ThemeProvider>
-    </StrictMode>,
+    </StrictMode>
   );
 }

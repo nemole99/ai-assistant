@@ -1,13 +1,13 @@
+import { copilotAuditRouter } from "./audit";
+import { copilotJiraRouter } from "./jira";
+import { copilotKpiRouter } from "./kpi";
 import { copilotTicketRouter } from "./ticket";
 import { copilotTimesheetRouter } from "./timesheet";
-import { copilotKpiRouter } from "./kpi";
-import { copilotJiraRouter } from "./jira";
-import { copilotAuditRouter } from "./audit";
 
 export const copilotEvaluationRouter = {
+  audit: copilotAuditRouter,
+  jira: copilotJiraRouter,
+  kpi: copilotKpiRouter,
   ticket: copilotTicketRouter,
   timesheet: copilotTimesheetRouter,
-  kpi: copilotKpiRouter,
-  jira: copilotJiraRouter,
-  audit: copilotAuditRouter,
 };

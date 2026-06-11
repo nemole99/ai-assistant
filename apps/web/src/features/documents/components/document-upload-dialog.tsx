@@ -1,9 +1,5 @@
-import { useState } from "react";
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { UploadCloud, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -13,7 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import {
   FileUpload,
   FileUploadDropzone,
@@ -25,21 +26,26 @@ import {
 } from "@workspace/ui/components/file-upload";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { UploadCloud, X } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { SelectDropdown } from "@/components/select-dropdown";
 import { orpc } from "@/lib/orpc";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string(),
   categoryId: z.string().min(1, "Category is required"),
+  description: z.string(),
+  title: z.string().min(1, "Title is required"),
 });
 
-type Props = {
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
 export function DocumentUploadDialog({ open, onOpenChange }: Props) {
   const queryClient = useQueryClient();
@@ -52,12 +58,15 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
     enabled: open,
   });
 
-  const requestUploadMutation = useMutation(orpc.document.requestUpload.mutationOptions());
-  const confirmUploadMutation = useMutation(orpc.document.confirmUpload.mutationOptions());
+  const requestUploadMutation = useMutation(
+    orpc.document.requestUpload.mutationOptions()
+  );
+  const confirmUploadMutation = useMutation(
+    orpc.document.confirmUpload.mutationOptions()
+  );
 
   const form = useForm({
-    defaultValues: { title: "", description: "", categoryId: "" },
-    validators: { onSubmit: formSchema },
+    defaultValues: { categoryId: "", description: "", title: "" },
     onSubmit: async ({ value }) => {
       if (!selectedFile) {
         toast.error("Please select a PDF file");
@@ -68,14 +77,15 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
       setUploadProgress(0);
 
       try {
-        const { documentId, presignedUrl } = await requestUploadMutation.mutateAsync({
-          title: value.title,
-          description: value.description || undefined,
-          categoryId: value.categoryId,
-          filename: selectedFile.name,
-          fileSize: selectedFile.size,
-          mimeType: "application/pdf",
-        });
+        const { documentId, presignedUrl } =
+          await requestUploadMutation.mutateAsync({
+            categoryId: value.categoryId,
+            description: value.description || undefined,
+            fileSize: selectedFile.size,
+            filename: selectedFile.name,
+            mimeType: "application/pdf",
+            title: value.title,
+          });
 
         const xhr = new XMLHttpRequest();
         await new Promise<void>((resolve, reject) => {
@@ -85,8 +95,11 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             }
           };
           xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) resolve();
-            else reject(new Error(`Upload failed with status ${xhr.status}`));
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve();
+            } else {
+              reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
           };
           xhr.onerror = () => reject(new Error("Upload failed"));
           xhr.open("PUT", presignedUrl);
@@ -99,13 +112,14 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
         queryClient.invalidateQueries(orpc.document.list.queryOptions());
         toast.success("Document uploaded and queued for processing.");
         handleClose();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Upload failed");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Upload failed");
       } finally {
         setIsUploading(false);
         setUploadProgress(0);
       }
     },
+    validators: { onSubmit: formSchema },
   });
 
   function handleClose() {
@@ -122,14 +136,19 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
   }));
 
   const isPending =
-    requestUploadMutation.isPending || confirmUploadMutation.isPending || isUploading;
+    requestUploadMutation.isPending ||
+    confirmUploadMutation.isPending ||
+    isUploading;
 
   return (
     <Dialog
       open={open}
       onOpenChange={(s) => {
-        if (!isPending) handleClose();
-        else if (s) onOpenChange(s);
+        if (!isPending) {
+          handleClose();
+        } else if (s) {
+          onOpenChange(s);
+        }
       }}
     >
       <DialogContent className="sm:max-w-lg">
@@ -158,7 +177,10 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                   const file = files[0] ?? null;
                   setSelectedFile(file);
                   if (file && !form.getFieldValue("title")) {
-                    form.setFieldValue("title", file.name.replace(/\.pdf$/i, ""));
+                    form.setFieldValue(
+                      "title",
+                      file.name.replace(/\.pdf$/i, "")
+                    );
                   }
                 }}
                 onFileReject={(_file, message) => toast.error(message)}
@@ -195,7 +217,8 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             <form.Field
               name="title"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Title</FieldLabel>
@@ -207,7 +230,9 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                       placeholder="e.g., Employee Handbook 2026"
                       autoComplete="off"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -216,7 +241,8 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             <form.Field
               name="categoryId"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Category</FieldLabel>
@@ -226,7 +252,9 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                       placeholder="Select a category"
                       items={categoryOptions}
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -238,7 +266,9 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     Description{" "}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
+                    <span className="text-muted-foreground font-normal">
+                      (optional)
+                    </span>
                   </FieldLabel>
                   <Textarea
                     id={field.name}
@@ -259,7 +289,11 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
             Cancel
           </Button>
           <Button type="submit" form="upload-form" disabled={isPending}>
-            {isPending ? (isUploading ? `Uploading ${uploadProgress}%…` : "Processing…") : "Upload"}
+            {isPending
+              ? (isUploading
+                ? `Uploading ${uploadProgress}%…`
+                : "Processing…")
+              : "Upload"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,7 +1,4 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Plus, Tag, FileText } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -12,17 +9,24 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { Plus, Tag, FileText } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { orpc } from "@/lib/orpc";
+
 import { DocumentCategoryActionDialog } from "./components/document-category-action-dialog";
 import { DocumentsEmptyState } from "./components/documents-empty-state";
-import { type DocumentCategory } from "./data/schema";
+import type { DocumentCategory } from "./data/schema";
 
 export function AdminDocumentCategories() {
   const queryClient = useQueryClient();
-  const { data: categories = [], isLoading } = useQuery(orpc.documentCategory.list.queryOptions());
+  const { data: categories = [], isLoading } = useQuery(
+    orpc.documentCategory.list.queryOptions()
+  );
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -30,14 +34,16 @@ export function AdminDocumentCategories() {
 
   const deleteMutation = useMutation(
     orpc.documentCategory.delete.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
-        queryClient.invalidateQueries(orpc.documentCategory.list.queryOptions());
+        queryClient.invalidateQueries(
+          orpc.documentCategory.list.queryOptions()
+        );
         toast.success("Category deleted.");
         setDeleteOpen(false);
         setCurrentRow(null);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   function handleEdit(cat: DocumentCategory) {
@@ -59,7 +65,9 @@ export function AdminDocumentCategories() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Documents</h2>
-            <p className="text-muted-foreground">Upload and manage company documents.</p>
+            <p className="text-muted-foreground">
+              Upload and manage company documents.
+            </p>
           </div>
           <Button
             onClick={() => {
@@ -101,7 +109,7 @@ export function AdminDocumentCategories() {
 
         {isLoading ? (
           <Loader />
-        ) : categories.length === 0 ? (
+        ) : (categories.length === 0 ? (
           <DocumentsEmptyState
             icon={<Tag />}
             title="No categories yet"
@@ -147,7 +155,11 @@ export function AdminDocumentCategories() {
                   <TableCell>{cat.documentCount}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(cat)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(cat)}
+                      >
                         Edit
                       </Button>
                       <Button
@@ -164,14 +176,16 @@ export function AdminDocumentCategories() {
               ))}
             </TableBody>
           </Table>
-        )}
+        ))}
 
         <DocumentCategoryActionDialog
           currentRow={currentRow ?? undefined}
           open={dialogOpen}
           onOpenChange={(s) => {
             setDialogOpen(s);
-            if (!s) setCurrentRow(null);
+            if (!s) {
+              setCurrentRow(null);
+            }
           }}
         />
 
@@ -179,21 +193,25 @@ export function AdminDocumentCategories() {
           open={deleteOpen}
           onOpenChange={(s) => {
             setDeleteOpen(s);
-            if (!s) setCurrentRow(null);
+            if (!s) {
+              setCurrentRow(null);
+            }
           }}
           title="Delete category?"
           desc={
             currentRow
-              ? currentRow.documentCount > 0
+              ? (currentRow.documentCount > 0
                 ? `Cannot delete "${currentRow.name}" — it has ${currentRow.documentCount} document(s). Move or delete them first.`
-                : `Delete "${currentRow.name}"? This action cannot be undone.`
+                : `Delete "${currentRow.name}"? This action cannot be undone.`)
               : ""
           }
           confirmText="Delete"
           destructive
           isLoading={deleteMutation.isPending}
           handleConfirm={() => {
-            if (currentRow) deleteMutation.mutate({ id: currentRow.id });
+            if (currentRow) {
+              deleteMutation.mutate({ id: currentRow.id });
+            }
           }}
           disabled={!!currentRow && currentRow.documentCount > 0}
         />

@@ -1,21 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@workspace/ui/components/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@workspace/ui/components/alert";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { orpc } from "@/lib/orpc";
-import { type Employee } from "../data/schema";
 
-type EmployeeDeleteDialogProps = {
+import type { Employee } from "../data/schema";
+
+interface EmployeeDeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentRow: Employee;
-};
+}
 
 export function EmployeesDeleteDialog({
   open,
@@ -27,18 +33,20 @@ export function EmployeesDeleteDialog({
 
   const deleteMutation = useMutation(
     orpc.employee.delete.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.employee.list.queryOptions());
         toast.success("Employee deleted successfully.");
         setValue("");
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const handleDelete = () => {
-    if (value.trim() !== currentRow.fullName) return;
+    if (value.trim() !== currentRow.fullName) {
+      return;
+    }
     deleteMutation.mutate({ id: currentRow.id });
   };
 
@@ -47,11 +55,16 @@ export function EmployeesDeleteDialog({
       open={open}
       onOpenChange={onOpenChange}
       form="employees-delete-form"
-      disabled={value.trim() !== currentRow.fullName || deleteMutation.isPending}
+      disabled={
+        value.trim() !== currentRow.fullName || deleteMutation.isPending
+      }
       title={
         <span className="text-destructive">
-          <AlertTriangle className="me-1 inline-block stroke-destructive" size={18} /> Delete
-          Employee
+          <AlertTriangle
+            className="me-1 inline-block stroke-destructive"
+            size={18}
+          />{" "}
+          Delete Employee
         </span>
       }
       desc={
@@ -64,10 +77,12 @@ export function EmployeesDeleteDialog({
           className="space-y-4"
         >
           <p className="mb-2">
-            Are you sure you want to delete <span className="font-bold">{currentRow.fullName}</span>
+            Are you sure you want to delete{" "}
+            <span className="font-bold">{currentRow.fullName}</span>
             ?
             <br />
-            This action will permanently remove the employee from the system. This cannot be undone.
+            This action will permanently remove the employee from the system.
+            This cannot be undone.
           </p>
 
           <Label className="my-2">

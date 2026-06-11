@@ -1,3 +1,4 @@
+import { ORPCError } from "@orpc/server";
 import { db } from "@workspace/db";
 import {
   copilotKpiProductivity,
@@ -7,18 +8,30 @@ import {
 } from "@workspace/db/schema/copilot-evaluation";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { ORPCError } from "@orpc/server";
+
 import { protectedProcedure, managerProcedure } from "../../index";
 
 const MONTH_INDEX: Record<string, number> = {
-  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
-  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+  apr: 3,
+  aug: 7,
+  dec: 11,
+  feb: 1,
+  jan: 0,
+  jul: 6,
+  jun: 5,
+  mar: 2,
+  may: 4,
+  nov: 10,
+  oct: 9,
+  sep: 8,
 };
 
 /** Returns true if the short month name (e.g. "apr") is strictly before the current month */
 function isPastMonth(monthKey: string): boolean {
   const idx = MONTH_INDEX[monthKey.toLowerCase()];
-  if (idx === undefined) return false;
+  if (idx === undefined) {
+    return false;
+  }
   const now = new Date();
   return idx < now.getMonth();
 }
@@ -38,19 +51,14 @@ const monthValueInput = z.object({
 });
 
 export const copilotKpiRouter = {
-  // --- Productivity KPI ---
-  listProductivity: protectedProcedure.handler(async () => {
-    return db.select().from(copilotKpiProductivity).orderBy(copilotKpiProductivity.developer);
-  }),
-
   createProductivity: managerProcedure
     .input(
       z.object({
         developer: z.string().min(1),
         project: z.string().min(1),
-        title: z.string().optional(),
         target: z.number().optional(),
-      }),
+        title: z.string().optional(),
+      })
     )
     .handler(async ({ input }) => {
       const id = crypto.randomUUID();
@@ -61,39 +69,32 @@ export const copilotKpiRouter = {
       return created;
     }),
 
-  updateProductivityMonth: managerProcedure
-    .input(monthValueInput)
+  createQuality: managerProcedure
+    .input(
+      z.object({
+        developer: z.string().min(1),
+        project: z.string().min(1),
+        reopenPercent: z.number().optional(),
+        title: z.string().optional(),
+      })
+    )
     .handler(async ({ input }) => {
-      assertNotPastMonth(input.month);
-
-      const [existing] = await db
-        .select()
-        .from(copilotKpiProductivity)
-        .where(eq(copilotKpiProductivity.id, input.id));
-      if (!existing) throw new ORPCError("NOT_FOUND");
-
-      const monthlyValues = { ...(existing.monthlyValues as Record<string, number>), [input.month]: input.value };
-      const [updated] = await db
-        .update(copilotKpiProductivity)
-        .set({ monthlyValues })
-        .where(eq(copilotKpiProductivity.id, input.id))
+      const id = crypto.randomUUID();
+      const [created] = await db
+        .insert(copilotKpiQuality)
+        .values({ id, ...input })
         .returning();
-      return updated;
+      return created;
     }),
-
-  // --- Sharing KPI ---
-  listSharing: protectedProcedure.handler(async () => {
-    return db.select().from(copilotKpiSharing).orderBy(copilotKpiSharing.developer);
-  }),
 
   createSharing: managerProcedure
     .input(
       z.object({
         developer: z.string().min(1),
         project: z.string().min(1),
-        title: z.string().optional(),
         target: z.number().optional(),
-      }),
+        title: z.string().optional(),
+      })
     )
     .handler(async ({ input }) => {
       const id = crypto.randomUUID();
@@ -104,47 +105,68 @@ export const copilotKpiRouter = {
       return created;
     }),
 
-  updateSharingMonth: managerProcedure
+  createSummary: managerProcedure
+    .input(
+      z.object({
+        developer: z.string().min(1),
+        project: z.string().min(1),
+        targetProductivity: z.number().optional(),
+        targetReopen: z.number().optional(),
+        targetSharing: z.number().optional(),
+        title: z.string().optional(),
+      })
+    )
+    .handler(async ({ input }) => {
+      const id = crypto.randomUUID();
+      const [created] = await db
+        .insert(copilotKpiSummary)
+        .values({ id, ...input })
+        .returning();
+      return created;
+    }),
+
+  listProductivity: protectedProcedure.handler(() =>
+    db
+      .select()
+      .from(copilotKpiProductivity)
+      .orderBy(copilotKpiProductivity.developer)
+  ),
+
+  listQuality: protectedProcedure.handler(() =>
+    db.select().from(copilotKpiQuality).orderBy(copilotKpiQuality.developer)
+  ),
+
+  listSharing: protectedProcedure.handler(() =>
+    db.select().from(copilotKpiSharing).orderBy(copilotKpiSharing.developer)
+  ),
+
+  listSummary: protectedProcedure.handler(() =>
+    db.select().from(copilotKpiSummary).orderBy(copilotKpiSummary.developer)
+  ),
+
+  updateProductivityMonth: managerProcedure
     .input(monthValueInput)
     .handler(async ({ input }) => {
       assertNotPastMonth(input.month);
 
       const [existing] = await db
         .select()
-        .from(copilotKpiSharing)
-        .where(eq(copilotKpiSharing.id, input.id));
-      if (!existing) throw new ORPCError("NOT_FOUND");
+        .from(copilotKpiProductivity)
+        .where(eq(copilotKpiProductivity.id, input.id));
+      if (!existing) {
+        throw new ORPCError("NOT_FOUND");
+      }
 
-      const monthlyValues = { ...(existing.monthlyValues as Record<string, number>), [input.month]: input.value };
+      const monthlyValues = {
+        ...(existing.monthlyValues as Record<string, number>),
+        [input.month]: input.value,
+      };
       const [updated] = await db
-        .update(copilotKpiSharing)
+        .update(copilotKpiProductivity)
         .set({ monthlyValues })
-        .where(eq(copilotKpiSharing.id, input.id))
+        .where(eq(copilotKpiProductivity.id, input.id))
         .returning();
       return updated;
-    }),
-
-  // --- Quality KPI ---
-  listQuality: protectedProcedure.handler(async () => {
-    return db.select().from(copilotKpiQuality).orderBy(copilotKpiQuality.developer);
-  }),
-
-  createQuality: managerProcedure
-    .input(
-      z.object({
-        developer: z.string().min(1),
-        project: z.string().min(1),
-        title: z.string().optional(),
-        reopenPercent: z.number().optional(),
-      }),
-    )
-    .handler(async ({ input }) => {
-      const id = crypto.randomUUID();
-      const [created] = await db
-        .insert(copilotKpiQuality)
-        .values({ id, ...input })
-        .returning();
-      return created;
     }),
 
   updateQualityMonth: managerProcedure
@@ -156,9 +178,14 @@ export const copilotKpiRouter = {
         .select()
         .from(copilotKpiQuality)
         .where(eq(copilotKpiQuality.id, input.id));
-      if (!existing) throw new ORPCError("NOT_FOUND");
+      if (!existing) {
+        throw new ORPCError("NOT_FOUND");
+      }
 
-      const monthlyValues = { ...(existing.monthlyValues as Record<string, number>), [input.month]: input.value };
+      const monthlyValues = {
+        ...(existing.monthlyValues as Record<string, number>),
+        [input.month]: input.value,
+      };
       const [updated] = await db
         .update(copilotKpiQuality)
         .set({ monthlyValues })
@@ -174,7 +201,9 @@ export const copilotKpiRouter = {
         .select()
         .from(copilotKpiQuality)
         .where(eq(copilotKpiQuality.id, input.id));
-      if (!existing) throw new ORPCError("NOT_FOUND");
+      if (!existing) {
+        throw new ORPCError("NOT_FOUND");
+      }
 
       const [updated] = await db
         .update(copilotKpiQuality)
@@ -184,39 +213,41 @@ export const copilotKpiRouter = {
       return updated;
     }),
 
-  // --- Summary KPI ---
-  listSummary: protectedProcedure.handler(async () => {
-    return db.select().from(copilotKpiSummary).orderBy(copilotKpiSummary.developer);
-  }),
-
-  createSummary: managerProcedure
-    .input(
-      z.object({
-        developer: z.string().min(1),
-        project: z.string().min(1),
-        title: z.string().optional(),
-        targetProductivity: z.number().optional(),
-        targetReopen: z.number().optional(),
-        targetSharing: z.number().optional(),
-      }),
-    )
+  updateSharingMonth: managerProcedure
+    .input(monthValueInput)
     .handler(async ({ input }) => {
-      const id = crypto.randomUUID();
-      const [created] = await db
-        .insert(copilotKpiSummary)
-        .values({ id, ...input })
+      assertNotPastMonth(input.month);
+
+      const [existing] = await db
+        .select()
+        .from(copilotKpiSharing)
+        .where(eq(copilotKpiSharing.id, input.id));
+      if (!existing) {
+        throw new ORPCError("NOT_FOUND");
+      }
+
+      const monthlyValues = {
+        ...(existing.monthlyValues as Record<string, number>),
+        [input.month]: input.value,
+      };
+      const [updated] = await db
+        .update(copilotKpiSharing)
+        .set({ monthlyValues })
+        .where(eq(copilotKpiSharing.id, input.id))
         .returning();
-      return created;
+      return updated;
     }),
 
   updateSummaryComment: managerProcedure
-    .input(z.object({ id: z.string(), comment: z.string() }))
+    .input(z.object({ comment: z.string(), id: z.string() }))
     .handler(async ({ input }) => {
       const [existing] = await db
         .select()
         .from(copilotKpiSummary)
         .where(eq(copilotKpiSummary.id, input.id));
-      if (!existing) throw new ORPCError("NOT_FOUND");
+      if (!existing) {
+        throw new ORPCError("NOT_FOUND");
+      }
 
       const [updated] = await db
         .update(copilotKpiSummary)

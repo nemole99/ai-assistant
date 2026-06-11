@@ -1,16 +1,24 @@
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Calendar } from "@workspace/ui/components/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 
-type DatePickerProps = {
+interface DatePickerProps {
   selected: Date | undefined;
   onSelect: (date: Date | undefined) => void;
   placeholder?: string;
-};
+}
 
-export function DatePicker({ selected, onSelect, placeholder = "Pick a date" }: DatePickerProps) {
+export function DatePicker({
+  selected,
+  onSelect,
+  placeholder = "Pick a date",
+}: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger
@@ -22,7 +30,11 @@ export function DatePicker({ selected, onSelect, placeholder = "Pick a date" }: 
           />
         }
       >
-        {selected ? format(selected, "MMM d, yyyy") : <span>{placeholder}</span>}
+        {selected ? (
+          format(selected, "MMM d, yyyy")
+        ) : (
+          <span>{placeholder}</span>
+        )}
         <CalendarIcon className="ms-auto h-4 w-4 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -31,7 +43,9 @@ export function DatePicker({ selected, onSelect, placeholder = "Pick a date" }: 
           captionLayout="dropdown"
           selected={selected}
           onSelect={onSelect}
-          disabled={(date: Date) => date > new Date() || date < new Date("1900-01-01")}
+          disabled={(date: Date) =>
+            date > new Date() || date < new Date("1900-01-01")
+          }
         />
       </PopoverContent>
     </Popover>

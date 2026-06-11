@@ -16,7 +16,7 @@ COPY packages/ui/package.json packages/ui/
 COPY packages/queue/package.json packages/queue/
 COPY packages/storage/package.json packages/storage/
 
-RUN bun install
+RUN bun install --ignore-scripts
 
 COPY apps/web/ apps/web/
 COPY packages/ packages/

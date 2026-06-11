@@ -1,9 +1,15 @@
-import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback } from "react";
-import type { UIMessage } from "ai";
-import { db, type Conversation, type ChatMessage } from "../db";
 import { useRouter } from "@tanstack/react-router";
 import { generateId } from "@workspace/ui/lib/id";
+import type { UIMessage } from "ai";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback } from "react";
+
+import { db } from "../db";
+import type { Conversation, ChatMessage } from "../db";
+
+// Module-level store so a pending first message survives the route transition
+// (component unmounts at /ask-ai and remounts at /ask-ai/$id).
+export const pendingFirstMessages = new Map<string, string>();
 
 export function useAskAiDb(targetConversationId?: string) {
   const router = useRouter();
@@ -15,69 +21,79 @@ export function useAskAiDb(targetConversationId?: string) {
   // Load messages for the current conversation
   const storedData = useLiveQuery(async () => {
     const messages = conversationId
-      ? await db.messages.where("conversationId").equals(conversationId).sortBy("createdAt")
+      ? await db.messages
+          .where("conversationId")
+          .equals(conversationId)
+          .sortBy("createdAt")
       : ([] as ChatMessage[]);
     return { conversationId, messages };
   }, [conversationId]);
 
-  const initialMessages: UIMessage[] = (storedData?.messages ?? []).map((m) => ({
-    id: m.id,
-    role: m.role,
-    parts: [{ type: "text" as const, text: (m as any).content }],
-    content: (m as any).content,
-  }));
+  const initialMessages: UIMessage[] = (storedData?.messages ?? []).map(
+    (m) => ({
+      content: (m as any).content,
+      id: m.id,
+      parts: [{ text: (m as any).content, type: "text" as const }],
+      role: m.role,
+    })
+  );
+
+  // Called when the user sends their very first message (no conversationId yet).
+  // Creates the conversation record, stores the message text for the new route to
+  // pick up, then navigates — so the stream starts inside the correct component
+  // and no state is lost on redirect.
+  const startNewConversation = useCallback(
+    async (text: string) => {
+      const newId = generateId();
+      const conv: Conversation = {
+        createdAt: Date.now(),
+        id: newId,
+        title: text.slice(0, 80),
+        updatedAt: Date.now(),
+      };
+      await db.conversations.add(conv);
+      pendingFirstMessages.set(newId, text);
+      router.navigate({
+        params: { conversationId: newId },
+        to: "/ask-ai/$conversationId",
+      });
+    },
+    [router]
+  );
 
   const saveMessages = useCallback(
     async (messages: UIMessage[]) => {
       const now = Date.now();
-      let convId = conversationId;
+      const convId = conversationId;
 
       if (!convId) {
-        convId = generateId();
-        const firstUserMsg = messages.find((m) => m.role === "user");
-        const title = firstUserMsg
-          ? typeof (firstUserMsg as any).content === "string"
-            ? (firstUserMsg as any).content
-            : (firstUserMsg.parts?.find((p) => p.type === "text")?.text ?? "New Chat")
-          : "New Chat";
-
-        const conv: Conversation = {
-          id: convId,
-          title: String(title).slice(0, 80),
-          createdAt: now,
-          updatedAt: now,
-        };
-        await db.conversations.add(conv);
-        setTimeout(() => {
-          router.navigate({
-            to: "/ask-ai/$conversationId",
-            params: { conversationId: convId! },
-          });
-        }, 0);
-      } else {
-        await db.conversations.update(convId, { updatedAt: now });
+        // Should not happen — startNewConversation guarantees a convId before
+        // streaming begins. Guard here just in case.
+        return;
       }
+
+      await db.conversations.update(convId, { updatedAt: now });
 
       const dbMessages: ChatMessage[] = messages
         .filter((m) => m.role === "user" || m.role === "assistant")
         .map((m, i) => ({
-          id: m.id,
-          conversationId: convId!,
-          role: m.role as "user" | "assistant",
           content:
             typeof (m as any).content === "string"
               ? (m as any).content
               : (m.parts?.find((p) => p.type === "text")?.text ?? ""),
+          conversationId: convId,
           createdAt: now + i,
+          id: m.id,
+          role: m.role as "user" | "assistant",
         }));
 
       // Upsert all messages
       await db.messages.bulkPut(dbMessages);
     },
-    [conversationId, router],
+    [conversationId]
   );
 
-  const newChat = useCallback(async () => {
+  const newChat = useCallback(() => {
     router.navigate({ to: "/ask-ai" });
   }, [router]);
 
@@ -85,9 +101,11 @@ export function useAskAiDb(targetConversationId?: string) {
     conversationId,
     initialMessages,
     isLoaded: targetConversationId
-      ? storedData !== undefined && storedData.conversationId === targetConversationId
+      ? storedData !== undefined &&
+        storedData.conversationId === targetConversationId
       : true,
-    saveMessages,
     newChat,
+    saveMessages,
+    startNewConversation,
   };
 }

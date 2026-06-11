@@ -1,4 +1,3 @@
-import { Building2, Lock, Pencil, Trash2, Users } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -8,12 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { type Department } from "../data/schema";
+import { Building2, Lock, Pencil, Trash2, Users } from "lucide-react";
+
+import type { Department } from "../data/schema";
 import { useDepartments } from "./departments-provider";
 
-type DepartmentCardProps = {
+interface DepartmentCardProps {
   department: Department;
-};
+}
 
 export function DepartmentCard({ department }: DepartmentCardProps) {
   const { setOpen, setCurrentRow } = useDepartments();
@@ -35,7 +36,9 @@ export function DepartmentCard({ department }: DepartmentCardProps) {
       </CardHeader>
       <CardContent className="flex-1">
         {department.description && (
-          <p className="text-muted-foreground text-sm">{department.description}</p>
+          <p className="text-muted-foreground text-sm">
+            {department.description}
+          </p>
         )}
       </CardContent>
       <CardFooter className="gap-2">

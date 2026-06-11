@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  type SortingState,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -11,9 +9,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useQuery } from "@tanstack/react-query";
-import { cn } from "@workspace/ui/lib/utils";
-import { type NavigateFn, useTableUrlState } from "@/hooks/use-table-url-state";
+import type { SortingState, VisibilityState } from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -22,24 +18,32 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
+import { cn } from "@workspace/ui/lib/utils";
+import { useEffect, useState } from "react";
+
 import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
+import { useTableUrlState } from "@/hooks/use-table-url-state";
+import type { NavigateFn } from "@/hooks/use-table-url-state";
 import { orpc } from "@/lib/orpc";
-import { type Employee } from "../data/schema";
+
+import type { Employee } from "../data/schema";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { employeesColumns as columns } from "./employees-columns";
 
-type DataTableProps = {
+interface DataTableProps {
   data: Employee[];
   search: Record<string, unknown>;
   navigate: NavigateFn;
-};
+}
 
 export function EmployeesTable({ data, search, navigate }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data: departments = [] } = useQuery(orpc.department.list.queryOptions());
+  const { data: departments = [] } = useQuery(
+    orpc.department.list.queryOptions()
+  );
 
   const {
     columnFilters,
@@ -48,40 +52,40 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
     onPaginationChange,
     ensurePageInRange,
   } = useTableUrlState({
-    search,
-    navigate,
-    pagination: { defaultPage: 1, defaultPageSize: 10 },
-    globalFilter: { enabled: false },
     columnFilters: [
       { columnId: "fullName", searchKey: "name", type: "string" },
       { columnId: "status", searchKey: "status", type: "array" },
       { columnId: "departmentName", searchKey: "department", type: "array" },
     ],
+    globalFilter: { enabled: false },
+    navigate,
+    pagination: { defaultPage: 1, defaultPageSize: 10 },
+    search,
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data,
     columns,
-    state: {
-      sorting,
-      pagination,
-      rowSelection,
-      columnFilters,
-      columnVisibility,
-    },
+    data,
     enableRowSelection: true,
-    onPaginationChange,
-    onColumnFiltersChange,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnVisibilityChange: setColumnVisibility,
-    getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange,
+    onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    state: {
+      columnFilters,
+      columnVisibility,
+      pagination,
+      rowSelection,
+      sorting,
+    },
   });
 
   useEffect(() => {
@@ -89,7 +93,12 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
   }, [table, ensurePageInRange]);
 
   return (
-    <div className={cn('max-sm:has-[div[role="toolbar"]]:mb-16', "flex flex-1 flex-col gap-4")}>
+    <div
+      className={cn(
+        'max-sm:has-[div[role="toolbar"]]:mb-16',
+        "flex flex-1 flex-col gap-4"
+      )}
+    >
       <DataTableToolbar
         table={table}
         searchPlaceholder="Filter employees..."
@@ -97,19 +106,19 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
         filters={[
           {
             columnId: "status",
-            title: "Status",
             options: [
               { label: "Active", value: "ACTIVE" },
               { label: "Inactive", value: "INACTIVE" },
             ],
+            title: "Status",
           },
           {
             columnId: "departmentName",
-            title: "Department",
             options: departments.map(({ id, name }) => ({
               label: name,
               value: id,
             })),
+            title: "Department",
           },
         ]}
       />
@@ -118,23 +127,24 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="group/row">
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={cn(
-                        "bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted",
-                        header.column.columnDef.meta?.className,
-                        header.column.columnDef.meta?.thClassName,
-                      )}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={cn(
+                      "bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted",
+                      header.column.columnDef.meta?.className,
+                      header.column.columnDef.meta?.thClassName
+                    )}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -152,17 +162,23 @@ export function EmployeesTable({ data, search, navigate }: DataTableProps) {
                       className={cn(
                         "bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted",
                         cell.column.columnDef.meta?.className,
-                        cell.column.columnDef.meta?.tdClassName,
+                        cell.column.columnDef.meta?.tdClassName
                       )}
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>

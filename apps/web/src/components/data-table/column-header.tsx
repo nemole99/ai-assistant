@@ -1,6 +1,4 @@
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
-import { type Column } from "@tanstack/react-table";
-import { cn } from "@workspace/ui/lib/utils";
+import type { Column } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -9,11 +7,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { cn } from "@workspace/ui/lib/utils";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
-type DataTableColumnHeaderProps<TData, TValue> = React.HTMLAttributes<HTMLDivElement> & {
-  column: Column<TData, TValue>;
-  title: string;
-};
+type DataTableColumnHeaderProps<TData, TValue> =
+  React.HTMLAttributes<HTMLDivElement> & {
+    column: Column<TData, TValue>;
+    title: string;
+  };
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
@@ -28,16 +29,22 @@ export function DataTableColumnHeader<TData, TValue>({
     <div className={cn("flex items-center space-x-2", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger
-          render={<Button variant="ghost" size="sm" className="h-8 data-[state=open]:bg-accent" />}
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 data-[state=open]:bg-accent"
+            />
+          }
         >
           <span>{title}</span>
           {column.getIsSorted() === "desc" ? (
             <ArrowDown className="ms-2 h-4 w-4" />
-          ) : column.getIsSorted() === "asc" ? (
+          ) : (column.getIsSorted() === "asc" ? (
             <ArrowUp className="ms-2 h-4 w-4" />
           ) : (
             <ChevronsUpDown className="ms-2 h-4 w-4" />
-          )}
+          ))}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <DropdownMenuItem onClick={() => column.toggleSorting(false)}>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import { DocumentReader } from "@/features/documents/document-reader";
 
 export const Route = createFileRoute("/_authenticated/documents/$id")({

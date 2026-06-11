@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { orpc } from "@/lib/orpc";
+
 import { DocumentEditDialog } from "./document-edit-dialog";
 import { DocumentUploadDialog } from "./document-upload-dialog";
 import { useDocuments } from "./documents-provider";
@@ -12,29 +14,32 @@ export function DocumentsDialogs() {
 
   const deleteMutation = useMutation(
     orpc.document.delete.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.document.list.queryOptions());
         toast.success("Document deleted.");
         setOpen(null);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const retryMutation = useMutation(
     orpc.document.retry.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.document.list.queryOptions());
         toast.success("Document queued for reprocessing.");
         setOpen(null);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   return (
     <>
-      <DocumentUploadDialog open={open === "upload"} onOpenChange={(s) => !s && setOpen(null)} />
+      <DocumentUploadDialog
+        open={open === "upload"}
+        onOpenChange={(s) => !s && setOpen(null)}
+      />
 
       {currentRow && (
         <>

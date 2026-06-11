@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/button";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
-import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
+import { Menu, X } from "lucide-react";
 
 export function AppTitle() {
   const { setOpenMobile } = useSidebar();
@@ -34,7 +34,11 @@ export function AppTitle() {
   );
 }
 
-function ToggleSidebar({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
+function ToggleSidebar({
+  className,
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
 
   return (

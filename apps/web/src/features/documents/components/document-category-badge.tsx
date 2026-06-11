@@ -1,4 +1,4 @@
-import { type DocumentCategory } from "../data/schema";
+import type { DocumentCategory } from "../data/schema";
 
 export function DocumentCategoryBadge({
   category,

@@ -13,14 +13,14 @@ COPY packages/ui/package.json packages/ui/
 COPY packages/queue/package.json packages/queue/
 COPY packages/storage/package.json packages/storage/
 
-RUN bun install
+RUN bun install --ignore-scripts
 
 COPY apps/server/ apps/server/
 COPY packages/ packages/
 
 # Compile self-contained binaries for both server and worker
-RUN bun build --compile --sourcemap ./apps/server/src/index.ts --outfile /server-bin
-RUN bun build --compile --sourcemap ./apps/server/src/worker.ts --outfile /worker-bin
+RUN bun build --compile --sourcemap ./apps/server/src/index.ts --outfile /server-bin --external msgpackr-extract
+RUN bun build --compile --sourcemap ./apps/server/src/worker.ts --outfile /worker-bin --external msgpackr-extract
 
 # ── Runtime ──────────────────────────────────────────────────
 FROM oven/bun:1-slim AS runtime
@@ -29,7 +29,7 @@ WORKDIR /app
 # Python + markitdown for the document processing worker
 RUN apt-get update && \
     apt-get install -y --no-install-recommends python3 python3-pip && \
-    pip3 install --break-system-packages 'markitdown[pdf]' && \
+    pip3 install --break-system-packages 'markitdown[pptx, pdf, docx, xlsx, xls]' && \
     apt-get purge -y python3-pip && \
     apt-get autoremove -y && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /root/.cache

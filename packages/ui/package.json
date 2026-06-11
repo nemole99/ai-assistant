@@ -32,6 +32,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.14.0",
+    "marked": "^18.0.3",
     "media-chrome": "^4.19.0",
     "motion": "^12.38.0",
     "nanoid": "^5.1.11",
@@ -40,8 +41,11 @@
     "react-day-picker": "^10.0.0",
     "react-dom": "^19.2.6",
     "react-jsx-parser": "^2.4.1",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.11.0",
     "recharts": "3.8.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "shadcn": "^4.7.0",
     "shiki": "^4.0.2",
     "sonner": "^2.0.7",
@@ -53,6 +57,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@workspace/config": "workspace:*",

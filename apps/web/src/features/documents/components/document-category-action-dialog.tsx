@@ -1,7 +1,5 @@
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import {
   ColorPicker,
@@ -21,11 +19,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { orpc } from "@/lib/orpc";
-import { type DocumentCategory } from "../data/schema";
+
+import type { DocumentCategory } from "../data/schema";
 
 const PRESET_COLORS = [
   "#ef4444",
@@ -41,42 +48,50 @@ const PRESET_COLORS = [
 ];
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
   color: z.string().min(1, "Color is required"),
   description: z.string(),
+  name: z.string().min(1, "Name is required"),
 });
 
-type Props = {
+interface Props {
   currentRow?: DocumentCategory;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-};
+}
 
-export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }: Props) {
+export function DocumentCategoryActionDialog({
+  currentRow,
+  open,
+  onOpenChange,
+}: Props) {
   const isEdit = !!currentRow;
   const queryClient = useQueryClient();
 
   const createMutation = useMutation(
     orpc.documentCategory.create.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
-        queryClient.invalidateQueries(orpc.documentCategory.list.queryOptions());
+        queryClient.invalidateQueries(
+          orpc.documentCategory.list.queryOptions()
+        );
         toast.success("Category created.");
         form.reset();
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const updateMutation = useMutation(
     orpc.documentCategory.update.mutationOptions({
+      onError: (err) => toast.error(err.message),
       onSuccess: () => {
-        queryClient.invalidateQueries(orpc.documentCategory.list.queryOptions());
+        queryClient.invalidateQueries(
+          orpc.documentCategory.list.queryOptions()
+        );
         toast.success("Category updated.");
         onOpenChange(false);
       },
-      onError: (err) => toast.error(err.message),
-    }),
+    })
   );
 
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -84,12 +99,11 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
   const form = useForm({
     defaultValues: isEdit
       ? {
-          name: currentRow.name,
           color: currentRow.color,
           description: currentRow.description ?? "",
+          name: currentRow.name,
         }
-      : { name: "", color: PRESET_COLORS[0]!, description: "" },
-    validators: { onSubmit: formSchema },
+      : { color: PRESET_COLORS[0]!, description: "", name: "" },
     onSubmit: ({ value }) => {
       if (isEdit) {
         updateMutation.mutate({
@@ -98,9 +112,13 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
           description: value.description || undefined,
         });
       } else {
-        createMutation.mutate({ ...value, description: value.description || undefined });
+        createMutation.mutate({
+          ...value,
+          description: value.description || undefined,
+        });
       }
     },
+    validators: { onSubmit: formSchema },
   });
 
   return (
@@ -115,7 +133,9 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
         <DialogHeader className="text-start">
           <DialogTitle>{isEdit ? "Edit Category" : "New Category"}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update the document category." : "Create a new document category."}
+            {isEdit
+              ? "Update the document category."
+              : "Create a new document category."}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -129,7 +149,8 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
             <form.Field
               name="name"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Name</FieldLabel>
@@ -141,7 +162,9 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
                       placeholder="e.g., Company Policy"
                       autoComplete="off"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -151,12 +174,23 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
               children={(field) => (
                 <Field>
                   <FieldLabel>Color</FieldLabel>
-                  <ColorPicker value={field.state.value} onValueChange={field.handleChange}>
+                  <ColorPicker
+                    value={field.state.value}
+                    onValueChange={field.handleChange}
+                  >
                     <ColorPickerTrigger
-                      render={<Button type="button" variant="outline" className="gap-2" />}
+                      render={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="gap-2"
+                        />
+                      }
                     >
                       <ColorPickerSwatch className="size-4 rounded-sm" />
-                      <span className="font-mono text-sm">{field.state.value}</span>
+                      <span className="font-mono text-sm">
+                        {field.state.value}
+                      </span>
                     </ColorPickerTrigger>
                     <ColorPickerContent>
                       <div className="flex flex-wrap gap-1.5">
@@ -167,8 +201,14 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
                             className="size-6 rounded-full border-2 transition-all"
                             style={{
                               backgroundColor: c,
-                              borderColor: field.state.value === c ? "white" : "transparent",
-                              outline: field.state.value === c ? `2px solid ${c}` : "none",
+                              borderColor:
+                                field.state.value === c
+                                  ? "white"
+                                  : "transparent",
+                              outline:
+                                field.state.value === c
+                                  ? `2px solid ${c}`
+                                  : "none",
                             }}
                             onClick={() => field.handleChange(c)}
                           />
@@ -192,7 +232,9 @@ export function DocumentCategoryActionDialog({ currentRow, open, onOpenChange }:
                 <Field>
                   <FieldLabel>
                     Description{" "}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
+                    <span className="text-muted-foreground font-normal">
+                      (optional)
+                    </span>
                   </FieldLabel>
                   <Textarea
                     value={field.state.value}

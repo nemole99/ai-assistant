@@ -1,5 +1,6 @@
-import { UserPlus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { UserPlus } from "lucide-react";
+
 import { useEmployees } from "./employees-provider";
 
 export function EmployeesPrimaryButtons() {

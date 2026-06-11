@@ -1,22 +1,23 @@
+import { ORPCError } from "@orpc/server";
 import { db } from "@workspace/db";
 import { copilotTicket } from "@workspace/db/schema/copilot-evaluation";
+import { env } from "@workspace/env/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { ORPCError } from "@orpc/server";
+
 import { managerProcedure } from "../../index";
-import { env } from "@workspace/env/server";
 
 const jiraTicketSchema = z.object({
-  developer: z.string(),
-  project: z.string(),
   category: z.enum(["bug", "feature"]),
-  ticketUrl: z.string().url(),
-  processDate: z.string(),
-  totalEffort: z.number(),
-  investigateActual: z.number(),
   codeFixActual: z.number(),
   codeReviewActual: z.number(),
   comment: z.string().optional(),
+  developer: z.string(),
+  investigateActual: z.number(),
+  processDate: z.string(),
+  project: z.string(),
+  ticketUrl: z.string().url(),
+  totalEffort: z.number(),
 });
 
 export const copilotJiraRouter = {
@@ -28,7 +29,8 @@ export const copilotJiraRouter = {
 
     if (!baseUrl || !token || !projectKey || !developersMap) {
       throw new ORPCError("BAD_REQUEST", {
-        message: "Jira integration is not configured. Set JIRA_BASE_URL, JIRA_TOKEN, JIRA_PROJECT, and JIRA_DEVELOPERS environment variables.",
+        message:
+          "Jira integration is not configured. Set JIRA_BASE_URL, JIRA_TOKEN, JIRA_PROJECT, and JIRA_DEVELOPERS environment variables.",
       });
     }
 
@@ -36,7 +38,9 @@ export const copilotJiraRouter = {
     const devMap = new Map<string, string>();
     for (const pair of developersMap.split(",")) {
       const [email, name] = pair.trim().split(":");
-      if (email && name) devMap.set(email.trim(), name.trim());
+      if (email && name) {
+        devMap.set(email.trim(), name.trim());
+      }
     }
 
     // Fetch open bugs from Jira
@@ -48,7 +52,7 @@ export const copilotJiraRouter = {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     if (!response.ok) {
@@ -57,8 +61,8 @@ export const copilotJiraRouter = {
       });
     }
 
-    const data = await response.json() as {
-      issues: Array<{
+    const data = (await response.json()) as {
+      issues: {
         key: string;
         fields: {
           summary: string;
@@ -66,31 +70,34 @@ export const copilotJiraRouter = {
           created: string;
           timeoriginalestimate?: number;
         };
-      }>;
+      }[];
     };
 
     const tickets = data.issues.map((issue) => {
       const assigneeEmail = issue.fields.assignee?.emailAddress ?? "";
-      const developer = devMap.get(assigneeEmail) ?? issue.fields.assignee?.displayName ?? "Unassigned";
+      const developer =
+        devMap.get(assigneeEmail) ??
+        issue.fields.assignee?.displayName ??
+        "Unassigned";
       const totalEffort = issue.fields.timeoriginalestimate
         ? issue.fields.timeoriginalestimate / 3600
         : 0;
 
       return {
-        developer,
-        project: projectKey,
         category: "bug" as const,
-        ticketUrl: `${baseUrl}/browse/${issue.key}`,
-        processDate: issue.fields.created.split("T")[0],
-        totalEffort,
-        investigateEstimate: totalEffort * 0.2,
-        investigateActual: 0,
-        codeFixEstimate: totalEffort * 0.4,
         codeFixActual: 0,
-        codeReviewEstimate: totalEffort * 0.15,
+        codeFixEstimate: totalEffort * 0.4,
         codeReviewActual: 0,
-        reopenStatus: 0,
+        codeReviewEstimate: totalEffort * 0.15,
         comment: issue.fields.summary,
+        developer,
+        investigateActual: 0,
+        investigateEstimate: totalEffort * 0.2,
+        processDate: issue.fields.created.split("T")[0],
+        project: projectKey,
+        reopenStatus: 0,
+        ticketUrl: `${baseUrl}/browse/${issue.key}`,
+        totalEffort,
       };
     });
 
@@ -100,14 +107,14 @@ export const copilotJiraRouter = {
   submitTickets: managerProcedure
     .input(z.object({ tickets: z.array(jiraTicketSchema) }))
     .handler(async ({ input }) => {
-      const results = { imported: 0, errors: [] as string[] };
+      const results = { errors: [] as string[], imported: 0 };
 
       for (const ticket of input.tickets) {
         const calculated = {
           ...ticket,
-          investigateEstimate: ticket.totalEffort * 0.2,
           codeFixEstimate: ticket.totalEffort * 0.4,
           codeReviewEstimate: ticket.totalEffort * 0.15,
+          investigateEstimate: ticket.totalEffort * 0.2,
           reopenStatus: 0,
         };
 

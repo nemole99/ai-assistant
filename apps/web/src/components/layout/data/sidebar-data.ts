@@ -9,34 +9,18 @@ import {
   FolderKanban,
   GalleryVerticalEnd,
   KeyRound,
-  LayoutDashboard,
+  LibraryBig,
+  ServerCog,
   Settings,
   UserCog,
   Wrench,
 } from "lucide-react";
-import { type SidebarData } from "../types";
+
+import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {
-  teams: [
-    {
-      name: "Ewoosoft Internal",
-      logo: Command,
-      plan: "Vite + ShadcnUI",
-    },
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-  ],
   navGroups: [
     {
-      title: "General",
       items: [
         // {
         //   title: "Dashboard",
@@ -44,93 +28,122 @@ export const sidebarData: SidebarData = {
         //   icon: LayoutDashboard,
         // },
         {
+          icon: BotMessageSquare,
           title: "Ask AI",
           url: "/ask-ai",
-          icon: BotMessageSquare,
         },
       ],
+      title: "General",
     },
     {
-      title: "Knowledge",
       items: [
         {
+          icon: BookOpen,
           title: "Documents",
           url: "/documents",
-          icon: BookOpen,
+        },
+        {
+          icon: LibraryBig,
+          title: "Wiki",
+          url: "/wiki",
         },
       ],
+      title: "Knowledge",
     },
     {
-      title: "Organization",
       items: [
         {
+          icon: Building2,
           title: "Departments",
           url: "/departments",
-          icon: Building2,
         },
         {
+          icon: Contact,
           title: "Employees",
           url: "/employees",
-          icon: Contact,
         },
         {
+          icon: FolderKanban,
           title: "Projects",
           url: "/projects",
-          icon: FolderKanban,
         },
         {
-          title: "Copilot Evaluation",
           icon: ClipboardCheck,
           items: [
             {
+              icon: ClipboardCheck,
               title: "Tickets",
               url: "/copilot-evaluation",
-              icon: ClipboardCheck,
             },
             {
+              icon: LayoutDashboard,
               title: "Statistics",
               url: "/copilot-evaluation/stats",
-              icon: LayoutDashboard,
             },
             {
+              icon: Contact,
               title: "Timesheet",
               url: "/copilot-evaluation/timesheet",
-              icon: Contact,
             },
             {
+              icon: FolderKanban,
               title: "KPI",
               url: "/copilot-evaluation/kpi",
-              icon: FolderKanban,
             },
           ],
+          title: "Copilot Evaluation",
         },
       ],
+      title: "Organization",
     },
     {
-      title: "Other",
       items: [
         {
-          title: "Settings",
           icon: Settings,
           items: [
             {
+              icon: UserCog,
               title: "Profile",
               url: "/settings",
-              icon: UserCog,
             },
             {
+              icon: Wrench,
               title: "AI Providers",
               url: "/settings/ai-providers",
-              icon: Wrench,
             },
             {
+              icon: KeyRound,
               title: "Password",
               url: "/settings/password",
-              icon: KeyRound,
+            },
+            {
+              adminOnly: true,
+              icon: ServerCog,
+              title: "System AI",
+              url: "/settings/system-ai",
             },
           ],
+          title: "Settings",
         },
       ],
+      title: "Other",
+    },
+  ],
+  teams: [
+    {
+      logo: Command,
+      name: "Ewoosoft Internal",
+      plan: "Vite + ShadcnUI",
+    },
+    {
+      logo: GalleryVerticalEnd,
+      name: "Acme Inc",
+      plan: "Enterprise",
+    },
+    {
+      logo: AudioWaveform,
+      name: "Acme Corp.",
+      plan: "Startup",
     },
   ],
 };

@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+
 import { AnalyticsChart } from "./analytics-chart";
 
 export function Analytics() {
@@ -44,7 +45,9 @@ export function Analytics() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Unique Visitors
+            </CardTitle>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -166,12 +169,19 @@ function SimpleBarList({
         return (
           <li key={i.name} className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="mb-1 truncate text-xs text-muted-foreground">{i.name}</div>
+              <div className="mb-1 truncate text-xs text-muted-foreground">
+                {i.name}
+              </div>
               <div className="h-2.5 w-full rounded-full bg-muted">
-                <div className={`h-2.5 rounded-full ${barClass}`} style={{ width }} />
+                <div
+                  className={`h-2.5 rounded-full ${barClass}`}
+                  style={{ width }}
+                />
               </div>
             </div>
-            <div className="ps-2 text-xs font-medium tabular-nums">{valueFormatter(i.value)}</div>
+            <div className="ps-2 text-xs font-medium tabular-nums">
+              {valueFormatter(i.value)}
+            </div>
           </li>
         );
       })}

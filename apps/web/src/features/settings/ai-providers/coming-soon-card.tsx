@@ -1,10 +1,10 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { Card, CardContent } from "@workspace/ui/components/card";
 
-type ComingSoonCardProps = {
+interface ComingSoonCardProps {
   name: string;
   description: string;
-};
+}
 
 export function ComingSoonCard({ name, description }: ComingSoonCardProps) {
   return (

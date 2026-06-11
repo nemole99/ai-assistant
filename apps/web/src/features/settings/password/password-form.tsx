@@ -1,16 +1,24 @@
 import { useForm } from "@tanstack/react-form";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
+import { PasswordInput } from "@workspace/ui/components/password-input";
 import { toast } from "sonner";
 import { z } from "zod";
+
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@workspace/ui/components/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@workspace/ui/components/field";
-import { PasswordInput } from "@workspace/ui/components/password-input";
 
 const passwordFormSchema = z
   .object({
-    currentPassword: z.string().min(1, "Current password is required."),
-    newPassword: z.string().min(8, "New password must be at least 8 characters."),
     confirmPassword: z.string().min(1, "Please confirm your new password."),
+    currentPassword: z.string().min(1, "Current password is required."),
+    newPassword: z
+      .string()
+      .min(8, "New password must be at least 8 characters."),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match.",
@@ -22,11 +30,10 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 export function PasswordForm() {
   const form = useForm({
     defaultValues: {
+      confirmPassword: "",
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
     } satisfies PasswordFormValues,
-    validators: { onSubmit: passwordFormSchema },
     onSubmit: async ({ value }) => {
       const { error } = await authClient.changePassword({
         currentPassword: value.currentPassword,
@@ -42,6 +49,7 @@ export function PasswordForm() {
       toast.success("Password changed successfully.");
       form.reset();
     },
+    validators: { onSubmit: passwordFormSchema },
   });
 
   return (
@@ -57,7 +65,8 @@ export function PasswordForm() {
         <form.Field
           name="currentPassword"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Current Password</FieldLabel>
@@ -78,7 +87,8 @@ export function PasswordForm() {
         <form.Field
           name="newPassword"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>New Password</FieldLabel>
@@ -99,10 +109,13 @@ export function PasswordForm() {
         <form.Field
           name="confirmPassword"
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Confirm New Password</FieldLabel>
+                <FieldLabel htmlFor={field.name}>
+                  Confirm New Password
+                </FieldLabel>
                 <PasswordInput
                   id={field.name}
                   value={field.state.value}

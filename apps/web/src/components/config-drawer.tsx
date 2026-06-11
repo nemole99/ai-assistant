@@ -1,20 +1,4 @@
-import { type SVGProps } from "react";
 import { Root as Radio, Item } from "@radix-ui/react-radio-group";
-import { CircleCheck, RotateCcw, Settings } from "lucide-react";
-import { IconDir } from "@/assets/custom/icon-dir";
-import { IconLayoutCompact } from "@/assets/custom/icon-layout-compact";
-import { IconLayoutDefault } from "@/assets/custom/icon-layout-default";
-import { IconLayoutFull } from "@/assets/custom/icon-layout-full";
-import { IconSidebarFloating } from "@/assets/custom/icon-sidebar-floating";
-import { IconSidebarInset } from "@/assets/custom/icon-sidebar-inset";
-import { IconSidebarSidebar } from "@/assets/custom/icon-sidebar-sidebar";
-import { IconThemeDark } from "@/assets/custom/icon-theme-dark";
-import { IconThemeLight } from "@/assets/custom/icon-theme-light";
-import { IconThemeSystem } from "@/assets/custom/icon-theme-system";
-import { cn } from "@workspace/ui/lib/utils";
-import { useDirection } from "@/context/direction-provider";
-import { type Collapsible, useLayout } from "@/context/layout-provider";
-import { useTheme } from "@/context/theme-provider";
 import { Button } from "@workspace/ui/components/button";
 import {
   Sheet,
@@ -26,6 +10,24 @@ import {
   SheetTrigger,
 } from "@workspace/ui/components/sheet";
 import { useSidebar } from "@workspace/ui/components/sidebar";
+import { cn } from "@workspace/ui/lib/utils";
+import { CircleCheck, RotateCcw, Settings } from "lucide-react";
+import type { SVGProps } from "react";
+
+import { IconDir } from "@/assets/custom/icon-dir";
+import { IconLayoutCompact } from "@/assets/custom/icon-layout-compact";
+import { IconLayoutDefault } from "@/assets/custom/icon-layout-default";
+import { IconLayoutFull } from "@/assets/custom/icon-layout-full";
+import { IconSidebarFloating } from "@/assets/custom/icon-sidebar-floating";
+import { IconSidebarInset } from "@/assets/custom/icon-sidebar-inset";
+import { IconSidebarSidebar } from "@/assets/custom/icon-sidebar-sidebar";
+import { IconThemeDark } from "@/assets/custom/icon-theme-dark";
+import { IconThemeLight } from "@/assets/custom/icon-theme-light";
+import { IconThemeSystem } from "@/assets/custom/icon-theme-system";
+import { useDirection } from "@/context/direction-provider";
+import { useLayout } from "@/context/layout-provider";
+import type { Collapsible } from "@/context/layout-provider";
+import { useTheme } from "@/context/theme-provider";
 
 export function ConfigDrawer() {
   const { setOpen } = useSidebar();
@@ -43,7 +45,13 @@ export function ConfigDrawer() {
   return (
     <Sheet>
       <SheetTrigger
-        render={<Button size="icon" variant="ghost" aria-label="Open theme settings" />}
+        render={
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Open theme settings"
+          />
+        }
       >
         <Settings aria-hidden="true" />
       </SheetTrigger>
@@ -92,7 +100,7 @@ function SectionTitle({
     <div
       className={cn(
         "mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground",
-        className,
+        className
       )}
     >
       {title}
@@ -134,7 +142,7 @@ function RadioGroupItem({
         className={cn(
           "relative rounded-[6px] ring-[1px] ring-border",
           "group-data-[state=checked]:shadow-2xl group-data-[state=checked]:ring-primary",
-          "group-focus-visible:ring-2",
+          "group-focus-visible:ring-2"
         )}
         role="img"
         aria-hidden="false"
@@ -144,19 +152,23 @@ function RadioGroupItem({
           className={cn(
             "size-6 fill-primary stroke-white",
             "group-data-[state=unchecked]:hidden",
-            "absolute top-0 right-0 translate-x-1/2 -translate-y-1/2",
+            "absolute top-0 right-0 translate-x-1/2 -translate-y-1/2"
           )}
           aria-hidden="true"
         />
         <item.icon
           className={cn(
             !isTheme &&
-              "fill-primary stroke-primary group-data-[state=unchecked]:fill-muted-foreground group-data-[state=unchecked]:stroke-muted-foreground",
+              "fill-primary stroke-primary group-data-[state=unchecked]:fill-muted-foreground group-data-[state=unchecked]:stroke-muted-foreground"
           )}
           aria-hidden="true"
         />
       </div>
-      <div className="mt-1 text-xs" id={`${item.value}-description`} aria-live="polite">
+      <div
+        className="mt-1 text-xs"
+        id={`${item.value}-description`}
+        aria-live="polite"
+      >
         {item.label}
       </div>
     </Item>
@@ -182,19 +194,19 @@ function ThemeConfig() {
       >
         {[
           {
-            value: "system",
-            label: "System",
             icon: IconThemeSystem,
+            label: "System",
+            value: "system",
           },
           {
-            value: "light",
-            label: "Light",
             icon: IconThemeLight,
+            label: "Light",
+            value: "light",
           },
           {
-            value: "dark",
-            label: "Dark",
             icon: IconThemeDark,
+            label: "Dark",
+            value: "dark",
           },
         ].map((item) => (
           <RadioGroupItem key={item.value} item={item} isTheme />
@@ -226,19 +238,19 @@ function SidebarConfig() {
       >
         {[
           {
-            value: "inset",
-            label: "Inset",
             icon: IconSidebarInset,
+            label: "Inset",
+            value: "inset",
           },
           {
-            value: "floating",
-            label: "Floating",
             icon: IconSidebarFloating,
+            label: "Floating",
+            value: "floating",
           },
           {
-            value: "sidebar",
-            label: "Sidebar",
             icon: IconSidebarSidebar,
+            label: "Sidebar",
+            value: "sidebar",
           },
         ].map((item) => (
           <RadioGroupItem key={item.value} item={item} />
@@ -284,19 +296,19 @@ function LayoutConfig() {
       >
         {[
           {
-            value: "default",
-            label: "Default",
             icon: IconLayoutDefault,
+            label: "Default",
+            value: "default",
           },
           {
-            value: "icon",
-            label: "Compact",
             icon: IconLayoutCompact,
+            label: "Compact",
+            value: "icon",
           },
           {
-            value: "offcanvas",
-            label: "Full layout",
             icon: IconLayoutFull,
+            label: "Full layout",
+            value: "offcanvas",
           },
         ].map((item) => (
           <RadioGroupItem key={item.value} item={item} />
@@ -328,14 +340,18 @@ function DirConfig() {
       >
         {[
           {
-            value: "ltr",
+            icon: (props: SVGProps<SVGSVGElement>) => (
+              <IconDir dir="ltr" {...props} />
+            ),
             label: "Left to Right",
-            icon: (props: SVGProps<SVGSVGElement>) => <IconDir dir="ltr" {...props} />,
+            value: "ltr",
           },
           {
-            value: "rtl",
+            icon: (props: SVGProps<SVGSVGElement>) => (
+              <IconDir dir="rtl" {...props} />
+            ),
             label: "Right to Left",
-            icon: (props: SVGProps<SVGSVGElement>) => <IconDir dir="rtl" {...props} />,
+            value: "rtl",
           },
         ].map((item) => (
           <RadioGroupItem key={item.value} item={item} />

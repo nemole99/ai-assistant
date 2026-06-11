@@ -1,8 +1,8 @@
 import { Logo } from "@/assets/logo";
 
-type AuthLayoutProps = {
+interface AuthLayoutProps {
   children: React.ReactNode;
-};
+}
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (

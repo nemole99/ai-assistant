@@ -1,7 +1,10 @@
-import { type SVGProps } from "react";
 import { cn } from "@workspace/ui/lib/utils";
+import type { SVGProps } from "react";
 
-export function IconThemeSystem({ className, ...props }: SVGProps<SVGSVGElement>) {
+export function IconThemeSystem({
+  className,
+  ...props
+}: SVGProps<SVGSVGElement>) {
   return (
     <svg
       data-name="icon-theme-system"
@@ -10,7 +13,7 @@ export function IconThemeSystem({ className, ...props }: SVGProps<SVGSVGElement>
       className={cn(
         "overflow-hidden rounded-[6px]",
         "fill-primary stroke-primary group-data-[state=unchecked]:fill-muted-foreground group-data-[state=unchecked]:stroke-muted-foreground",
-        className,
+        className
       )}
       {...props}
     >

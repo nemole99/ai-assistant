@@ -1,8 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
+
 import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { orpc } from "@/lib/orpc";
-import { useQuery } from "@tanstack/react-query";
-import { getRouteApi } from "@tanstack/react-router";
+
 import { EmployeesDialogs } from "./components/employees-dialogs";
 import { EmployeesPrimaryButtons } from "./components/employees-primary-buttons";
 import { EmployeesProvider } from "./components/employees-provider";
@@ -14,7 +16,9 @@ export function Employees() {
   const search = route.useSearch();
   const navigate = route.useNavigate();
 
-  const { data: employees = [], isLoading } = useQuery(orpc.employee.list.queryOptions());
+  const { data: employees = [], isLoading } = useQuery(
+    orpc.employee.list.queryOptions()
+  );
 
   return (
     <ContentLayout>
@@ -31,7 +35,11 @@ export function Employees() {
         {isLoading ? (
           <Loader />
         ) : (
-          <EmployeesTable data={employees} search={search} navigate={navigate} />
+          <EmployeesTable
+            data={employees}
+            search={search}
+            navigate={navigate}
+          />
         )}
         <EmployeesDialogs />
       </EmployeesProvider>

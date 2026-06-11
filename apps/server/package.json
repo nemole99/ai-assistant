@@ -9,11 +9,10 @@
     "dev": "bun run --hot src/index.ts",
     "dev:worker": "bun run --hot src/worker.ts",
     "db:seed": "bun src/seed/index.ts",
-    "db:seed:employees": "bun src/seed/seed-employees.ts",
-    "db:seed:projects": "bun src/seed/seed-projects.ts",
     "start": "bun run dist/index.mjs"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.77",
     "@ai-sdk/devtools": "^0.0.2",
     "@ai-sdk/google": "^3.0.71",
     "@ai-sdk/openai": "^3.0.63",

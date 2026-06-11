@@ -78,146 +78,155 @@ Manager có full CRUD + import; Employee chỉ xem. Hỗ trợ Jira integration 
 **8 new tables** under `packages/db/src/schema/copilot-evaluation.ts`:
 
 #### `copilot_ticket`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| developer | text | NOT NULL, indexed |
-| project | text | NOT NULL, indexed |
-| category | enum(`bug`, `feature`) | NOT NULL |
-| ticket_url | text | NOT NULL, UNIQUE |
-| process_date | date | NOT NULL, indexed |
-| total_effort | real | NOT NULL |
-| investigate_estimate | real | NOT NULL |
-| investigate_actual | real | NOT NULL |
-| code_fix_estimate | real | NOT NULL |
-| code_fix_actual | real | NOT NULL |
-| code_review_estimate | real | NOT NULL |
-| code_review_actual | real | NOT NULL |
-| reopen_status | integer | NOT NULL, default 0 |
-| comment | text | nullable |
-| created_at | timestamp | NOT NULL, default now |
-| updated_at | timestamp | NOT NULL, auto-update |
+
+| Column               | Type                   | Constraints           |
+| -------------------- | ---------------------- | --------------------- |
+| id                   | text                   | PK                    |
+| developer            | text                   | NOT NULL, indexed     |
+| project              | text                   | NOT NULL, indexed     |
+| category             | enum(`bug`, `feature`) | NOT NULL              |
+| ticket_url           | text                   | NOT NULL, UNIQUE      |
+| process_date         | date                   | NOT NULL, indexed     |
+| total_effort         | real                   | NOT NULL              |
+| investigate_estimate | real                   | NOT NULL              |
+| investigate_actual   | real                   | NOT NULL              |
+| code_fix_estimate    | real                   | NOT NULL              |
+| code_fix_actual      | real                   | NOT NULL              |
+| code_review_estimate | real                   | NOT NULL              |
+| code_review_actual   | real                   | NOT NULL              |
+| reopen_status        | integer                | NOT NULL, default 0   |
+| comment              | text                   | nullable              |
+| created_at           | timestamp              | NOT NULL, default now |
+| updated_at           | timestamp              | NOT NULL, auto-update |
 
 #### `copilot_timesheet_entry`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| month | text | NOT NULL (format: YYYY-MM), indexed |
-| employee_name | text | NOT NULL, indexed |
-| day | integer | NOT NULL (1–31) |
-| value | text | NOT NULL, default "" ("x" = present) |
-| created_at | timestamp | NOT NULL, default now |
-| updated_at | timestamp | NOT NULL, auto-update |
+
+| Column        | Type      | Constraints                          |
+| ------------- | --------- | ------------------------------------ |
+| id            | text      | PK                                   |
+| month         | text      | NOT NULL (format: YYYY-MM), indexed  |
+| employee_name | text      | NOT NULL, indexed                    |
+| day           | integer   | NOT NULL (1–31)                      |
+| value         | text      | NOT NULL, default "" ("x" = present) |
+| created_at    | timestamp | NOT NULL, default now                |
+| updated_at    | timestamp | NOT NULL, auto-update                |
 
 Unique constraint: `(month, employee_name, day)`
 
 #### `copilot_timesheet_holiday`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| month | text | NOT NULL (YYYY-MM), indexed |
-| day | integer | NOT NULL (1–31) |
-| created_at | timestamp | NOT NULL, default now |
+
+| Column     | Type      | Constraints                 |
+| ---------- | --------- | --------------------------- |
+| id         | text      | PK                          |
+| month      | text      | NOT NULL (YYYY-MM), indexed |
+| day        | integer   | NOT NULL (1–31)             |
+| created_at | timestamp | NOT NULL, default now       |
 
 Unique constraint: `(month, day)`
 
 #### `copilot_kpi_productivity`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| developer | text | NOT NULL, indexed |
-| project | text | NOT NULL |
-| title | text | nullable |
-| target | real | nullable (tickets/day target) |
-| result | real | nullable (tickets/day actual) |
-| monthly_values | jsonb | default {}, stores `Record<string, number>` |
-| created_at | timestamp | NOT NULL, default now |
-| updated_at | timestamp | NOT NULL, auto-update |
+
+| Column         | Type      | Constraints                                 |
+| -------------- | --------- | ------------------------------------------- |
+| id             | text      | PK                                          |
+| developer      | text      | NOT NULL, indexed                           |
+| project        | text      | NOT NULL                                    |
+| title          | text      | nullable                                    |
+| target         | real      | nullable (tickets/day target)               |
+| result         | real      | nullable (tickets/day actual)               |
+| monthly_values | jsonb     | default {}, stores `Record<string, number>` |
+| created_at     | timestamp | NOT NULL, default now                       |
+| updated_at     | timestamp | NOT NULL, auto-update                       |
 
 #### `copilot_kpi_sharing`
+
 Same structure as `copilot_kpi_productivity`. Target = hours/year.
 
 #### `copilot_kpi_quality`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| developer | text | NOT NULL, indexed |
-| project | text | NOT NULL |
-| title | text | nullable |
-| reopen_percent | real | nullable |
-| total_by_mar | real | nullable |
-| reopen_number | real | nullable |
-| result | real | nullable |
-| monthly_values | jsonb | default {}, stores `Record<string, number>` |
-| created_at | timestamp | NOT NULL, default now |
-| updated_at | timestamp | NOT NULL, auto-update |
+
+| Column         | Type      | Constraints                                 |
+| -------------- | --------- | ------------------------------------------- |
+| id             | text      | PK                                          |
+| developer      | text      | NOT NULL, indexed                           |
+| project        | text      | NOT NULL                                    |
+| title          | text      | nullable                                    |
+| reopen_percent | real      | nullable                                    |
+| total_by_mar   | real      | nullable                                    |
+| reopen_number  | real      | nullable                                    |
+| result         | real      | nullable                                    |
+| monthly_values | jsonb     | default {}, stores `Record<string, number>` |
+| created_at     | timestamp | NOT NULL, default now                       |
+| updated_at     | timestamp | NOT NULL, auto-update                       |
 
 #### `copilot_kpi_summary`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| developer | text | NOT NULL, indexed |
-| project | text | NOT NULL |
-| title | text | nullable |
-| target_productivity | real | nullable |
-| target_reopen | real | nullable |
-| target_sharing | real | nullable |
-| result_productivity | real | nullable |
-| result_reopen | real | nullable |
-| result_sharing | real | nullable |
-| comment | text | nullable |
-| created_at | timestamp | NOT NULL, default now |
-| updated_at | timestamp | NOT NULL, auto-update |
+
+| Column              | Type      | Constraints           |
+| ------------------- | --------- | --------------------- |
+| id                  | text      | PK                    |
+| developer           | text      | NOT NULL, indexed     |
+| project             | text      | NOT NULL              |
+| title               | text      | nullable              |
+| target_productivity | real      | nullable              |
+| target_reopen       | real      | nullable              |
+| target_sharing      | real      | nullable              |
+| result_productivity | real      | nullable              |
+| result_reopen       | real      | nullable              |
+| result_sharing      | real      | nullable              |
+| comment             | text      | nullable              |
+| created_at          | timestamp | NOT NULL, default now |
+| updated_at          | timestamp | NOT NULL, auto-update |
 
 #### `copilot_audit_log`
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | text | PK |
-| action | enum(`CREATE_TICKET`, `UPDATE_TICKET`, `DELETE_TICKET`, `IMPORT_TICKET`) | NOT NULL, indexed |
-| developer | text | nullable |
-| details | jsonb | nullable, stores `Record<string, unknown>` |
-| performed_by | text | FK → employee.id, ON DELETE SET NULL |
-| created_at | timestamp | NOT NULL, default now, indexed |
+
+| Column       | Type                                                                     | Constraints                                |
+| ------------ | ------------------------------------------------------------------------ | ------------------------------------------ |
+| id           | text                                                                     | PK                                         |
+| action       | enum(`CREATE_TICKET`, `UPDATE_TICKET`, `DELETE_TICKET`, `IMPORT_TICKET`) | NOT NULL, indexed                          |
+| developer    | text                                                                     | nullable                                   |
+| details      | jsonb                                                                    | nullable, stores `Record<string, unknown>` |
+| performed_by | text                                                                     | FK → employee.id, ON DELETE SET NULL       |
+| created_at   | timestamp                                                                | NOT NULL, default now, indexed             |
 
 **Enums:**
+
 - `ticket_category`: `bug` | `feature`
 - `copilot_audit_action`: `CREATE_TICKET` | `UPDATE_TICKET` | `DELETE_TICKET` | `IMPORT_TICKET`
 
 ### Authorization
 
-| Procedure | Auth Level |
-|-----------|-----------|
-| ticket.list | `protectedProcedure` |
-| ticket.get | `protectedProcedure` |
-| ticket.listDevelopers | `protectedProcedure` |
-| ticket.listProjects | `protectedProcedure` |
-| ticket.create | `managerProcedure` |
-| ticket.update | `managerProcedure` |
-| ticket.delete | `managerProcedure` |
-| ticket.import | `managerProcedure` |
-| ticket.chartData | `protectedProcedure` |
-| ticket.efficiencyData | `protectedProcedure` |
-| timesheet.getMonth | `protectedProcedure` |
-| timesheet.listEmployees | `protectedProcedure` |
-| timesheet.addEmployee | `managerProcedure` |
-| timesheet.updateCell | `managerProcedure` |
-| timesheet.setHolidays | `managerProcedure` |
-| kpi.listProductivity | `protectedProcedure` |
-| kpi.createProductivity | `managerProcedure` |
-| kpi.updateProductivityMonth | `managerProcedure` |
-| kpi.listSharing | `protectedProcedure` |
-| kpi.createSharing | `managerProcedure` |
-| kpi.updateSharingMonth | `managerProcedure` |
-| kpi.listQuality | `protectedProcedure` |
-| kpi.createQuality | `managerProcedure` |
-| kpi.updateQualityMonth | `managerProcedure` |
-| kpi.updateQualityTotalByMar | `managerProcedure` |
-| kpi.listSummary | `protectedProcedure` |
-| kpi.createSummary | `managerProcedure` |
-| kpi.updateSummaryComment | `managerProcedure` |
-| jira.fetchTickets | `managerProcedure` |
-| jira.submitTickets | `managerProcedure` |
-| audit.list | `protectedProcedure` |
+| Procedure                   | Auth Level           |
+| --------------------------- | -------------------- |
+| ticket.list                 | `protectedProcedure` |
+| ticket.get                  | `protectedProcedure` |
+| ticket.listDevelopers       | `protectedProcedure` |
+| ticket.listProjects         | `protectedProcedure` |
+| ticket.create               | `managerProcedure`   |
+| ticket.update               | `managerProcedure`   |
+| ticket.delete               | `managerProcedure`   |
+| ticket.import               | `managerProcedure`   |
+| ticket.chartData            | `protectedProcedure` |
+| ticket.efficiencyData       | `protectedProcedure` |
+| timesheet.getMonth          | `protectedProcedure` |
+| timesheet.listEmployees     | `protectedProcedure` |
+| timesheet.addEmployee       | `managerProcedure`   |
+| timesheet.updateCell        | `managerProcedure`   |
+| timesheet.setHolidays       | `managerProcedure`   |
+| kpi.listProductivity        | `protectedProcedure` |
+| kpi.createProductivity      | `managerProcedure`   |
+| kpi.updateProductivityMonth | `managerProcedure`   |
+| kpi.listSharing             | `protectedProcedure` |
+| kpi.createSharing           | `managerProcedure`   |
+| kpi.updateSharingMonth      | `managerProcedure`   |
+| kpi.listQuality             | `protectedProcedure` |
+| kpi.createQuality           | `managerProcedure`   |
+| kpi.updateQualityMonth      | `managerProcedure`   |
+| kpi.updateQualityTotalByMar | `managerProcedure`   |
+| kpi.listSummary             | `protectedProcedure` |
+| kpi.createSummary           | `managerProcedure`   |
+| kpi.updateSummaryComment    | `managerProcedure`   |
+| jira.fetchTickets           | `managerProcedure`   |
+| jira.submitTickets          | `managerProcedure`   |
+| audit.list                  | `protectedProcedure` |
 
 ### Business Rules
 
@@ -238,12 +247,12 @@ Same structure as `copilot_kpi_productivity`. Target = hours/year.
 
 ### Environment Variables (Jira Integration)
 
-| Variable | Description |
-|----------|-------------|
-| `JIRA_BASE_URL` | Jira instance base URL (e.g., `https://company.atlassian.net`) |
-| `JIRA_TOKEN` | Bearer token for Jira API authentication |
-| `JIRA_PROJECT` | Jira project key to query |
-| `JIRA_DEVELOPERS` | Developer mapping: `email1:Name1,email2:Name2` |
+| Variable          | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| `JIRA_BASE_URL`   | Jira instance base URL (e.g., `https://company.atlassian.net`) |
+| `JIRA_TOKEN`      | Bearer token for Jira API authentication                       |
+| `JIRA_PROJECT`    | Jira project key to query                                      |
+| `JIRA_DEVELOPERS` | Developer mapping: `email1:Name1,email2:Name2`                 |
 
 All 4 variables must be set for Jira integration to function; otherwise a `BAD_REQUEST` error is returned.
 
@@ -252,6 +261,7 @@ All 4 variables must be set for Jira integration to function; otherwise a `BAD_R
 **Location:** `packages/api/src/routers/copilot-evaluation/`
 
 Sub-routers:
+
 - `ticket` — `copilot-evaluation/ticket.ts`
 - `timesheet` — `copilot-evaluation/timesheet.ts`
 - `kpi` — `copilot-evaluation/kpi.ts`
@@ -260,20 +270,20 @@ Sub-routers:
 
 **Key procedures:**
 
-| Procedure | Input | Output |
-|-----------|-------|--------|
-| `ticket.list` | `{ month?, developer?, project?, category?, ticket?, page?, limit? }` | `{ data: CopilotTicket[], total, page, limit, totalPages }` |
-| `ticket.listDevelopers` | none | `string[]` (first names from employee table) |
-| `ticket.listProjects` | none | `string[]` (canonical project list) |
-| `ticket.create` | Full ticket fields | `CopilotTicket` |
-| `ticket.import` | `{ tickets: InsertTicket[] }` | `{ imported: number, errors: string[] }` |
-| `ticket.chartData` | `{ month: "YYYY-MM" }` | `{ month, data: { developer, count }[] }` |
-| `ticket.efficiencyData` | `{ month: "YYYY-MM" }` | `{ month, data: { developer, investigateEff, codeEff, reviewEff }[] }` |
-| `timesheet.getMonth` | `{ month: "YYYY-MM" }` | `{ month, employees: { name, days }[], holidays: number[] }` |
-| `timesheet.updateCell` | `{ month, employee, day, value }` | `{ success: true }` |
-| `jira.fetchTickets` | none | Jira ticket array (preview) |
-| `jira.submitTickets` | `{ tickets: JiraTicket[] }` | `{ imported, errors }` |
-| `audit.list` | `{ month?, limit? }` | `AuditLog[]` |
+| Procedure               | Input                                                                 | Output                                                                 |
+| ----------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `ticket.list`           | `{ month?, developer?, project?, category?, ticket?, page?, limit? }` | `{ data: CopilotTicket[], total, page, limit, totalPages }`            |
+| `ticket.listDevelopers` | none                                                                  | `string[]` (first names from employee table)                           |
+| `ticket.listProjects`   | none                                                                  | `string[]` (canonical project list)                                    |
+| `ticket.create`         | Full ticket fields                                                    | `CopilotTicket`                                                        |
+| `ticket.import`         | `{ tickets: InsertTicket[] }`                                         | `{ imported: number, errors: string[] }`                               |
+| `ticket.chartData`      | `{ month: "YYYY-MM" }`                                                | `{ month, data: { developer, count }[] }`                              |
+| `ticket.efficiencyData` | `{ month: "YYYY-MM" }`                                                | `{ month, data: { developer, investigateEff, codeEff, reviewEff }[] }` |
+| `timesheet.getMonth`    | `{ month: "YYYY-MM" }`                                                | `{ month, employees: { name, days }[], holidays: number[] }`           |
+| `timesheet.updateCell`  | `{ month, employee, day, value }`                                     | `{ success: true }`                                                    |
+| `jira.fetchTickets`     | none                                                                  | Jira ticket array (preview)                                            |
+| `jira.submitTickets`    | `{ tickets: JiraTicket[] }`                                           | `{ imported, errors }`                                                 |
+| `audit.list`            | `{ month?, limit? }`                                                  | `AuditLog[]`                                                           |
 
 ### Frontend Feature Layout
 
@@ -298,16 +308,17 @@ features/copilot-evaluation/
 
 **Routes (TanStack Router):**
 
-| Route | Component |
-|-------|-----------|
-| `/copilot-evaluation` | `CopilotEvaluationTickets` |
+| Route                           | Component                    |
+| ------------------------------- | ---------------------------- |
+| `/copilot-evaluation`           | `CopilotEvaluationTickets`   |
 | `/copilot-evaluation/timesheet` | `CopilotEvaluationTimesheet` |
-| `/copilot-evaluation/stats` | `CopilotEvaluationStats` |
-| `/copilot-evaluation/kpi` | `CopilotEvaluationKpi` |
+| `/copilot-evaluation/stats`     | `CopilotEvaluationStats`     |
+| `/copilot-evaluation/kpi`       | `CopilotEvaluationKpi`       |
 
 All routes are under `/_authenticated/` layout (requires login).
 
 **UI Patterns:**
+
 - Month selector (`<Input type="month">`) on every page for period filtering
 - **Fixed layout** for Tickets page: header/filters stay at top, table scrolls internally, pagination pinned at bottom (uses `<Main fixed>` with `overflow-hidden`)
 - **Filter bar** with 4 controls: Developer (select), Project (select), Category (select: All/Bug/Feature), Ticket (text search input)
@@ -325,6 +336,7 @@ All routes are under `/_authenticated/` layout (requires login).
 **Location:** `apps/server/src/seed/seed-copilot-evaluation.ts`
 
 Imports historical data from `migration-export/` directory:
+
 - `tickets.json` — Historical ticket data
 - `timesheet/{month}.json` — Monthly attendance per employee
 - `kpi/productivity.json`, `kpi/sharing.json`, `kpi/quality.json`, `kpi/summary.json`
@@ -332,6 +344,7 @@ Imports historical data from `migration-export/` directory:
 ## Testing Decisions
 
 Modules to test:
+
 - `ticket-table.tsx` — Column rendering, efficiency calculations display
 - `ticket-form-dialog.tsx` — Form validation, category selection, URL uniqueness feedback
 - `timesheet-page.tsx` — Calendar grid rendering, cell toggle interaction

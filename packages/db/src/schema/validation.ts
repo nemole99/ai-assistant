@@ -7,7 +7,11 @@ import {
   employee,
   project,
   projectMember,
+  systemAiConfig,
   user,
+  wikiPage,
+  wikiPageChunk,
+  wikiPageSource,
 } from "./auth";
 import {
   copilotTicket,
@@ -29,8 +33,8 @@ export const insertUserSchema = createInsertSchema(user);
 
 export const selectDepartmentSchema = createSelectSchema(department);
 export const insertDepartmentSchema = createInsertSchema(department).omit({
-  id: true,
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 export const updateDepartmentSchema = insertDepartmentSchema.partial();
@@ -40,11 +44,11 @@ export const updateDepartmentSchema = insertDepartmentSchema.partial();
 export const selectEmployeeSchema = createSelectSchema(employee);
 export const insertEmployeeSchema = createInsertSchema(employee)
   .omit({
-    id: true,
-    userId: true,
-    status: true,
     createdAt: true,
+    id: true,
+    status: true,
     updatedAt: true,
+    userId: true,
   })
   .extend({
     employeeCode: createInsertSchema(employee).shape.employeeCode.optional(),
@@ -61,8 +65,8 @@ export const updateEmployeeSchema = insertEmployeeSchema
 
 export const selectProjectSchema = createSelectSchema(project);
 export const insertProjectSchema = createInsertSchema(project).omit({
-  id: true,
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 export const updateProjectSchema = insertProjectSchema.partial();
@@ -71,94 +75,147 @@ export const selectProjectMemberSchema = createSelectSchema(projectMember);
 
 // --- DocumentCategory ---
 
-export const selectDocumentCategorySchema = createSelectSchema(documentCategory);
-export const insertDocumentCategorySchema = createInsertSchema(documentCategory).omit({
-  id: true,
+export const selectDocumentCategorySchema =
+  createSelectSchema(documentCategory);
+export const insertDocumentCategorySchema = createInsertSchema(
+  documentCategory
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
-export const updateDocumentCategorySchema = insertDocumentCategorySchema.partial();
+export const updateDocumentCategorySchema =
+  insertDocumentCategorySchema.partial();
 
 // --- Document ---
 
 export const selectDocumentSchema = createSelectSchema(document);
 export const insertDocumentSchema = createInsertSchema(document).omit({
-  id: true,
-  status: true,
-  markdownContent: true,
-  errorMessage: true,
   createdAt: true,
+  errorMessage: true,
+  id: true,
+  markdownContent: true,
+  status: true,
   updatedAt: true,
 });
 export const updateDocumentSchema = insertDocumentSchema
-  .pick({ title: true, description: true, categoryId: true })
+  .pick({ categoryId: true, description: true, title: true })
   .partial();
 
 // --- Copilot Ticket ---
 
 export const selectCopilotTicketSchema = createSelectSchema(copilotTicket);
-export const insertCopilotTicketSchema = createInsertSchema(copilotTicket).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const insertCopilotTicketSchema = createInsertSchema(copilotTicket).omit(
+  {
+    createdAt: true,
+    id: true,
+    updatedAt: true,
+  }
+);
 export const updateCopilotTicketSchema = insertCopilotTicketSchema.partial();
 
 // --- Copilot Timesheet ---
 
-export const selectCopilotTimesheetEntrySchema = createSelectSchema(copilotTimesheetEntry);
-export const insertCopilotTimesheetEntrySchema = createInsertSchema(copilotTimesheetEntry).omit({
-  id: true,
+export const selectCopilotTimesheetEntrySchema = createSelectSchema(
+  copilotTimesheetEntry
+);
+export const insertCopilotTimesheetEntrySchema = createInsertSchema(
+  copilotTimesheetEntry
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
 
-export const selectCopilotTimesheetHolidaySchema = createSelectSchema(copilotTimesheetHoliday);
-export const insertCopilotTimesheetHolidaySchema = createInsertSchema(copilotTimesheetHoliday).omit(
-  {
-    id: true,
-    createdAt: true,
-  },
+export const selectCopilotTimesheetHolidaySchema = createSelectSchema(
+  copilotTimesheetHoliday
 );
+export const insertCopilotTimesheetHolidaySchema = createInsertSchema(
+  copilotTimesheetHoliday
+).omit({
+  createdAt: true,
+  id: true,
+});
 
 // --- Copilot KPI ---
 
-export const selectCopilotKpiProductivitySchema = createSelectSchema(copilotKpiProductivity);
-export const insertCopilotKpiProductivitySchema = createInsertSchema(copilotKpiProductivity).omit({
-  id: true,
+export const selectCopilotKpiProductivitySchema = createSelectSchema(
+  copilotKpiProductivity
+);
+export const insertCopilotKpiProductivitySchema = createInsertSchema(
+  copilotKpiProductivity
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiProductivitySchema = insertCopilotKpiProductivitySchema.partial();
+export const updateCopilotKpiProductivitySchema =
+  insertCopilotKpiProductivitySchema.partial();
 
-export const selectCopilotKpiSharingSchema = createSelectSchema(copilotKpiSharing);
-export const insertCopilotKpiSharingSchema = createInsertSchema(copilotKpiSharing).omit({
-  id: true,
+export const selectCopilotKpiSharingSchema =
+  createSelectSchema(copilotKpiSharing);
+export const insertCopilotKpiSharingSchema = createInsertSchema(
+  copilotKpiSharing
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiSharingSchema = insertCopilotKpiSharingSchema.partial();
+export const updateCopilotKpiSharingSchema =
+  insertCopilotKpiSharingSchema.partial();
 
-export const selectCopilotKpiQualitySchema = createSelectSchema(copilotKpiQuality);
-export const insertCopilotKpiQualitySchema = createInsertSchema(copilotKpiQuality).omit({
-  id: true,
+export const selectCopilotKpiQualitySchema =
+  createSelectSchema(copilotKpiQuality);
+export const insertCopilotKpiQualitySchema = createInsertSchema(
+  copilotKpiQuality
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiQualitySchema = insertCopilotKpiQualitySchema.partial();
+export const updateCopilotKpiQualitySchema =
+  insertCopilotKpiQualitySchema.partial();
 
-export const selectCopilotKpiSummarySchema = createSelectSchema(copilotKpiSummary);
-export const insertCopilotKpiSummarySchema = createInsertSchema(copilotKpiSummary).omit({
-  id: true,
+export const selectCopilotKpiSummarySchema =
+  createSelectSchema(copilotKpiSummary);
+export const insertCopilotKpiSummarySchema = createInsertSchema(
+  copilotKpiSummary
+).omit({
   createdAt: true,
+  id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiSummarySchema = insertCopilotKpiSummarySchema.partial();
+export const updateCopilotKpiSummarySchema =
+  insertCopilotKpiSummarySchema.partial();
 
 // --- Copilot Audit Log ---
 
 export const selectCopilotAuditLogSchema = createSelectSchema(copilotAuditLog);
-export const insertCopilotAuditLogSchema = createInsertSchema(copilotAuditLog).omit({
-  id: true,
+export const insertCopilotAuditLogSchema = createInsertSchema(
+  copilotAuditLog
+).omit({
   createdAt: true,
+  id: true,
 });
+// --- SystemAIConfig ---
+
+export const selectSystemAiConfigSchema = createSelectSchema(systemAiConfig);
+export const insertSystemAiConfigSchema = createInsertSchema(
+  systemAiConfig
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+
+// --- WikiPage ---
+
+export const selectWikiPageSchema = createSelectSchema(wikiPage);
+export const insertWikiPageSchema = createInsertSchema(wikiPage).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+
+export const selectWikiPageSourceSchema = createSelectSchema(wikiPageSource);
+export const selectWikiPageChunkSchema = createSelectSchema(wikiPageChunk);

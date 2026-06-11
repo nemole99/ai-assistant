@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { orpc } from "@/lib/orpc";
 import { Separator } from "@workspace/ui/components/separator";
-import { GitHubCopilotCard } from "./github-copilot-card";
+
+import { orpc } from "@/lib/orpc";
+
 import { ComingSoonCard } from "./coming-soon-card";
+import { GitHubCopilotCard } from "./github-copilot-card";
 
 export function AIProvidersPanel() {
   const queryClient = useQueryClient();
@@ -17,10 +19,12 @@ export function AIProvidersPanel() {
       onSuccess: () => {
         queryClient.invalidateQueries(orpc.aiProvider.list.queryOptions());
       },
-    }),
+    })
   );
 
-  const connectedCopilot = providers.find((p) => p.provider === "github_copilot");
+  const connectedCopilot = providers.find(
+    (p) => p.provider === "github_copilot"
+  );
 
   return (
     <div className="space-y-6">
@@ -30,7 +34,9 @@ export function AIProvidersPanel() {
           <GitHubCopilotCard
             connected={connectedCopilot}
             isPending={isPending}
-            onDisconnect={() => disconnectMutation.mutate({ provider: "github_copilot" })}
+            onDisconnect={() =>
+              disconnectMutation.mutate({ provider: "github_copilot" })
+            }
             isDisconnecting={disconnectMutation.isPending}
             onConnectSuccess={() =>
               queryClient.invalidateQueries(orpc.aiProvider.list.queryOptions())
@@ -44,8 +50,14 @@ export function AIProvidersPanel() {
       <div>
         <h4 className="text-sm font-medium mb-3">Coming Soon</h4>
         <div className="space-y-3">
-          <ComingSoonCard name="OpenAI" description="GPT-4o, o3, text-embedding-3" />
-          <ComingSoonCard name="Google" description="Gemini 2.5 Pro, text-embedding-004" />
+          <ComingSoonCard
+            name="OpenAI"
+            description="GPT-4o, o3, text-embedding-3"
+          />
+          <ComingSoonCard
+            name="Google"
+            description="Gemini 2.5 Pro, text-embedding-004"
+          />
           <ComingSoonCard name="Anthropic" description="Claude Sonnet, Haiku" />
         </div>
       </div>

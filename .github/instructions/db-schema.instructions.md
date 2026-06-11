@@ -2,6 +2,7 @@
 description: "Use when modifying Drizzle ORM schema, adding tables/columns, or creating migrations."
 applyTo: "packages/db/src/schema/**"
 ---
+
 # Database Schema Conventions
 
 - All schema lives in `packages/db/src/schema/`. Re-export from `index.ts`.

@@ -1,5 +1,3 @@
-import { format } from "date-fns";
-import { AlertCircle, FileText, MoreHorizontal, Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
@@ -16,9 +14,23 @@ import {
   TableHeader,
   TableRow,
 } from "@workspace/ui/components/table";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import { format } from "date-fns";
+import {
+  AlertCircle,
+  MoreHorizontal,
+  Pencil,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+
 import { LongText } from "@/components/long-text";
-import { type Document } from "../data/schema";
+
+import type { Document } from "../data/schema";
 import { DocumentCategoryBadge } from "./document-category-badge";
 import { DocumentStatusBadge } from "./document-status-badge";
 import { useDocuments } from "./documents-provider";
@@ -44,19 +56,22 @@ export function DocumentsTable({ data }: { data: Document[] }) {
             <TableCell className="max-w-64 font-medium">
               <div className="flex items-center gap-2">
                 <LongText className="max-w-48">{doc.title}</LongText>
-                {doc.status === "FAILED" && doc.errorMessage && (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <AlertCircle
-                          className="text-destructive size-4 shrink-0"
-                          aria-label="Processing error"
-                        />
-                      }
-                    />
-                    <TooltipContent className="max-w-64">{doc.errorMessage}</TooltipContent>
-                  </Tooltip>
-                )}
+                {(doc.status === "FAILED" || doc.status === "INGEST_FAILED") &&
+                  doc.errorMessage && (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <AlertCircle
+                            className="text-destructive size-4 shrink-0"
+                            aria-label="Processing error"
+                          />
+                        }
+                      />
+                      <TooltipContent className="max-w-64">
+                        {doc.errorMessage}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
               </div>
             </TableCell>
             <TableCell>
@@ -74,7 +89,9 @@ export function DocumentsTable({ data }: { data: Document[] }) {
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<Button variant="ghost" size="icon" className="size-8" />}
+                  render={
+                    <Button variant="ghost" size="icon" className="size-8" />
+                  }
                 >
                   <MoreHorizontal className="size-4" />
                   <span className="sr-only">Actions</span>
@@ -89,7 +106,8 @@ export function DocumentsTable({ data }: { data: Document[] }) {
                     <Pencil className="mr-2 size-4" />
                     Edit
                   </DropdownMenuItem>
-                  {doc.status === "FAILED" && (
+                  {(doc.status === "FAILED" ||
+                    doc.status === "INGEST_FAILED") && (
                     <DropdownMenuItem
                       onClick={() => {
                         setCurrentRow(doc);

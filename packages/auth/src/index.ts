@@ -8,43 +8,41 @@ export function createAuth() {
   const db = createDb();
 
   return betterAuth({
+    advanced: {
+      defaultCookieAttributes: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+      },
+    },
+    baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, {
       provider: "pg",
 
-      schema: schema,
+      schema,
     }),
-    trustedOrigins: env.NODE_ENV === "development"
-      ? ["http://localhost:3001", "http://localhost:3002", "http://localhost:5173"]
-      : [env.CORS_ORIGIN],
     emailAndPassword: {
       enabled: true,
     },
+    plugins: [],
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
-    advanced: {
-      defaultCookieAttributes: {
-        sameSite: "lax",
-        secure: false,
-        httpOnly: true,
-      },
-    },
+    trustedOrigins: [env.CORS_ORIGIN],
     user: {
       additionalFields: {
-        role: {
-          type: "string",
-          required: true,
-          defaultValue: "EMPLOYEE",
-          input: false, // not settable by user during sign-up
-        },
         mustChangePassword: {
-          type: "boolean",
-          required: true,
           defaultValue: false,
           input: false,
+          required: true,
+          type: "boolean",
+        },
+        role: {
+          defaultValue: "EMPLOYEE",
+          input: false, // not settable by user during sign-up
+          required: true,
+          type: "string",
         },
       },
     },
-    plugins: [],
   });
 }
 

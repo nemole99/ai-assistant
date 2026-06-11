@@ -2,18 +2,23 @@ import { createORPCClient } from "@orpc/client";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  createRootRouteWithContext,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { AppRouterClient } from "@workspace/api/routers/index";
 import { Toaster } from "@workspace/ui/components/sonner";
 import { useState } from "react";
 
-import { link, orpc } from "@/lib/orpc";
-
 import { NavigationProgress } from "@/components/navigation-progress";
-import "../index.css";
 import { GeneralError } from "@/features/errors/general-error";
+
+import "../index.css";
 import { NotFoundError } from "@/features/errors/not-found-error";
+import type { orpc } from "@/lib/orpc";
+import { link } from "@/lib/orpc";
 
 export interface RouterAppContext {
   orpc: typeof orpc;
@@ -22,25 +27,25 @@ export interface RouterAppContext {
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
+  errorComponent: GeneralError,
   head: () => ({
+    links: [
+      {
+        href: "/favicon.ico",
+        rel: "icon",
+      },
+    ],
     meta: [
       {
         title: "Ewoosoft Internal",
       },
       {
-        name: "description",
         content: "Ewoosoft Internal is a web application",
-      },
-    ],
-    links: [
-      {
-        rel: "icon",
-        href: "/favicon.ico",
+        name: "description",
       },
     ],
   }),
   notFoundComponent: NotFoundError,
-  errorComponent: GeneralError,
 });
 
 function RootComponent() {
