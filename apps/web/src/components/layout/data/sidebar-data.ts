@@ -3,6 +3,7 @@ import {
   BotMessageSquare,
   BookOpen,
   Building2,
+  ClipboardCheck,
   Command,
   Contact,
   FolderKanban,
@@ -65,6 +66,27 @@ export const sidebarData: SidebarData = {
           icon: FolderKanban,
           title: "Projects",
           url: "/projects",
+        },
+        {
+          icon: ClipboardCheck,
+          items: [
+            {
+              icon: ClipboardCheck,
+              title: "Tickets",
+              url: "/evaluation",
+            },
+            {
+              icon: Contact,
+              title: "Timesheet",
+              url: "/evaluation/timesheet",
+            },
+            {
+              icon: FolderKanban,
+              title: "KPI",
+              url: "/evaluation/kpi",
+            },
+          ],
+          title: "Evaluation",
         },
       ],
       title: "Organization",

@@ -17,6 +17,9 @@ export const env = createEnv({
       .string()
       .length(64, "ENCRYPTION_KEY must be a 64-character hex string"),
     GITHUB_COPILOT_CLIENT_ID: z.string().default("Iv1.b507a08c87ecfe98"),
+    JIRA_BASE_URL: z.string().url().optional(),
+    JIRA_PROJECT: z.string().optional(),
+    JIRA_TOKEN: z.string().optional(),
     MINIO_ACCESS_KEY: z.string().min(1),
     MINIO_BUCKET: z.string().min(1).default("documents"),
     MINIO_ENDPOINT: z.string().min(1),

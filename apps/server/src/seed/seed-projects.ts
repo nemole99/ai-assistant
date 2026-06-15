@@ -7,7 +7,7 @@ const PROJECTS: {
   name: string;
   description: string;
   status: "ACTIVE" | "COMPLETED";
-  managerEmail: string;
+  managerEmail: string | null;
   memberEmails: string[];
 }[] = [
   {
@@ -49,6 +49,35 @@ const PROJECTS: {
     name: "GPP",
     status: "COMPLETED",
   },
+  // Projects referenced by Evaluation data (no manager/members assigned yet)
+  ...[
+    "EzSeries",
+    "EzOrtho",
+    "CleverRC",
+    "Clever One",
+    "Bontech V1",
+    "IDP",
+    "LMP",
+    "RY",
+    "XmaruC",
+    "XmaruPACS",
+    "XmaruPro",
+    "XmaruW",
+  ].map((name) => ({
+    description: `${name} project.`,
+    managerEmail: null,
+    memberEmails: [],
+    name,
+    status: "ACTIVE" as const,
+  })),
+  {
+    description:
+      "Temporary catch-all bucket for evaluation work outside a real project.",
+    managerEmail: null,
+    memberEmails: [],
+    name: "Other",
+    status: "ACTIVE",
+  },
 ];
 
 export async function seedProjects() {
@@ -56,7 +85,11 @@ export async function seedProjects() {
 
   // Load all employees indexed by email for fast lookup
   const allEmails = [
-    ...new Set(PROJECTS.flatMap((p) => [p.managerEmail, ...p.memberEmails])),
+    ...new Set(
+      PROJECTS.flatMap((p) =>
+        [p.managerEmail, ...p.memberEmails].filter((e): e is string => !!e)
+      )
+    ),
   ];
 
   const employees = await db
@@ -79,8 +112,10 @@ export async function seedProjects() {
       continue;
     }
 
-    const managerId = employeeByEmail.get(proj.managerEmail);
-    if (!managerId) {
+    const managerId = proj.managerEmail
+      ? employeeByEmail.get(proj.managerEmail)
+      : null;
+    if (proj.managerEmail && !managerId) {
       console.warn(
         `  ⚠ Manager employee not found for email "${proj.managerEmail}", skipping project "${proj.name}".`
       );
@@ -114,7 +149,7 @@ export async function seedProjects() {
     }
 
     console.log(
-      `  ✅ [${proj.status}] "${proj.name}" — manager: ${proj.managerEmail} — ${memberRows.length} member(s)`
+      `  ✅ [${proj.status}] "${proj.name}" — manager: ${proj.managerEmail ?? "none"} — ${memberRows.length} member(s)`
     );
   }
 

@@ -1,3 +1,4 @@
+// oxlint-disable jsx-a11y/label-has-associated-control
 "use client";
 
 import { cn } from "@workspace/ui/lib/utils";

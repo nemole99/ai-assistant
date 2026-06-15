@@ -1,0 +1,15 @@
+{
+  "exportedAt": "2026-05-22T09:17:48.892Z",
+  "source": "http://172.76.10.210:3010",
+  "counts": {
+    "tickets": 955,
+    "timesheetMonths": 2,
+    "kpi_productivity": "?",
+    "kpi_sharing": "?",
+    "kpi_quality": "?",
+    "kpi_summary": "?",
+    "employees": "?",
+    "excelSizeKB": 584
+  },
+  "months": ["2026-04", "2026-05"]
+}

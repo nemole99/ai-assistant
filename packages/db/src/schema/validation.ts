@@ -13,6 +13,16 @@ import {
   wikiPageChunk,
   wikiPageSource,
 } from "./auth";
+import {
+  evaluationTicket,
+  evaluationTimesheetEntry,
+  evaluationTimesheetHoliday,
+  evaluationKpiProductivity,
+  evaluationKpiSharing,
+  evaluationKpiQuality,
+  evaluationKpiSummary,
+  evaluationAuditLog,
+} from "./evaluation";
 
 // --- User ---
 
@@ -92,6 +102,104 @@ export const updateDocumentSchema = insertDocumentSchema
   .pick({ categoryId: true, description: true, title: true })
   .partial();
 
+// --- Evaluation Ticket ---
+
+export const selectEvaluationTicketSchema =
+  createSelectSchema(evaluationTicket);
+export const insertEvaluationTicketSchema = createInsertSchema(
+  evaluationTicket
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+export const updateEvaluationTicketSchema =
+  insertEvaluationTicketSchema.partial();
+
+// --- Evaluation Timesheet ---
+
+export const selectEvaluationTimesheetEntrySchema = createSelectSchema(
+  evaluationTimesheetEntry
+);
+export const insertEvaluationTimesheetEntrySchema = createInsertSchema(
+  evaluationTimesheetEntry
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+
+export const selectEvaluationTimesheetHolidaySchema = createSelectSchema(
+  evaluationTimesheetHoliday
+);
+export const insertEvaluationTimesheetHolidaySchema = createInsertSchema(
+  evaluationTimesheetHoliday
+).omit({
+  createdAt: true,
+  id: true,
+});
+
+// --- Evaluation KPI ---
+
+export const selectEvaluationKpiProductivitySchema = createSelectSchema(
+  evaluationKpiProductivity
+);
+export const insertEvaluationKpiProductivitySchema = createInsertSchema(
+  evaluationKpiProductivity
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+export const updateEvaluationKpiProductivitySchema =
+  insertEvaluationKpiProductivitySchema.partial();
+
+export const selectEvaluationKpiSharingSchema =
+  createSelectSchema(evaluationKpiSharing);
+export const insertEvaluationKpiSharingSchema = createInsertSchema(
+  evaluationKpiSharing
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+export const updateEvaluationKpiSharingSchema =
+  insertEvaluationKpiSharingSchema.partial();
+
+export const selectEvaluationKpiQualitySchema =
+  createSelectSchema(evaluationKpiQuality);
+export const insertEvaluationKpiQualitySchema = createInsertSchema(
+  evaluationKpiQuality
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+export const updateEvaluationKpiQualitySchema =
+  insertEvaluationKpiQualitySchema.partial();
+
+export const selectEvaluationKpiSummarySchema =
+  createSelectSchema(evaluationKpiSummary);
+export const insertEvaluationKpiSummarySchema = createInsertSchema(
+  evaluationKpiSummary
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+export const updateEvaluationKpiSummarySchema =
+  insertEvaluationKpiSummarySchema.partial();
+
+// --- Evaluation Audit Log ---
+
+export const selectEvaluationAuditLogSchema =
+  createSelectSchema(evaluationAuditLog);
+export const insertEvaluationAuditLogSchema = createInsertSchema(
+  evaluationAuditLog
+).omit({
+  createdAt: true,
+  id: true,
+});
 // --- SystemAIConfig ---
 
 export const selectSystemAiConfigSchema = createSelectSchema(systemAiConfig);

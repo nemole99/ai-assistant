@@ -21,6 +21,7 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedWikiIndexRouteImport } from './routes/_authenticated/wiki/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects/index'
+import { Route as AuthenticatedEvaluationIndexRouteImport } from './routes/_authenticated/evaluation/index'
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
 import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
@@ -29,6 +30,8 @@ import { Route as AuthenticatedSettingsSystemAiRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
+import { Route as AuthenticatedEvaluationTimesheetRouteImport } from './routes/_authenticated/evaluation/timesheet'
+import { Route as AuthenticatedEvaluationKpiRouteImport } from './routes/_authenticated/evaluation/kpi'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedDocumentsCategoriesRouteImport } from './routes/_authenticated/documents/categories'
 import { Route as AuthenticatedDocumentsIdRouteImport } from './routes/_authenticated/documents/$id'
@@ -96,6 +99,12 @@ const AuthenticatedProjectsIndexRoute =
     path: '/projects/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEvaluationIndexRoute =
+  AuthenticatedEvaluationIndexRouteImport.update({
+    id: '/evaluation/',
+    path: '/evaluation/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEmployeesIndexRoute =
   AuthenticatedEmployeesIndexRouteImport.update({
     id: '/employees/',
@@ -143,6 +152,18 @@ const AuthenticatedProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEvaluationTimesheetRoute =
+  AuthenticatedEvaluationTimesheetRouteImport.update({
+    id: '/evaluation/timesheet',
+    path: '/evaluation/timesheet',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEvaluationKpiRoute =
+  AuthenticatedEvaluationKpiRouteImport.update({
+    id: '/evaluation/kpi',
+    path: '/evaluation/kpi',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedErrorsErrorRoute =
   AuthenticatedErrorsErrorRouteImport.update({
     id: '/errors/$error',
@@ -181,6 +202,8 @@ export interface FileRoutesByFullPath {
   '/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/evaluation/kpi': typeof AuthenticatedEvaluationKpiRoute
+  '/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
@@ -189,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
+  '/evaluation/': typeof AuthenticatedEvaluationIndexRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/wiki/': typeof AuthenticatedWikiIndexRoute
@@ -205,6 +229,8 @@ export interface FileRoutesByTo {
   '/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/evaluation/kpi': typeof AuthenticatedEvaluationKpiRoute
+  '/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
@@ -213,6 +239,7 @@ export interface FileRoutesByTo {
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
   '/documents': typeof AuthenticatedDocumentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
+  '/evaluation': typeof AuthenticatedEvaluationIndexRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/wiki': typeof AuthenticatedWikiIndexRoute
@@ -232,6 +259,8 @@ export interface FileRoutesById {
   '/_authenticated/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/_authenticated/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/_authenticated/evaluation/kpi': typeof AuthenticatedEvaluationKpiRoute
+  '/_authenticated/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
   '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
@@ -240,6 +269,7 @@ export interface FileRoutesById {
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
+  '/_authenticated/evaluation/': typeof AuthenticatedEvaluationIndexRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/wiki/': typeof AuthenticatedWikiIndexRoute
@@ -259,6 +289,8 @@ export interface FileRouteTypes {
     | '/documents/$id'
     | '/documents/categories'
     | '/errors/$error'
+    | '/evaluation/kpi'
+    | '/evaluation/timesheet'
     | '/projects/$projectId'
     | '/settings/ai-providers'
     | '/settings/password'
@@ -267,6 +299,7 @@ export interface FileRouteTypes {
     | '/departments/'
     | '/documents/'
     | '/employees/'
+    | '/evaluation/'
     | '/projects/'
     | '/settings/'
     | '/wiki/'
@@ -283,6 +316,8 @@ export interface FileRouteTypes {
     | '/documents/$id'
     | '/documents/categories'
     | '/errors/$error'
+    | '/evaluation/kpi'
+    | '/evaluation/timesheet'
     | '/projects/$projectId'
     | '/settings/ai-providers'
     | '/settings/password'
@@ -291,6 +326,7 @@ export interface FileRouteTypes {
     | '/departments'
     | '/documents'
     | '/employees'
+    | '/evaluation'
     | '/projects'
     | '/settings'
     | '/wiki'
@@ -309,6 +345,8 @@ export interface FileRouteTypes {
     | '/_authenticated/documents/$id'
     | '/_authenticated/documents/categories'
     | '/_authenticated/errors/$error'
+    | '/_authenticated/evaluation/kpi'
+    | '/_authenticated/evaluation/timesheet'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
     | '/_authenticated/settings/password'
@@ -317,6 +355,7 @@ export interface FileRouteTypes {
     | '/_authenticated/departments/'
     | '/_authenticated/documents/'
     | '/_authenticated/employees/'
+    | '/_authenticated/evaluation/'
     | '/_authenticated/projects/'
     | '/_authenticated/settings/'
     | '/_authenticated/wiki/'
@@ -418,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/evaluation/': {
+      id: '/_authenticated/evaluation/'
+      path: '/evaluation'
+      fullPath: '/evaluation/'
+      preLoaderRoute: typeof AuthenticatedEvaluationIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/employees/': {
       id: '/_authenticated/employees/'
       path: '/employees'
@@ -472,6 +518,20 @@ declare module '@tanstack/react-router' {
       path: '/projects/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/evaluation/timesheet': {
+      id: '/_authenticated/evaluation/timesheet'
+      path: '/evaluation/timesheet'
+      fullPath: '/evaluation/timesheet'
+      preLoaderRoute: typeof AuthenticatedEvaluationTimesheetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/evaluation/kpi': {
+      id: '/_authenticated/evaluation/kpi'
+      path: '/evaluation/kpi'
+      fullPath: '/evaluation/kpi'
+      preLoaderRoute: typeof AuthenticatedEvaluationKpiRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/errors/$error': {
@@ -533,11 +593,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsIdRoute: typeof AuthenticatedDocumentsIdRoute
   AuthenticatedDocumentsCategoriesRoute: typeof AuthenticatedDocumentsCategoriesRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
+  AuthenticatedEvaluationKpiRoute: typeof AuthenticatedEvaluationKpiRoute
+  AuthenticatedEvaluationTimesheetRoute: typeof AuthenticatedEvaluationTimesheetRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
   AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
   AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
   AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
+  AuthenticatedEvaluationIndexRoute: typeof AuthenticatedEvaluationIndexRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
   AuthenticatedWikiIndexRoute: typeof AuthenticatedWikiIndexRoute
 }
@@ -549,11 +612,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsIdRoute: AuthenticatedDocumentsIdRoute,
   AuthenticatedDocumentsCategoriesRoute: AuthenticatedDocumentsCategoriesRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
+  AuthenticatedEvaluationKpiRoute: AuthenticatedEvaluationKpiRoute,
+  AuthenticatedEvaluationTimesheetRoute: AuthenticatedEvaluationTimesheetRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,
   AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
   AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
   AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
+  AuthenticatedEvaluationIndexRoute: AuthenticatedEvaluationIndexRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
   AuthenticatedWikiIndexRoute: AuthenticatedWikiIndexRoute,
 }

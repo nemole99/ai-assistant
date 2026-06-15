@@ -19,6 +19,12 @@ import { aiRoutes } from "./routes/ai";
 const app = new Hono();
 
 app.use(logger());
+const allowedOrigins =
+  env.NODE_ENV === "development"
+    ? (origin: string) =>
+        /^http:\/\/localhost:\d+$/.test(origin) ? origin : env.CORS_ORIGIN
+    : env.CORS_ORIGIN;
+
 app.use(
   "/*",
   cors({
@@ -26,7 +32,7 @@ app.use(
     allowMethods: ["GET", "POST", "OPTIONS"],
     credentials: true,
     exposeHeaders: ["X-Wiki-Citations"],
-    origin: env.CORS_ORIGIN,
+    origin: allowedOrigins,
   })
 );
 

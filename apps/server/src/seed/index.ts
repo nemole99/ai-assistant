@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 
 import { seedCategories } from "./seed-categories";
 import { seedEmployees } from "./seed-employees";
+import { seedEvaluation } from "./seed-evaluation";
 import { seedProjects } from "./seed-projects";
 
 async function seed() {
@@ -56,6 +57,15 @@ async function main() {
     await seedEmployees();
     await seedCategories();
     await seedProjects();
+
+    if (process.env.LEGACY_EVALUATION_DATABASE_URL) {
+      await seedEvaluation();
+    } else {
+      console.log(
+        "\n⏭️  Skipping evaluation seed (LEGACY_EVALUATION_DATABASE_URL not set)."
+      );
+    }
+
     console.log("\n🎉 All seeds completed successfully.");
     process.exit(0);
   } catch (error) {

@@ -25,7 +25,7 @@ export function Documents() {
   );
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: categories = [] } = useQuery(
     orpc.documentCategory.list.queryOptions()
@@ -42,7 +42,9 @@ export function Documents() {
 
   function handleSearchChange(value: string) {
     setSearch(value);
-    clearTimeout(searchTimerRef.current);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
     searchTimerRef.current = setTimeout(() => setDebouncedSearch(value), 300);
   }
 

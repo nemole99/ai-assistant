@@ -17,6 +17,30 @@ interface DataTableBulkActionsProps<TData> {
   children: React.ReactNode;
 }
 
+function focusToolbarButton(
+  buttons: NodeListOf<HTMLButtonElement>,
+  index: number
+) {
+  buttons[index]?.focus();
+}
+
+function isDropdownEscapeTarget(
+  target: HTMLElement,
+  activeElement: HTMLElement
+): boolean {
+  const isFromDropdownTrigger =
+    target.dataset.slot === "dropdown-menu-trigger" ||
+    activeElement.dataset.slot === "dropdown-menu-trigger" ||
+    target.closest('[data-slot="dropdown-menu-trigger"]') !== null ||
+    activeElement.closest('[data-slot="dropdown-menu-trigger"]') !== null;
+
+  const isFromDropdownContent =
+    activeElement.closest('[data-slot="dropdown-menu-content"]') !== null ||
+    target.closest('[data-slot="dropdown-menu-content"]') !== null;
+
+  return isFromDropdownTrigger || isFromDropdownContent;
+}
+
 /**
  * A modular toolbar for displaying bulk actions when table rows are selected.
  *
@@ -70,51 +94,35 @@ export function DataTableBulkActions<TData>({
     switch (event.key) {
       case "ArrowRight": {
         event.preventDefault();
-        const nextIndex = (currentIndex + 1) % buttons.length;
-        buttons[nextIndex]?.focus();
+        focusToolbarButton(buttons, (currentIndex + 1) % buttons.length);
         break;
       }
       case "ArrowLeft": {
         event.preventDefault();
-        const prevIndex =
-          currentIndex === 0 ? buttons.length - 1 : currentIndex - 1;
-        buttons[prevIndex]?.focus();
+        focusToolbarButton(
+          buttons,
+          currentIndex === 0 ? buttons.length - 1 : currentIndex - 1
+        );
         break;
       }
       case "Home": {
         event.preventDefault();
-        buttons[0]?.focus();
+        focusToolbarButton(buttons, 0);
         break;
       }
       case "End": {
         event.preventDefault();
-        [...buttons].at(-1)?.focus();
+        focusToolbarButton(buttons, buttons.length - 1);
         break;
       }
       case "Escape": {
-        // Check if the Escape key came from a dropdown trigger or content
-        // We can't check dropdown state because Radix UI closes it before our handler runs
         const target = event.target as HTMLElement;
         const activeElement = document.activeElement as HTMLElement;
 
-        // Check if the event target or currently focused element is a dropdown trigger
-        const isFromDropdownTrigger =
-          target.dataset.slot === "dropdown-menu-trigger" ||
-          activeElement.dataset.slot === "dropdown-menu-trigger" ||
-          target?.closest('[data-slot="dropdown-menu-trigger"]') ||
-          activeElement?.closest('[data-slot="dropdown-menu-trigger"]');
-
-        // Check if the focused element is inside dropdown content (which is portaled)
-        const isFromDropdownContent =
-          activeElement?.closest('[data-slot="dropdown-menu-content"]') ||
-          target?.closest('[data-slot="dropdown-menu-content"]');
-
-        if (isFromDropdownTrigger || isFromDropdownContent) {
-          // Escape was meant for the dropdown - don't clear selection
+        if (isDropdownEscapeTarget(target, activeElement)) {
           return;
         }
 
-        // Escape was meant for the toolbar - clear selection
         event.preventDefault();
         handleClearSelection();
         break;
