@@ -1,3 +1,3 @@
 export * from "./auth";
-export * from "./copilot-evaluation";
+export * from "./evaluation";
 export * from "./validation";

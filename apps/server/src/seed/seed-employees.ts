@@ -29,6 +29,9 @@ const EMPLOYEES = [
   { email: "dante.nguyen@ewoosoft.com", fullName: "Dante Nguyen" },
   { email: "mark.phan@ewoosoft.com", fullName: "Mark Phan" },
   { email: "joy.luu@ewoosoft.com", fullName: "Joy Luu" },
+  { email: "ben.tran@ewoosoft.com", fullName: "Ben Tran" },
+  { email: "nolan.nguyen@ewoosoft.com", fullName: "Nolan Nguyen" },
+  { email: "carpenter.luu@ewoosoft.com", fullName: "Carpenter Luu" },
 ];
 
 export async function seedEmployees() {
@@ -71,6 +74,17 @@ export async function seedEmployees() {
   let inserted = 0;
 
   for (const emp of EMPLOYEES) {
+    // Skip if employee record already exists
+    const [existing] = await db
+      .select({ id: employee.id })
+      .from(employee)
+      .where(eq(employee.email, emp.email))
+      .limit(1);
+    if (existing) {
+      console.log(`  ⏭ ${emp.fullName} already exists, skipping.`);
+      continue;
+    }
+
     // Create user account first, then employee
     const result = await auth.api.signUpEmail({
       body: {

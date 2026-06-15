@@ -211,6 +211,7 @@ export const projectRouter = {
           id: employee.id,
           joinDate: employee.joinDate,
           joinedProjectAt: sql<string>`${projectMember.createdAt}::text`,
+          level: employee.level,
           phone: employee.phone,
           position: employee.position,
           status: employee.status,

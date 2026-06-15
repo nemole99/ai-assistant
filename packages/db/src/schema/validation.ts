@@ -14,15 +14,15 @@ import {
   wikiPageSource,
 } from "./auth";
 import {
-  copilotTicket,
-  copilotTimesheetEntry,
-  copilotTimesheetHoliday,
-  copilotKpiProductivity,
-  copilotKpiSharing,
-  copilotKpiQuality,
-  copilotKpiSummary,
-  copilotAuditLog,
-} from "./copilot-evaluation";
+  evaluationTicket,
+  evaluationTimesheetEntry,
+  evaluationTimesheetHoliday,
+  evaluationKpiProductivity,
+  evaluationKpiSharing,
+  evaluationKpiQuality,
+  evaluationKpiSummary,
+  evaluationAuditLog,
+} from "./evaluation";
 
 // --- User ---
 
@@ -102,97 +102,100 @@ export const updateDocumentSchema = insertDocumentSchema
   .pick({ categoryId: true, description: true, title: true })
   .partial();
 
-// --- Copilot Ticket ---
+// --- Evaluation Ticket ---
 
-export const selectCopilotTicketSchema = createSelectSchema(copilotTicket);
-export const insertCopilotTicketSchema = createInsertSchema(copilotTicket).omit(
-  {
-    createdAt: true,
-    id: true,
-    updatedAt: true,
-  }
+export const selectEvaluationTicketSchema =
+  createSelectSchema(evaluationTicket);
+export const insertEvaluationTicketSchema = createInsertSchema(
+  evaluationTicket
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+export const updateEvaluationTicketSchema =
+  insertEvaluationTicketSchema.partial();
+
+// --- Evaluation Timesheet ---
+
+export const selectEvaluationTimesheetEntrySchema = createSelectSchema(
+  evaluationTimesheetEntry
 );
-export const updateCopilotTicketSchema = insertCopilotTicketSchema.partial();
+export const insertEvaluationTimesheetEntrySchema = createInsertSchema(
+  evaluationTimesheetEntry
+).omit({
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
 
-// --- Copilot Timesheet ---
-
-export const selectCopilotTimesheetEntrySchema = createSelectSchema(
-  copilotTimesheetEntry
+export const selectEvaluationTimesheetHolidaySchema = createSelectSchema(
+  evaluationTimesheetHoliday
 );
-export const insertCopilotTimesheetEntrySchema = createInsertSchema(
-  copilotTimesheetEntry
+export const insertEvaluationTimesheetHolidaySchema = createInsertSchema(
+  evaluationTimesheetHoliday
 ).omit({
   createdAt: true,
   id: true,
-  updatedAt: true,
 });
 
-export const selectCopilotTimesheetHolidaySchema = createSelectSchema(
-  copilotTimesheetHoliday
+// --- Evaluation KPI ---
+
+export const selectEvaluationKpiProductivitySchema = createSelectSchema(
+  evaluationKpiProductivity
 );
-export const insertCopilotTimesheetHolidaySchema = createInsertSchema(
-  copilotTimesheetHoliday
-).omit({
-  createdAt: true,
-  id: true,
-});
-
-// --- Copilot KPI ---
-
-export const selectCopilotKpiProductivitySchema = createSelectSchema(
-  copilotKpiProductivity
-);
-export const insertCopilotKpiProductivitySchema = createInsertSchema(
-  copilotKpiProductivity
+export const insertEvaluationKpiProductivitySchema = createInsertSchema(
+  evaluationKpiProductivity
 ).omit({
   createdAt: true,
   id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiProductivitySchema =
-  insertCopilotKpiProductivitySchema.partial();
+export const updateEvaluationKpiProductivitySchema =
+  insertEvaluationKpiProductivitySchema.partial();
 
-export const selectCopilotKpiSharingSchema =
-  createSelectSchema(copilotKpiSharing);
-export const insertCopilotKpiSharingSchema = createInsertSchema(
-  copilotKpiSharing
+export const selectEvaluationKpiSharingSchema =
+  createSelectSchema(evaluationKpiSharing);
+export const insertEvaluationKpiSharingSchema = createInsertSchema(
+  evaluationKpiSharing
 ).omit({
   createdAt: true,
   id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiSharingSchema =
-  insertCopilotKpiSharingSchema.partial();
+export const updateEvaluationKpiSharingSchema =
+  insertEvaluationKpiSharingSchema.partial();
 
-export const selectCopilotKpiQualitySchema =
-  createSelectSchema(copilotKpiQuality);
-export const insertCopilotKpiQualitySchema = createInsertSchema(
-  copilotKpiQuality
+export const selectEvaluationKpiQualitySchema =
+  createSelectSchema(evaluationKpiQuality);
+export const insertEvaluationKpiQualitySchema = createInsertSchema(
+  evaluationKpiQuality
 ).omit({
   createdAt: true,
   id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiQualitySchema =
-  insertCopilotKpiQualitySchema.partial();
+export const updateEvaluationKpiQualitySchema =
+  insertEvaluationKpiQualitySchema.partial();
 
-export const selectCopilotKpiSummarySchema =
-  createSelectSchema(copilotKpiSummary);
-export const insertCopilotKpiSummarySchema = createInsertSchema(
-  copilotKpiSummary
+export const selectEvaluationKpiSummarySchema =
+  createSelectSchema(evaluationKpiSummary);
+export const insertEvaluationKpiSummarySchema = createInsertSchema(
+  evaluationKpiSummary
 ).omit({
   createdAt: true,
   id: true,
   updatedAt: true,
 });
-export const updateCopilotKpiSummarySchema =
-  insertCopilotKpiSummarySchema.partial();
+export const updateEvaluationKpiSummarySchema =
+  insertEvaluationKpiSummarySchema.partial();
 
-// --- Copilot Audit Log ---
+// --- Evaluation Audit Log ---
 
-export const selectCopilotAuditLogSchema = createSelectSchema(copilotAuditLog);
-export const insertCopilotAuditLogSchema = createInsertSchema(
-  copilotAuditLog
+export const selectEvaluationAuditLogSchema =
+  createSelectSchema(evaluationAuditLog);
+export const insertEvaluationAuditLogSchema = createInsertSchema(
+  evaluationAuditLog
 ).omit({
   createdAt: true,
   id: true,

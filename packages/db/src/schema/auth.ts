@@ -121,6 +121,8 @@ export const employeeStatusEnum = pgEnum("employee_status", [
   "INACTIVE",
 ]);
 
+export const employeeLevelEnum = pgEnum("employee_level", ["JUNIOR", "SENIOR"]);
+
 export const department = pgTable("department", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   description: text("description"),
@@ -145,6 +147,7 @@ export const employee = pgTable(
     fullName: text("full_name").notNull(),
     id: text("id").primaryKey(),
     joinDate: date("join_date").notNull(),
+    level: employeeLevelEnum("level"),
     phone: text("phone"),
     position: text("position").notNull(),
     status: employeeStatusEnum("status").default("ACTIVE").notNull(),

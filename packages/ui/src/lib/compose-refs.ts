@@ -1,3 +1,4 @@
+// oxlint-disable react-hooks/exhaustive-deps
 import * as React from "react";
 
 type PossibleRef<T> = React.Ref<T> | undefined;

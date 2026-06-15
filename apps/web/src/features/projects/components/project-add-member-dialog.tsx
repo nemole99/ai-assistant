@@ -26,7 +26,7 @@ import {
 } from "@workspace/ui/components/popover";
 import { cn } from "@workspace/ui/lib/utils";
 import { UserPlus, ChevronsUpDown, Check, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 
 import { orpc } from "@/lib/orpc";
@@ -48,6 +48,7 @@ export function ProjectAddMemberDialog({
 }: AddMemberDialogProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const employeeListboxId = useId();
   const queryClient = useQueryClient();
 
   const { data: employees = [] } = useQuery({
@@ -130,6 +131,8 @@ export function ProjectAddMemberDialog({
                 <Button
                   variant="outline"
                   role="combobox"
+                  aria-expanded={popoverOpen}
+                  aria-controls={employeeListboxId}
                   className="w-full justify-between font-normal"
                 />
               }
@@ -142,6 +145,7 @@ export function ProjectAddMemberDialog({
               <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
             </PopoverTrigger>
             <PopoverContent
+              id={employeeListboxId}
               className="w-(--radix-popover-trigger-width) p-0"
               align="start"
             >

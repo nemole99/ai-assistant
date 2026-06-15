@@ -176,8 +176,83 @@ Quy trình tự động biến Document thành WikiPage, gồm 3 phase chạy tu
    Chạy hoàn toàn tự động (không có human review gate). Trigger khi Document status chuyển sang `COMPLETED` (markdown đã convert xong).
    _Avoid_: Workflow, Process (quá chung)
 
+**Evaluation** (route: `/evaluation`, sidebar: "Evaluation"):
+Module theo dõi hiệu suất developer (effort tickets, timesheet, KPI, statistics). **Employee** tự nhập effort ticket, sharing hours, và reopen status trên ticket của mình; **Manager** đặt KPI targets, summary comment, quản lý timesheet/holiday, import/Jira, và override/sửa/xóa mọi record. Mọi user đăng nhập xem được toàn bộ dữ liệu. Prototype — schema/API trước, import Excel sau. Bảng DB prefix `evaluation_*`.
+_Avoid_: Copilot Evaluation, copilot\_ (DB prefix)
+
+**EvaluatedDeveloper** (UI label: "Developer"):
+Employee được đánh giá trong module **Evaluation**. Lưu bằng FK `employeeId` → `employee.id` — bắt buộc. Employee phải đang `ACTIVE` **tại thời điểm ghi** (tạo ticket, gán KPI target, thêm vào timesheet, import Jira) — check ở tầng API, vì FK chỉ đảm bảo tồn tại. Employee chuyển `INACTIVE` sau đó: giữ nguyên toàn bộ record lịch sử, chỉ chặn tạo record mới; dashboard vẫn hiển thị dữ liệu cũ. Dropdown chọn developer và auto-populate timesheet chỉ liệt kê Employee `ACTIVE`. Jira assignee map qua `employee.email`. Một Employee có thể có ticket/KPI trên nhiều **Project** khác nhau.
+_Avoid_: Developer name, assignee name, account
+
+**EvaluationProject** (UI label: "Project"):
+Project được dùng trong module **Evaluation**. Lưu bằng FK `projectId` → `project.id` — bắt buộc. Dropdown lấy từ bảng `project`; Admin tạo Project mới qua org module khi gặp tên chưa có (không hardcode canonical list). Jira prefix mapping resolve ra `project.id`. Tên project trong Excel nhập tay không đồng nhất — seed/import normalize bằng lowercase + bỏ khoảng trắng, kèm alias map tường minh cho ca đặc biệt (`We` → WeClever); tên không resolve được → fail kèm danh sách, không silent skip. **`Other`** là một Project record thật (bucket tạm thời cho việc ngoài project) — giữ FK `projectId` luôn bắt buộc.
+_Avoid_: Project name string, canonical project list, nullable projectId
+
+**EvaluationTimesheet**:
+Bảng chấm công tháng trong module **Evaluation**. Mỗi cell = một Employee × ngày. Lưu tại `evaluation_timesheet_entry` với FK `employeeId`. Tháng mới auto-populate Employee `ACTIVE`; Manager toggle present/absent và thêm Employee onboard giữa tháng qua dropdown. Sheet Timesheet trong Excel không ghi năm — chốt là **2026**; import chỉ lấy từ January đến tháng hiện tại, bỏ tháng tương lai. Cell lưu nguyên marker: `x` = đi làm cả ngày, `x/2` = nửa ngày, `-` = xin nghỉ (có phép), trống = vắng. Tầng aggregate quy đổi `x`=1 công, `x/2`=0.5, còn lại =0 — không mất thông tin gốc.
+_Avoid_: Attendance sheet, employee name column, copilot_timesheet
+
+**JiraTicketImport**:
+Luồng Manager fetch ticket từ Jira, preview, rồi submit vào **Evaluation**. Assignee map qua `employee.email` — không dùng env `JIRA_DEVELOPERS`. Email không khớp Employee → row flagged warning; Manager chọn Employee thủ công hoặc skip trước khi submit.
+_Avoid_: Jira sync, auto-import
+
+**EvaluationEffortTicket** (UI label: "Ticket"):
+Bản ghi effort **duy nhất cho một work item** (bug/feature) do Employee tự tạo/sửa (chỉ record của mình). `ticketUrl` **unique** — mỗi work item đúng một record (khôi phục 2026-06-12: dữ liệu live 1.409 tickets không còn URL trùng nào; quy ước log-theo-ngày thời trước đã bỏ). Gồm effort 3 phase và **reopen status** do Employee khai báo. Lưu tại `evaluation_ticket`. Khác **Ticket** (Jira external). Quy ước ô trống khi import Excel: effort phase trống = `0` (phase không làm); reopen trống = `0`; **total effort** trống = `null` (số planned riêng, không derive từ phase, không bịa `0`); **process date** trống = lấy theo ticket gần nó nhất trong sheet (cùng thứ tự nhập).
+_Avoid_: Ticket (standalone — trùng Jira Ticket trong glossary)
+
+**SharingLog**:
+Giờ knowledge sharing Employee tự khai báo theo tháng. Lưu trong `evaluation_kpi_sharing.monthly_values` (hoặc bảng riêng nếu tách sau). Employee chỉ sửa log của chính mình.
+_Avoid_: Sharing KPI (label UI), collaboration entry
+
+**EmployeeLevel** (cột `employee.level`, UI label trong Evaluation: "Title"):
+Seniority của Employee — `JUNIOR` hoặc `SENIOR`. Nullable (Employee ngoài diện đánh giá không cần level). Công ty chỉ promote cuối năm. Là nguồn để điền sẵn khi Manager tạo KPI row mới; KPI row (`evaluation_kpi_*.title`) lưu **bản copy tại thời điểm tạo, không refer** — promote không rewrite lịch sử KPI.
+_Avoid_: Title (standalone — dễ lẫn `employee.position`), Position, Rank
+
+**EvaluationTarget**:
+Chỉ tiêu KPI (productivity ticket/day, reopen target, sharing hours/year) do Manager đặt theo Employee × Project. Employee không sửa target. Result columns trên dashboard có thể derive từ dữ liệu Employee nhập hoặc nhập tay — tùy metric (đang chốt từng cái).
+_Avoid_: KPI target row, goal setting
+
+## Relationships
+
+- Một **EvaluationEffortTicket** thuộc đúng một **Employee** (evaluated developer) và đúng một **Project** (evaluation project)
+- Không xóa **Employee** đang có record evaluation (FK restrict) — lịch sử evaluation là bất biến theo người
+- Một **Employee** có thể có nhiều **EvaluationEffortTicket** trên nhiều **Project** khác nhau
+- Một **EvaluationKpi** record (`evaluation_kpi_*`) thuộc đúng một **Employee** và một **Project**
+- Một **EvaluationTimesheet** entry (`evaluation_timesheet_entry`) thuộc đúng một **Employee**, một tháng (YYYY-MM), và một ngày (1–31)
+- Một **Employee** có nhiều **EvaluationTimesheet** entry trong cùng tháng (một row × nhiều ngày)
+- **EvaluationAuditLog** (`evaluation_audit_log`): `performedBy` → **Employee** qua `employee.userId`; `null` nếu User không có Employee. Ghi mọi mutation (ticket, timesheet, KPI/sharing log) — append-only.
+
+## Example dialogue
+
+> **Dev:** "Field `developer` trên ticket lưu gì — tên hiển thị hay FK?"
+> **Domain expert:** "FK tới **Employee**. UI hiển thị `fullName`; filter/group theo `employeeId`. Không lưu first name hay email string."
+
+> **Dev:** "Một developer chỉ track trên 1 project à?"
+> **Domain expert:** "Không — mỗi ticket/KPI row gắn một **Project**, nhưng cùng một **Employee** có thể có nhiều row trên nhiều project. Giống **ProjectMember** ở org module."
+
+> **Dev:** "Project dropdown lấy từ đâu?"
+> **Domain expert:** "Bảng **Project** hiện có. Chưa có thì Admin tạo mới — không maintain list 15 tên riêng trong code."
+
+> **Dev:** "Timesheet ghi tên tay như Excel cũ à?"
+> **Domain expert:** "Không — FK **Employee**. Tháng mới tự điền hết Employee ACTIVE. Manager chỉ đánh dấu ngày công; onboard giữa tháng thì thêm Employee qua dropdown."
+
+> **Dev:** "Jira assignee map thế nào?"
+> **Domain expert:** "Match `employee.email`. Không khớp thì preview cảnh báo — Manager chọn **Employee** tay hoặc bỏ qua. Không maintain mapping riêng trong env."
+
+> **Dev:** "Audit log biết ai sửa không?"
+> **Domain expert:** "`performedBy` = **Employee** của User đang login. Admin không có hồ sơ HR thì để null — vẫn ghi action, timestamp, và details."
+
+> **Dev:** "Ai được thêm effort ticket?"
+> **Domain expert:** "**Employee** tự thêm/sửa ticket của mình (effort + reopen). **Manager** có thể sửa/xóa mọi ticket. Sharing hours cũng do Employee tự log."
+
+> **Dev:** "Manager nhập KPI result à?"
+> **Domain expert:** "Manager chỉ đặt **EvaluationTarget** và viết summary comment. Effort, sharing, reopen do Employee nhập — dashboard aggregate lên."
+
 ## Deferred scope
 
+- **Evaluation data migration**: Nguồn dữ liệu để import là **Postgres `riskradar`** của app legacy (trước là `copilot_statistic`, nay đã tiến hóa thành app **riskradar**) chạy live tại `172.76.10.246:5432` (cập nhật 2026-06-12 — địa chỉ cũ `timesheet_db` @ 172.76.10.210 lỗi thời). Import một lần qua kết nối trực tiếp (env `LEGACY_EVALUATION_DATABASE_URL`), wipe-reload nên chạy lại được đến ngày cutover. Sau cutover, **ai-assistant là source of truth duy nhất cho evaluation data** — app riskradar không nhận thêm evaluation entry (app vẫn có thể chạy cho tính năng risk riêng). File Excel và JSON export đều lỗi thời. Quy tắc đã chốt từ data live: duplicate "Ben" **đã được dọn ở legacy** (merge khi import không còn cần; 2 dòng timesheet mồ côi trỏ id đã xóa → skip kèm warning, sửa tay sau nếu cần); KPI row `month=null` chứa target năm, các row theo tháng đổ vào `monthlyValues`; `summary_kpi` cũ toàn null — bỏ qua; `timesheet_holidays` cũ rỗng.
+- **Risk-analysis data của app riskradar**: cột `risk`/`riskreason` trên ticket và các bảng `ai_analysis`, `risk_predictions`, `requirements`, `execution_metrics` — **không** import; là domain riêng của app riskradar, ở lại với app đó.
+- **Wiki entries / Issue management từ app cũ**: bảng `wiki_entries` (hiện rỗng) và `issue_management` — **không** import trong cutover này. Nếu cần sau, làm phase riêng với entity riêng (không trộn vào **WikiPage** do LLM sở hữu). `audit_log` của app cũ cũng bỏ.
 - **Jira sync**: Tích hợp Jira (import ticket/bug/task) sẽ làm ở phase sau. Phase 1 chỉ xử lý static documents (file upload).
 - **Human review gate**: Cho phép Admin review compilation plan trước khi wiki được cập nhật. Hiện tại pipeline chạy fully automatic.
 - **WikiPage revisions**: Lưu lịch sử thay đổi WikiPage. Hiện tại update in place, không giữ snapshot cũ.
@@ -194,3 +269,6 @@ Quy trình tự động biến Document thành WikiPage, gồm 3 phase chạy tu
 - "Account" được dùng lẫn lộn với User và Employee — đã resolve: dùng **User** cho tài khoản đăng nhập, **Employee** cho hồ sơ nhân sự.
 - "Connect GitHub" — không phải đăng nhập bằng GitHub (không thay OAuth login). Là liên kết GitHub account để lấy Copilot API access. Dùng **GitHub Device Flow**, không phải OAuth redirect.
 - "Active provider" — không có khái niệm 1 provider active toàn cục. Thay vào đó là **AIModelAssignment**: mỗi purpose (chat/embedding/vision) chỉ ra provider + model đang được dùng. System Model list (như Ollama) được fetch dynamic từ server API, không hardcode. `modelId` string được namespace (ví dụ: `ollama:llama3`, `copilot:gpt-4o`) để tự định tuyến đúng provider. Backend trả về một list model tổng hợp (server-side aggregation) để UI dễ dàng render.
+- "Developer" trong Copilot Evaluation — đã resolve: là **Employee** (FK bắt buộc), không phải **User** hay chuỗi tên tự do.
+- "Copilot" trong tên bảng DB — đã resolve: prefix `evaluation_*`, route `/evaluation`. Tránh nhầm với GitHub Copilot (`AIProvider`).
+- **Ai nhập dữ liệu Evaluation** — đã resolve (split ownership): Employee nhập effort ticket (gồm reopen), sharing log; Manager targets, summary comment, timesheet/holiday, import/override. PRD `0006` có thể lỗi thời — **CONTEXT.md** là source of truth cho grill session này.
