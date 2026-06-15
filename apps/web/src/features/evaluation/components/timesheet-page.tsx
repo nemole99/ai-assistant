@@ -27,6 +27,8 @@ import {
   useTimesheetEmployees,
   useLatestTimesheetMonth,
 } from "../hooks/use-timesheet";
+import { useTour } from "../hooks/use-tour";
+import { TimesheetTour } from "./evaluation-tour";
 
 const CELL_STATES = ["", "x", "x/2", "-"] as const;
 type CellState = (typeof CELL_STATES)[number];
@@ -62,6 +64,7 @@ export function EvaluationTimesheet() {
   const { data: latest } = useLatestTimesheetMonth();
   const [month, setMonthOverride] = useMonthWithDefault(latest?.month);
   const [newEmployeeId, setNewEmployeeId] = useState("");
+  const { open, setOpen } = useTour("timesheet");
 
   const { data, isLoading } = useTimesheetMonth(month);
   const { data: activeEmployees = [] } = useTimesheetEmployees();
@@ -143,7 +146,9 @@ export function EvaluationTimesheet() {
           <h2 className="text-2xl font-bold tracking-tight">Timesheet</h2>
           <p className="text-muted-foreground">Monthly attendance tracking.</p>
         </div>
-        <MonthPicker value={month} onChange={setMonthOverride} />
+        <div data-tour="timesheet-month-picker">
+          <MonthPicker value={month} onChange={setMonthOverride} />
+        </div>
       </div>
 
       {isLoading ? (
@@ -186,7 +191,10 @@ export function EvaluationTimesheet() {
               </div>
             )}{" "}
           </div>
-          <table className="w-full text-xs border-collapse">
+          <table
+            data-tour="timesheet-grid"
+            className="w-full text-xs border-collapse"
+          >
             <thead>
               <tr>
                 <th className="border p-1 text-left sticky left-0 bg-background min-w-28">
@@ -312,6 +320,7 @@ export function EvaluationTimesheet() {
           </div>
         </>
       )}
+      <TimesheetTour open={open} onOpenChange={setOpen} />
     </>
   );
 }

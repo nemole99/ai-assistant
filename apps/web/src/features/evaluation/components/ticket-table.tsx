@@ -108,44 +108,46 @@ export function TicketTable({
 
   return (
     <div className={cn("flex flex-1 flex-col gap-4")}>
-      <DataTableToolbar
-        table={table}
-        searchPlaceholder="Search ticket..."
-        filters={[
-          {
-            columnId: "fullName",
-            options: developers.map((d) => ({
-              count: devCountMap[d.id],
-              label: d.fullName,
-              value: d.id,
-            })),
-            title: "Developer",
-          },
-          {
-            columnId: "projectName",
-            options: projects.map((p) => ({
-              count: projCountMap[p.id],
-              label: p.name,
-              value: p.id,
-            })),
-            title: "Project",
-          },
-          {
-            columnId: "category",
-            options: [
-              { count: stats?.categories.bug, label: "Bug", value: "bug" },
-              {
-                count: stats?.categories.feature,
-                label: "Feature",
-                value: "feature",
-              },
-            ],
-            singleSelect: true,
-            title: "Category",
-          },
-        ]}
-      />
-      <div className="overflow-hidden">
+      <div>
+        <DataTableToolbar
+          table={table}
+          searchPlaceholder="Search ticket..."
+          filters={[
+            {
+              columnId: "fullName",
+              options: developers.map((d) => ({
+                count: devCountMap[d.id],
+                label: d.fullName,
+                value: d.id,
+              })),
+              title: "Developer",
+            },
+            {
+              columnId: "projectName",
+              options: projects.map((p) => ({
+                count: projCountMap[p.id],
+                label: p.name,
+                value: p.id,
+              })),
+              title: "Project",
+            },
+            {
+              columnId: "category",
+              options: [
+                { count: stats?.categories.bug, label: "Bug", value: "bug" },
+                {
+                  count: stats?.categories.feature,
+                  label: "Feature",
+                  value: "feature",
+                },
+              ],
+              singleSelect: true,
+              title: "Category",
+            },
+          ]}
+        />
+      </div>
+      <div data-tour="ticket-table" className="overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -20,7 +20,7 @@ import {
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
 import { cn } from "@workspace/ui/lib/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import { Loader } from "@/components/loader";
 import { MonthPicker } from "@/components/month-picker";
@@ -36,6 +36,8 @@ import {
 } from "../hooks/use-kpi";
 import { useMonthWithDefault } from "../hooks/use-month";
 import { useChartData, useLatestTicketMonth } from "../hooks/use-tickets";
+import { useTour } from "../hooks/use-tour";
+import { KpiTour } from "./evaluation-tour";
 
 /** Generate YYYY-MM keys for all 12 months of a given year */
 function yearMonthKeys(year: number): string[] {
@@ -134,6 +136,9 @@ export function EvaluationKpi() {
   // Default to the latest month that has data; fall back to the current month.
   const { data: latest } = useLatestTicketMonth();
   const [month, setMonthOverride] = useMonthWithDefault(latest?.month);
+  const [activeTab, setActiveTab] = useState("summary");
+  const { open, setOpen } = useTour("kpi");
+  const handleSwitchTab = useCallback((tab: string) => setActiveTab(tab), []);
 
   const year = Number(month.split("-")[0]);
   const monthKeys = useMemo(() => yearMonthKeys(year), [year]);
@@ -171,12 +176,16 @@ export function EvaluationKpi() {
         <MonthPicker value={month} onChange={setMonthOverride} />
       </div>
 
-      <Tabs defaultValue="summary">
-        <TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList data-tour="kpi-tabs">
           <TabsTrigger value="summary">Summary</TabsTrigger>
           <TabsTrigger value="productivity">Productivity</TabsTrigger>
-          <TabsTrigger value="sharing">Sharing</TabsTrigger>
-          <TabsTrigger value="quality">Quality</TabsTrigger>
+          <TabsTrigger value="sharing" data-tour="kpi-sharing-tab">
+            Sharing
+          </TabsTrigger>
+          <TabsTrigger value="quality" data-tour="kpi-quality-tab">
+            Quality
+          </TabsTrigger>
         </TabsList>
 
         {/* Summary Tab */}
@@ -490,7 +499,7 @@ export function EvaluationKpi() {
 
         <TabsContent value="sharing" className="mt-4">
           <CardTitle>Sharing KPI</CardTitle>
-          <Table className="mt-8">
+          <Table className="mt-8" data-tour="kpi-sharing-cells">
             <TableHeader>
               <TableRow>
                 <TableHead>Developer</TableHead>
@@ -566,6 +575,11 @@ export function EvaluationKpi() {
           />
         </TabsContent>
       </Tabs>
+      <KpiTour
+        open={open}
+        onOpenChange={setOpen}
+        onSwitchTab={handleSwitchTab}
+      />
     </>
   );
 }
@@ -606,7 +620,7 @@ function QualityKpiTable({
         Re-open bug counts · Editable: {shortMonthLabel(editableMonth)} · Màu
         (Re-open number): xanh lá = trong ngân sách, đỏ = vượt quá
       </p>
-      <Table className="mt-8">
+      <Table className="mt-8" data-tour="kpi-quality-cells">
         <TableHeader>
           <TableRow>
             <TableHead className="w-10 text-center">#</TableHead>

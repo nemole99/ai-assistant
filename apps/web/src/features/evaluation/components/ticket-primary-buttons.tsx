@@ -26,6 +26,7 @@ export function TicketPrimaryButtons({ month }: TicketPrimaryButtonsProps) {
   return (
     <div className="flex gap-2">
       <Button
+        data-tour="import-btn"
         variant="outline"
         className="space-x-1"
         onClick={() => setOpen("import")}
@@ -42,7 +43,11 @@ export function TicketPrimaryButtons({ month }: TicketPrimaryButtonsProps) {
         <Download size={18} />
         <span>Export</span>
       </Button>
-      <Button className="space-x-1" onClick={() => setOpen("add")}>
+      <Button
+        data-tour="add-ticket-btn"
+        className="space-x-1"
+        onClick={() => setOpen("add")}
+      >
         <Plus size={18} />
         <span>Add Ticket</span>
       </Button>

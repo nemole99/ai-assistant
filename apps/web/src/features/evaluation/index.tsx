@@ -3,6 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { Loader } from "@/components/loader";
 import { MonthPicker } from "@/components/month-picker";
 
+import { TicketsTour } from "./components/evaluation-tour";
 import { TicketsProvider } from "./components/ticket-context";
 import { TicketDialogs } from "./components/ticket-dialogs";
 import { TicketPrimaryButtons } from "./components/ticket-primary-buttons";
@@ -15,6 +16,7 @@ import {
   useLatestTicketMonth,
   useTicketStats,
 } from "./hooks/use-tickets";
+import { useTour } from "./hooks/use-tour";
 
 const route = getRouteApi("/_authenticated/evaluation/");
 
@@ -22,6 +24,7 @@ const route = getRouteApi("/_authenticated/evaluation/");
 export function EvaluationTickets() {
   const search = route.useSearch();
   const navigate = route.useNavigate();
+  const { open, setOpen } = useTour("tickets");
 
   const { data: latest } = useLatestTicketMonth();
   const month = search.month || latest?.month || currentYearMonth();
@@ -48,34 +51,39 @@ export function EvaluationTickets() {
   };
 
   return (
-    <TicketsProvider>
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tickets</h2>
-          <p className="text-muted-foreground">
-            Track developer effort on tickets and generate KPIs.
-          </p>
+    <>
+      <TicketsProvider>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Tickets</h2>
+            <p className="text-muted-foreground">
+              Track developer effort on tickets and generate KPIs.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div data-tour="month-picker">
+              <MonthPicker value={month} onChange={handleMonthChange} />
+            </div>
+            <TicketPrimaryButtons month={month} />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <MonthPicker value={month} onChange={handleMonthChange} />
-          <TicketPrimaryButtons month={month} />
-        </div>
-      </div>
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <TicketTable
-          data={result?.data ?? []}
-          search={search}
-          navigate={navigate}
-          developers={developers}
-          projects={projects}
-          pageCount={result?.totalPages ?? 1}
-          rowCount={result?.total ?? 0}
-          stats={stats}
-        />
-      )}
-      <TicketDialogs />
-    </TicketsProvider>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <TicketTable
+            data={result?.data ?? []}
+            search={search}
+            navigate={navigate}
+            developers={developers}
+            projects={projects}
+            pageCount={result?.totalPages ?? 1}
+            rowCount={result?.total ?? 0}
+            stats={stats}
+          />
+        )}
+        <TicketDialogs />
+      </TicketsProvider>
+      <TicketsTour open={open} onOpenChange={setOpen} />
+    </>
   );
 }
