@@ -64,25 +64,21 @@ const INITIAL_COMPONENTS: Partial<Components> = {
 };
 
 const MemoizedMarkdownBlock = memo(
-  function MarkdownBlock({
+  ({
     content,
     components = INITIAL_COMPONENTS,
   }: {
     content: string;
     components?: Partial<Components>;
-  }) {
-    return (
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkBreaks]}
-        components={components}
-      >
-        {content}
-      </ReactMarkdown>
-    );
-  },
-  function propsAreEqual(prevProps, nextProps) {
-    return prevProps.content === nextProps.content;
-  }
+  }) => (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm, remarkBreaks]}
+      components={components}
+    >
+      {content}
+    </ReactMarkdown>
+  ),
+  (prevProps, nextProps) => prevProps.content === nextProps.content
 );
 
 MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";

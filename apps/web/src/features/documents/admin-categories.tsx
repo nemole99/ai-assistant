@@ -109,7 +109,7 @@ export function AdminDocumentCategories() {
 
         {isLoading ? (
           <Loader />
-        ) : (categories.length === 0 ? (
+        ) : categories.length === 0 ? (
           <DocumentsEmptyState
             icon={<Tag />}
             title="No categories yet"
@@ -176,7 +176,7 @@ export function AdminDocumentCategories() {
               ))}
             </TableBody>
           </Table>
-        ))}
+        )}
 
         <DocumentCategoryActionDialog
           currentRow={currentRow ?? undefined}
@@ -200,9 +200,9 @@ export function AdminDocumentCategories() {
           title="Delete category?"
           desc={
             currentRow
-              ? (currentRow.documentCount > 0
+              ? currentRow.documentCount > 0
                 ? `Cannot delete "${currentRow.name}" — it has ${currentRow.documentCount} document(s). Move or delete them first.`
-                : `Delete "${currentRow.name}"? This action cannot be undone.`)
+                : `Delete "${currentRow.name}"? This action cannot be undone.`
               : ""
           }
           confirmText="Delete"

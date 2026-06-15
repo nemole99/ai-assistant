@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import type { Row } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -10,6 +11,9 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { Ellipsis, Pencil, Trash2 } from "lucide-react";
 
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/lib/orpc";
+
 import type { EvaluationTicket } from "../data/schema";
 import { useTicketsContext } from "./ticket-context";
 
@@ -19,6 +23,15 @@ interface DataTableRowActionsProps {
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const { setOpen, setCurrentRow } = useTicketsContext();
+  const { data: session } = authClient.useSession();
+  const role = session?.user?.role;
+  const isManagerOrAdmin = role === "ADMIN" || role === "MANAGER";
+
+  const { data: selfEmployee } = useQuery(orpc.employee.getSelf.queryOptions());
+
+  const isOwner = !!selfEmployee && selfEmployee.id === row.original.employeeId;
+  const canEdit = isManagerOrAdmin || isOwner;
+  const canDelete = isManagerOrAdmin || isOwner;
 
   return (
     <DropdownMenu modal={false}>
@@ -35,6 +48,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem
+          disabled={!canEdit}
           onClick={() => {
             setCurrentRow(row.original);
             setOpen("edit");
@@ -47,11 +61,12 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
+          disabled={!canDelete}
+          className="text-red-500!"
           onClick={() => {
             setCurrentRow(row.original);
             setOpen("delete");
           }}
-          className="text-red-500!"
         >
           Delete
           <DropdownMenuShortcut>

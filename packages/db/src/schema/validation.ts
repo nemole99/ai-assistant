@@ -23,6 +23,7 @@ import {
   evaluationKpiSummary,
   evaluationAuditLog,
 } from "./evaluation";
+import { issue, issueComment, issueUpvote } from "./issue";
 
 // --- User ---
 
@@ -200,6 +201,26 @@ export const insertEvaluationAuditLogSchema = createInsertSchema(
   createdAt: true,
   id: true,
 });
+// --- Issue ---
+
+export const selectIssueSchema = createSelectSchema(issue);
+export const insertIssueSchema = createInsertSchema(issue).omit({
+  createdAt: true,
+  id: true,
+  reporterId: true,
+  status: true,
+  updatedAt: true,
+});
+
+export const selectIssueUpvoteSchema = createSelectSchema(issueUpvote);
+export const selectIssueCommentSchema = createSelectSchema(issueComment);
+export const insertIssueCommentSchema = createInsertSchema(issueComment).omit({
+  authorId: true,
+  createdAt: true,
+  id: true,
+  updatedAt: true,
+});
+
 // --- SystemAIConfig ---
 
 export const selectSystemAiConfigSchema = createSelectSchema(systemAiConfig);

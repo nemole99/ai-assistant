@@ -40,7 +40,7 @@ export function Projects() {
         </div>
         {isLoading ? (
           <Loader />
-        ) : (projects.length === 0 ? (
+        ) : projects.length === 0 ? (
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -64,7 +64,7 @@ export function Projects() {
               <ProjectCard key={project.id} project={project} />
             ))}
           </div>
-        ))}
+        )}
         <ProjectsDialogs />
       </ProjectsProvider>
     </ContentLayout>

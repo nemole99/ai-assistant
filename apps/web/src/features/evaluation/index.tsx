@@ -1,6 +1,5 @@
 import { getRouteApi } from "@tanstack/react-router";
 
-import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
 import { MonthPicker } from "@/components/month-picker";
 
@@ -14,6 +13,7 @@ import {
   useTicketDevelopers,
   useTicketProjects,
   useLatestTicketMonth,
+  useTicketStats,
 } from "./hooks/use-tickets";
 
 const route = getRouteApi("/_authenticated/evaluation/");
@@ -28,13 +28,15 @@ export function EvaluationTickets() {
   const { data: developers = [] } = useTicketDevelopers();
   const { data: projects = [] } = useTicketProjects();
 
+  const { data: stats } = useTicketStats(month);
+
   const { data: result, isLoading } = useTickets({
     category: search.category?.[0] as "bug" | "feature" | undefined,
-    employeeId: search.employee?.[0],
+    employeeIds: search.employee?.length ? search.employee : undefined,
     limit: search.pageSize ?? 10,
     month,
     page: search.page ?? 1,
-    projectId: search.project?.[0],
+    projectIds: search.project?.length ? search.project : undefined,
     ticket: search.ticket || undefined,
   });
 
@@ -45,35 +47,34 @@ export function EvaluationTickets() {
   };
 
   return (
-    <ContentLayout>
-      <TicketsProvider>
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Evaluation</h2>
-            <p className="text-muted-foreground">
-              Track developer effort on tickets and generate KPIs.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <MonthPicker value={month} onChange={handleMonthChange} />
-            <TicketPrimaryButtons />
-          </div>
+    <TicketsProvider>
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Tickets</h2>
+          <p className="text-muted-foreground">
+            Track developer effort on tickets and generate KPIs.
+          </p>
         </div>
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <TicketTable
-            data={result?.data ?? []}
-            search={search}
-            navigate={navigate}
-            developers={developers}
-            projects={projects}
-            pageCount={result?.totalPages ?? 1}
-            rowCount={result?.total ?? 0}
-          />
-        )}
-        <TicketDialogs />
-      </TicketsProvider>
-    </ContentLayout>
+        <div className="flex items-center gap-2">
+          <MonthPicker value={month} onChange={handleMonthChange} />
+          <TicketPrimaryButtons month={month} />
+        </div>
+      </div>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <TicketTable
+          data={result?.data ?? []}
+          search={search}
+          navigate={navigate}
+          developers={developers}
+          projects={projects}
+          pageCount={result?.totalPages ?? 1}
+          rowCount={result?.total ?? 0}
+          stats={stats}
+        />
+      )}
+      <TicketDialogs />
+    </TicketsProvider>
   );
 }

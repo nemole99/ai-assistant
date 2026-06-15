@@ -23,9 +23,11 @@ import * as React from "react";
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
+  singleSelect?: boolean;
   options: {
     label: string;
     value: string;
+    count?: number;
     icon?: React.ComponentType<{ className?: string }>;
   }[];
 }
@@ -33,6 +35,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
 export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,
+  singleSelect,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
@@ -94,15 +97,21 @@ export function DataTableFacetedFilter<TData, TValue>({
                     key={option.value}
                     className="[&>svg:last-child]:hidden"
                     onSelect={() => {
-                      if (isSelected) {
-                        selectedValues.delete(option.value);
+                      if (singleSelect) {
+                        column?.setFilterValue(
+                          isSelected ? undefined : [option.value]
+                        );
                       } else {
-                        selectedValues.add(option.value);
+                        if (isSelected) {
+                          selectedValues.delete(option.value);
+                        } else {
+                          selectedValues.add(option.value);
+                        }
+                        const filterValues = [...selectedValues];
+                        column?.setFilterValue(
+                          filterValues.length ? filterValues : undefined
+                        );
                       }
-                      const filterValues = [...selectedValues];
-                      column?.setFilterValue(
-                        filterValues.length ? filterValues : undefined
-                      );
                     }}
                   >
                     <Checkbox checked={isSelected} tabIndex={-1} />
@@ -111,9 +120,9 @@ export function DataTableFacetedFilter<TData, TValue>({
                     )}
                     <span className="flex flex-1 items-center justify-between">
                       <span>{option.label}</span>
-                      {facets?.get(option.value) && (
+                      {(option.count ?? facets?.get(option.value)) != null && (
                         <span className="font-mono text-xs text-muted-foreground">
-                          {facets.get(option.value)}
+                          {option.count ?? facets?.get(option.value)}
                         </span>
                       )}
                     </span>
@@ -121,20 +130,20 @@ export function DataTableFacetedFilter<TData, TValue>({
                 );
               })}
             </CommandGroup>
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => column?.setFilterValue(undefined)}
-                    className="justify-center text-center"
-                  >
-                    Clear filters
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
           </CommandList>
+          {selectedValues.size > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup>
+                <CommandItem
+                  onSelect={() => column?.setFilterValue(undefined)}
+                  className="justify-center text-center"
+                >
+                  Clear filters
+                </CommandItem>
+              </CommandGroup>
+            </>
+          )}
         </Command>
       </PopoverContent>
     </Popover>

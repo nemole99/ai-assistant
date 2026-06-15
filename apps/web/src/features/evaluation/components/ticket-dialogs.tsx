@@ -3,12 +3,13 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useDeleteTicket } from "../hooks/use-tickets";
 import { useTicketsContext } from "./ticket-context";
 import { TicketFormDialog } from "./ticket-form-dialog";
+import { TicketImportDialog } from "./ticket-import-dialog";
 
 export function TicketDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useTicketsContext();
   const deleteTicket = useDeleteTicket();
 
-  const closeAndClear = (type: "add" | "edit" | "delete") => {
+  const closeAndClear = (type: "add" | "edit" | "delete" | "import") => {
     setOpen(type);
     setTimeout(() => setCurrentRow(null), 500);
   };
@@ -19,6 +20,21 @@ export function TicketDialogs() {
         key="ticket-add"
         open={open === "add"}
         onOpenChange={() => setOpen("add")}
+      />
+
+      {currentRow && (
+        <TicketFormDialog
+          key={`ticket-edit-${currentRow.id}`}
+          currentRow={currentRow}
+          open={open === "edit"}
+          onOpenChange={() => closeAndClear("edit")}
+        />
+      )}
+
+      <TicketImportDialog
+        key="ticket-import"
+        open={open === "import"}
+        onOpenChange={() => closeAndClear("import")}
       />
 
       {currentRow && (

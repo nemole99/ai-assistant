@@ -65,7 +65,7 @@ export function AdminWiki() {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="animate-spin text-muted-foreground" size={24} />
           </div>
-        ) : (items.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <BookOpen size={40} className="text-muted-foreground mb-3" />
             <p className="font-medium">No wiki pages yet</p>
@@ -131,7 +131,7 @@ export function AdminWiki() {
               ))}
             </TableBody>
           </Table>
-        ))}
+        )}
       </div>
 
       {viewingPageId && (

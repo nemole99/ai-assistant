@@ -8,14 +8,14 @@ import { Main } from "./main";
 
 interface ContentLayoutProps {
   children?: React.ReactNode;
-  title?: string;
-  hrefBack?: string;
+  tabs?: React.ReactNode;
 }
 
-export function ContentLayout({ children }: ContentLayoutProps) {
+export function ContentLayout({ children, tabs }: ContentLayoutProps) {
   return (
     <>
       <Header fixed>
+        {tabs}
         <div className="ml-auto flex items-center gap-3">
           <ThemeSwitch />
           <ConfigDrawer />

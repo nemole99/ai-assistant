@@ -4,7 +4,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Input } from "@workspace/ui/components/input";
 import {
   Table,
   TableBody,
@@ -22,8 +21,8 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { useState, useMemo } from "react";
 
-import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
+import { MonthPicker } from "@/components/month-picker";
 
 import {
   useKpiProductivity,
@@ -156,15 +155,11 @@ export function EvaluationKpi() {
   );
 
   if (isLoading) {
-    return (
-      <ContentLayout>
-        <Loader />
-      </ContentLayout>
-    );
+    return <Loader />;
   }
 
   return (
-    <ContentLayout>
+    <>
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">KPI Dashboard</h2>
@@ -172,72 +167,7 @@ export function EvaluationKpi() {
             Manage productivity, sharing, quality, and summary KPIs.
           </p>
         </div>
-        <Input
-          type="month"
-          value={month}
-          onChange={(e) => setMonthOverride(e.target.value)}
-          className="w-40"
-        />
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-              Tổng Ticket
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {stats.totalTickets}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Tháng {month.split("-")[1]}/{month.split("-")[0]}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-              Số Developer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {stats.devCount}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              tham gia trong tháng
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-              Nhiều nhất
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {stats.maxCount}
-            </div>
-            <p className="text-xs text-muted-foreground">{stats.maxDev}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-              TB Ticket / Người
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {stats.avgPerDev.toFixed(1)}
-            </div>
-            <p className="text-xs text-muted-foreground">ticket / developer</p>
-          </CardContent>
-        </Card>
+        <MonthPicker value={month} onChange={setMonthOverride} />
       </div>
 
       <Tabs defaultValue="summary">
@@ -250,6 +180,67 @@ export function EvaluationKpi() {
 
         {/* Summary Tab */}
         <TabsContent value="summary" className="mt-4">
+          {/* Summary Cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
+                  Tổng Ticket
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">
+                  {stats.totalTickets}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Tháng {month.split("-")[1]}/{month.split("-")[0]}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
+                  Số Developer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">
+                  {stats.devCount}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  tham gia trong tháng
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
+                  Nhiều nhất
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">
+                  {stats.maxCount}
+                </div>
+                <p className="text-xs text-muted-foreground">{stats.maxDev}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
+                  TB Ticket / Người
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">
+                  {stats.avgPerDev.toFixed(1)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  ticket / developer
+                </p>
+              </CardContent>
+            </Card>
+          </div>
           <CardTitle>Summary KPI — {summary?.length ?? 0} developers</CardTitle>
           <p className="text-sm text-muted-foreground">
             Tổng hợp Productivity · Quality · Sharing KPI
@@ -574,7 +565,7 @@ export function EvaluationKpi() {
           />
         </TabsContent>
       </Tabs>
-    </ContentLayout>
+    </>
   );
 }
 

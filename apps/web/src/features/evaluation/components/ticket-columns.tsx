@@ -97,66 +97,6 @@ export const ticketColumns: ColumnDef<EvaluationTicket>[] = [
     meta: { className: "text-right" },
   },
   {
-    accessorKey: "investigateActual",
-    cell: ({ row }) => (
-      <div className="text-right">{row.getValue("investigateActual")}</div>
-    ),
-    enableSorting: false,
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Investigate (h)"
-        className="justify-end"
-      />
-    ),
-    meta: { className: "text-right" },
-  },
-  {
-    accessorKey: "codeFixActual",
-    cell: ({ row }) => (
-      <div className="text-right">{row.getValue("codeFixActual")}</div>
-    ),
-    enableSorting: false,
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Code Fix (h)"
-        className="justify-end"
-      />
-    ),
-    meta: { className: "text-right" },
-  },
-  {
-    accessorKey: "codeReviewActual",
-    cell: ({ row }) => (
-      <div className="text-right">{row.getValue("codeReviewActual")}</div>
-    ),
-    enableSorting: false,
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title="Review (h)"
-        className="justify-end"
-      />
-    ),
-    meta: { className: "text-right" },
-  },
-  {
-    accessorKey: "reopenStatus",
-    cell: ({ row }) => {
-      const status = row.getValue<number>("reopenStatus");
-      return (
-        <Badge variant={status === 1 ? "destructive" : "secondary"}>
-          {status === 1 ? "Yes" : "No"}
-        </Badge>
-      );
-    },
-    enableSorting: false,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Reopen" />
-    ),
-  },
-  {
     cell: DataTableRowActions,
     id: "actions",
   },

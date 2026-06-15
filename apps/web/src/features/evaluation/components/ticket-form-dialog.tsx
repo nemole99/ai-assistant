@@ -16,60 +16,107 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { useEffect } from "react";
 
+import { authClient } from "@/lib/auth-client";
+
+import type { EvaluationTicket } from "../data/schema";
 import {
   useCreateTicket,
+  useUpdateTicket,
   useTicketDevelopers,
   useTicketProjects,
 } from "../hooks/use-tickets";
 
 interface TicketFormDialogProps {
+  currentRow?: EvaluationTicket;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function TicketFormDialog({
+  currentRow,
   open,
   onOpenChange,
 }: TicketFormDialogProps) {
+  const isEdit = !!currentRow;
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
+
   const createTicket = useCreateTicket();
+  const updateTicket = useUpdateTicket();
   const { data: developers = [] } = useTicketDevelopers();
   const { data: projects = [] } = useTicketProjects();
 
+  const isPending = createTicket.isPending || updateTicket.isPending;
+
   const form = useForm({
     defaultValues: {
-      category: "" as "" | "bug" | "feature",
-      codeFixActual: 0,
-      codeReviewActual: 0,
-      comment: "",
-      employeeId: "",
-      investigateActual: 0,
-      processDate: new Date().toISOString().split("T")[0]!,
-      projectId: "",
-      reopenStatus: 0,
-      ticketUrl: "",
-      totalEffort: 16,
+      category: (currentRow?.category ?? "") as "" | "bug" | "feature",
+      comment: currentRow?.comment ?? "",
+      employeeId: currentRow?.employeeId ?? "",
+      processDate:
+        currentRow?.processDate ?? new Date().toISOString().split("T")[0]!,
+      projectId: currentRow?.projectId ?? "",
+      ticketUrl: currentRow?.ticketUrl ?? "",
+      totalEffort: currentRow?.totalEffort ?? 16,
     },
     onSubmit: async ({ value }) => {
-      const data = {
-        ...value,
-        category: value.category as "bug" | "feature",
-        codeFixEstimate: value.totalEffort * 0.4,
-        codeReviewEstimate: value.totalEffort * 0.15,
-        investigateEstimate: value.totalEffort * 0.2,
-        totalEffort: value.totalEffort > 0 ? value.totalEffort : null,
-      };
-      await createTicket.mutateAsync(data);
+      if (isEdit) {
+        await updateTicket.mutateAsync({
+          data: {
+            category: value.category as "bug" | "feature",
+            comment: value.comment || undefined,
+            processDate: value.processDate,
+            projectId: value.projectId,
+            ticketUrl: value.ticketUrl,
+            totalEffort: value.totalEffort > 0 ? value.totalEffort : null,
+            ...(isAdmin && value.employeeId
+              ? { employeeId: value.employeeId }
+              : {}),
+          },
+          id: currentRow.id,
+        });
+      } else {
+        await createTicket.mutateAsync({
+          category: value.category as "bug" | "feature",
+          comment: value.comment || undefined,
+          ...(isAdmin && value.employeeId
+            ? { employeeId: value.employeeId }
+            : {}),
+          processDate: value.processDate,
+          projectId: value.projectId,
+          ticketUrl: value.ticketUrl,
+          totalEffort: value.totalEffort > 0 ? value.totalEffort : null,
+        });
+      }
       onOpenChange(false);
       form.reset();
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        category: (currentRow?.category ?? "") as "" | "bug" | "feature",
+        comment: currentRow?.comment ?? "",
+        employeeId: currentRow?.employeeId ?? "",
+        processDate:
+          currentRow?.processDate ?? new Date().toISOString().split("T")[0]!,
+        projectId: currentRow?.projectId ?? "",
+        ticketUrl: currentRow?.ticketUrl ?? "",
+        totalEffort: currentRow?.totalEffort ?? 16,
+      });
+    }
+  }, [open, currentRow]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nhập dữ liệu mới</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Ticket" : "Nhập dữ liệu mới"}
+          </DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -78,40 +125,49 @@ export function TicketFormDialog({
           }}
           className="space-y-4"
         >
-          {/* Row 1: Developer + Project */}
-          <div className="grid grid-cols-2 gap-4">
-            <form.Field name="employeeId">
-              {(field) => (
-                <div className="space-y-1">
-                  <Label>Developer *</Label>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(v) => field.handleChange(v ?? "")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn developer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {developers.map((dev) => (
-                        <SelectItem key={dev.id} value={dev.id}>
-                          {dev.fullName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </form.Field>
-
+          {/* Developer + Project */}
+          <div className={isAdmin ? "grid grid-cols-2 gap-4" : ""}>
+            {isAdmin && (
+              <form.Field name="employeeId">
+                {(field) => (
+                  <div className="space-y-1">
+                    <Label>Developer *</Label>
+                    <Select
+                      items={developers.map((d) => ({
+                        label: d.fullName,
+                        value: d.id,
+                      }))}
+                      value={field.state.value}
+                      onValueChange={(v) => field.handleChange(v ?? "")}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn developer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {developers.map((dev) => (
+                          <SelectItem key={dev.id} value={dev.id}>
+                            {dev.fullName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </form.Field>
+            )}
             <form.Field name="projectId">
               {(field) => (
                 <div className="space-y-1">
                   <Label>Project *</Label>
                   <Select
+                    items={projects.map((p) => ({
+                      label: p.name,
+                      value: p.id,
+                    }))}
                     value={field.state.value}
                     onValueChange={(v) => field.handleChange(v ?? "")}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Chọn project" />
                     </SelectTrigger>
                     <SelectContent>
@@ -127,54 +183,41 @@ export function TicketFormDialog({
             </form.Field>
           </div>
 
-          {/* Row 2: Category + Ticket URL */}
-          <div className="grid grid-cols-2 gap-4">
-            <form.Field name="category">
-              {(field) => (
-                <div className="space-y-1">
-                  <Label>Category *</Label>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(v) =>
-                      field.handleChange((v ?? "") as "bug" | "feature")
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="-- Chọn --" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bug">Bug</SelectItem>
-                      <SelectItem value="feature">Feature</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </form.Field>
-
-            <form.Field name="ticketUrl">
-              {(field) => (
-                <div className="space-y-1">
-                  <Label htmlFor="ticketUrl">Ticket URL *</Label>
-                  <Input
-                    id="ticketUrl"
-                    placeholder="https://..."
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-            </form.Field>
-          </div>
-
-          {/* Process Date */}
-          <form.Field name="processDate">
+          {/* Category */}
+          <form.Field name="category">
             {(field) => (
               <div className="space-y-1">
-                <Label htmlFor="processDate">Process date</Label>
+                <Label>Category *</Label>
+                <Select
+                  items={[
+                    { label: "Bug", value: "bug" },
+                    { label: "Feature", value: "feature" },
+                  ]}
+                  value={field.state.value}
+                  onValueChange={(v) =>
+                    field.handleChange((v ?? "") as "bug" | "feature")
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="-- Chọn --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bug">Bug</SelectItem>
+                    <SelectItem value="feature">Feature</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </form.Field>
+
+          {/* Ticket URL */}
+          <form.Field name="ticketUrl">
+            {(field) => (
+              <div className="space-y-1">
+                <Label htmlFor="ticketUrl">Ticket URL *</Label>
                 <Input
-                  id="processDate"
-                  type="date"
+                  id="ticketUrl"
+                  placeholder="https://..."
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   required
@@ -183,158 +226,39 @@ export function TicketFormDialog({
             )}
           </form.Field>
 
-          {/* Total Effort */}
-          <form.Field name="totalEffort">
-            {(field) => (
-              <div className="space-y-1">
-                <Label htmlFor="totalEffort">Total effort (hours)</Label>
-                <Input
-                  id="totalEffort"
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
-                />
-              </div>
-            )}
-          </form.Field>
+          {/* Process Date + Total Effort */}
+          <div className="grid grid-cols-2 gap-4">
+            <form.Field name="processDate">
+              {(field) => (
+                <div className="space-y-1">
+                  <Label htmlFor="processDate">Process date</Label>
+                  <Input
+                    id="processDate"
+                    type="date"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+            </form.Field>
 
-          {/* INVESTIGATE Section */}
-          <div>
-            <h4 className="text-sm font-bold text-teal-700 dark:text-teal-400 uppercase mb-2">
-              Investigate
-            </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <form.Field name="totalEffort">
-                {(field) => (
-                  <div className="space-y-1">
-                    <Label>Estimation 20%</Label>
-                    <Input
-                      type="number"
-                      value={(field.state.value * 0.2).toFixed(2)}
-                      readOnly
-                      tabIndex={-1}
-                      className="bg-muted"
-                    />
-                  </div>
-                )}
-              </form.Field>
-              <form.Field name="investigateActual">
-                {(field) => (
-                  <div className="space-y-1">
-                    <Label htmlFor="investigateActual">Actual</Label>
-                    <Input
-                      id="investigateActual"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={field.state.value}
-                      onChange={(e) =>
-                        field.handleChange(Number(e.target.value))
-                      }
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
+            <form.Field name="totalEffort">
+              {(field) => (
+                <div className="space-y-1">
+                  <Label htmlFor="totalEffort">Total effort (hours)</Label>
+                  <Input
+                    id="totalEffort"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(Number(e.target.value))}
+                  />
+                </div>
+              )}
+            </form.Field>
           </div>
-
-          {/* CODE / FIXING Section */}
-          <div>
-            <h4 className="text-sm font-bold text-teal-700 dark:text-teal-400 uppercase mb-2">
-              Code / Fixing
-            </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <form.Field name="totalEffort">
-                {(field) => (
-                  <div className="space-y-1">
-                    <Label>Estimate 40%</Label>
-                    <Input
-                      type="number"
-                      value={(field.state.value * 0.4).toFixed(2)}
-                      readOnly
-                      tabIndex={-1}
-                      className="bg-muted"
-                    />
-                  </div>
-                )}
-              </form.Field>
-              <form.Field name="codeFixActual">
-                {(field) => (
-                  <div className="space-y-1">
-                    <Label htmlFor="codeFixActual">Actual</Label>
-                    <Input
-                      id="codeFixActual"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={field.state.value}
-                      onChange={(e) =>
-                        field.handleChange(Number(e.target.value))
-                      }
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
-          </div>
-
-          {/* CODE REVIEW Section */}
-          <div>
-            <h4 className="text-sm font-bold text-teal-700 dark:text-teal-400 uppercase mb-2">
-              Code Review
-            </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <form.Field name="totalEffort">
-                {(field) => (
-                  <div className="space-y-1">
-                    <Label>Estimate 15%</Label>
-                    <Input
-                      type="number"
-                      value={(field.state.value * 0.15).toFixed(2)}
-                      readOnly
-                      tabIndex={-1}
-                      className="bg-muted"
-                    />
-                  </div>
-                )}
-              </form.Field>
-              <form.Field name="codeReviewActual">
-                {(field) => (
-                  <div className="space-y-1">
-                    <Label htmlFor="codeReviewActual">Actual</Label>
-                    <Input
-                      id="codeReviewActual"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={field.state.value}
-                      onChange={(e) =>
-                        field.handleChange(Number(e.target.value))
-                      }
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
-          </div>
-
-          {/* Re-open status */}
-          <form.Field name="reopenStatus">
-            {(field) => (
-              <div className="space-y-1">
-                <Label htmlFor="reopenStatus">Re-open status</Label>
-                <Input
-                  id="reopenStatus"
-                  type="number"
-                  min="0"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
-                />
-              </div>
-            )}
-          </form.Field>
 
           {/* Comment */}
           <form.Field name="comment">
@@ -359,8 +283,14 @@ export function TicketFormDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createTicket.isPending}>
-              {createTicket.isPending ? "Đang tạo..." : "Tạo ticket"}
+            <Button type="submit" disabled={isPending}>
+              {isPending
+                ? isEdit
+                  ? "Saving..."
+                  : "Đang tạo..."
+                : isEdit
+                  ? "Save"
+                  : "Tạo ticket"}
             </Button>
           </DialogFooter>
         </form>

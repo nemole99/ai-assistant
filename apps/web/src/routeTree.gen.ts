@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedEvaluationRouteImport } from './routes/_authenticated/evaluation'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -21,10 +22,12 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedWikiIndexRouteImport } from './routes/_authenticated/wiki/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects/index'
+import { Route as AuthenticatedIssuesIndexRouteImport } from './routes/_authenticated/issues/index'
 import { Route as AuthenticatedEvaluationIndexRouteImport } from './routes/_authenticated/evaluation/index'
 import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
 import { Route as AuthenticatedDocumentsIndexRouteImport } from './routes/_authenticated/documents/index'
 import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
 import { Route as AuthenticatedSettingsSystemAiRouteImport } from './routes/_authenticated/settings/system-ai'
 import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
@@ -44,6 +47,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEvaluationRoute = AuthenticatedEvaluationRouteImport.update({
+  id: '/evaluation',
+  path: '/evaluation',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const errors503Route = errors503RouteImport.update({
@@ -99,11 +107,17 @@ const AuthenticatedProjectsIndexRoute =
     path: '/projects/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIssuesIndexRoute =
+  AuthenticatedIssuesIndexRouteImport.update({
+    id: '/issues/',
+    path: '/issues/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEvaluationIndexRoute =
   AuthenticatedEvaluationIndexRouteImport.update({
-    id: '/evaluation/',
-    path: '/evaluation/',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedEvaluationRoute,
   } as any)
 const AuthenticatedEmployeesIndexRoute =
   AuthenticatedEmployeesIndexRouteImport.update({
@@ -121,6 +135,12 @@ const AuthenticatedDepartmentsIndexRoute =
   AuthenticatedDepartmentsIndexRouteImport.update({
     id: '/departments/',
     path: '/departments/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAskAiIndexRoute = AuthenticatedAskAiIndexRouteImport.update({
@@ -154,15 +174,15 @@ const AuthenticatedProjectsProjectIdRoute =
   } as any)
 const AuthenticatedEvaluationTimesheetRoute =
   AuthenticatedEvaluationTimesheetRouteImport.update({
-    id: '/evaluation/timesheet',
-    path: '/evaluation/timesheet',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/timesheet',
+    path: '/timesheet',
+    getParentRoute: () => AuthenticatedEvaluationRoute,
   } as any)
 const AuthenticatedEvaluationKpiRoute =
   AuthenticatedEvaluationKpiRouteImport.update({
-    id: '/evaluation/kpi',
-    path: '/evaluation/kpi',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/kpi',
+    path: '/kpi',
+    getParentRoute: () => AuthenticatedEvaluationRoute,
   } as any)
 const AuthenticatedErrorsErrorRoute =
   AuthenticatedErrorsErrorRouteImport.update({
@@ -198,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/evaluation': typeof AuthenticatedEvaluationRouteWithChildren
   '/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
   '/documents/$id': typeof AuthenticatedDocumentsIdRoute
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
@@ -209,10 +230,12 @@ export interface FileRoutesByFullPath {
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
+  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/evaluation/': typeof AuthenticatedEvaluationIndexRoute
+  '/issues/': typeof AuthenticatedIssuesIndexRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/wiki/': typeof AuthenticatedWikiIndexRoute
@@ -236,10 +259,12 @@ export interface FileRoutesByTo {
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/ask-ai': typeof AuthenticatedAskAiIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/departments': typeof AuthenticatedDepartmentsIndexRoute
   '/documents': typeof AuthenticatedDocumentsIndexRoute
   '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/evaluation': typeof AuthenticatedEvaluationIndexRoute
+  '/issues': typeof AuthenticatedIssuesIndexRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/wiki': typeof AuthenticatedWikiIndexRoute
@@ -254,6 +279,7 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/_authenticated/evaluation': typeof AuthenticatedEvaluationRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/ask-ai/$conversationId': typeof AuthenticatedAskAiConversationIdRoute
   '/_authenticated/documents/$id': typeof AuthenticatedDocumentsIdRoute
@@ -266,10 +292,12 @@ export interface FileRoutesById {
   '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/_authenticated/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
   '/_authenticated/documents/': typeof AuthenticatedDocumentsIndexRoute
   '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/_authenticated/evaluation/': typeof AuthenticatedEvaluationIndexRoute
+  '/_authenticated/issues/': typeof AuthenticatedIssuesIndexRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/wiki/': typeof AuthenticatedWikiIndexRoute
@@ -285,6 +313,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/evaluation'
     | '/ask-ai/$conversationId'
     | '/documents/$id'
     | '/documents/categories'
@@ -296,10 +325,12 @@ export interface FileRouteTypes {
     | '/settings/password'
     | '/settings/system-ai'
     | '/ask-ai/'
+    | '/dashboard/'
     | '/departments/'
     | '/documents/'
     | '/employees/'
     | '/evaluation/'
+    | '/issues/'
     | '/projects/'
     | '/settings/'
     | '/wiki/'
@@ -323,10 +354,12 @@ export interface FileRouteTypes {
     | '/settings/password'
     | '/settings/system-ai'
     | '/ask-ai'
+    | '/dashboard'
     | '/departments'
     | '/documents'
     | '/employees'
     | '/evaluation'
+    | '/issues'
     | '/projects'
     | '/settings'
     | '/wiki'
@@ -340,6 +373,7 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/_authenticated/evaluation'
     | '/_authenticated/'
     | '/_authenticated/ask-ai/$conversationId'
     | '/_authenticated/documents/$id'
@@ -352,10 +386,12 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/password'
     | '/_authenticated/settings/system-ai'
     | '/_authenticated/ask-ai/'
+    | '/_authenticated/dashboard/'
     | '/_authenticated/departments/'
     | '/_authenticated/documents/'
     | '/_authenticated/employees/'
     | '/_authenticated/evaluation/'
+    | '/_authenticated/issues/'
     | '/_authenticated/projects/'
     | '/_authenticated/settings/'
     | '/_authenticated/wiki/'
@@ -385,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/evaluation': {
+      id: '/_authenticated/evaluation'
+      path: '/evaluation'
+      fullPath: '/evaluation'
+      preLoaderRoute: typeof AuthenticatedEvaluationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/(errors)/503': {
@@ -457,12 +500,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/issues/': {
+      id: '/_authenticated/issues/'
+      path: '/issues'
+      fullPath: '/issues/'
+      preLoaderRoute: typeof AuthenticatedIssuesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/evaluation/': {
       id: '/_authenticated/evaluation/'
-      path: '/evaluation'
+      path: '/'
       fullPath: '/evaluation/'
       preLoaderRoute: typeof AuthenticatedEvaluationIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedEvaluationRoute
     }
     '/_authenticated/employees/': {
       id: '/_authenticated/employees/'
@@ -483,6 +533,13 @@ declare module '@tanstack/react-router' {
       path: '/departments'
       fullPath: '/departments/'
       preLoaderRoute: typeof AuthenticatedDepartmentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ask-ai/': {
@@ -522,17 +579,17 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/evaluation/timesheet': {
       id: '/_authenticated/evaluation/timesheet'
-      path: '/evaluation/timesheet'
+      path: '/timesheet'
       fullPath: '/evaluation/timesheet'
       preLoaderRoute: typeof AuthenticatedEvaluationTimesheetRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedEvaluationRoute
     }
     '/_authenticated/evaluation/kpi': {
       id: '/_authenticated/evaluation/kpi'
-      path: '/evaluation/kpi'
+      path: '/kpi'
       fullPath: '/evaluation/kpi'
       preLoaderRoute: typeof AuthenticatedEvaluationKpiRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedEvaluationRoute
     }
     '/_authenticated/errors/$error': {
       id: '/_authenticated/errors/$error'
@@ -586,40 +643,59 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
+interface AuthenticatedEvaluationRouteChildren {
+  AuthenticatedEvaluationKpiRoute: typeof AuthenticatedEvaluationKpiRoute
+  AuthenticatedEvaluationTimesheetRoute: typeof AuthenticatedEvaluationTimesheetRoute
+  AuthenticatedEvaluationIndexRoute: typeof AuthenticatedEvaluationIndexRoute
+}
+
+const AuthenticatedEvaluationRouteChildren: AuthenticatedEvaluationRouteChildren =
+  {
+    AuthenticatedEvaluationKpiRoute: AuthenticatedEvaluationKpiRoute,
+    AuthenticatedEvaluationTimesheetRoute:
+      AuthenticatedEvaluationTimesheetRoute,
+    AuthenticatedEvaluationIndexRoute: AuthenticatedEvaluationIndexRoute,
+  }
+
+const AuthenticatedEvaluationRouteWithChildren =
+  AuthenticatedEvaluationRoute._addFileChildren(
+    AuthenticatedEvaluationRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedEvaluationRoute: typeof AuthenticatedEvaluationRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAskAiConversationIdRoute: typeof AuthenticatedAskAiConversationIdRoute
   AuthenticatedDocumentsIdRoute: typeof AuthenticatedDocumentsIdRoute
   AuthenticatedDocumentsCategoriesRoute: typeof AuthenticatedDocumentsCategoriesRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
-  AuthenticatedEvaluationKpiRoute: typeof AuthenticatedEvaluationKpiRoute
-  AuthenticatedEvaluationTimesheetRoute: typeof AuthenticatedEvaluationTimesheetRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
   AuthenticatedDocumentsIndexRoute: typeof AuthenticatedDocumentsIndexRoute
   AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
-  AuthenticatedEvaluationIndexRoute: typeof AuthenticatedEvaluationIndexRoute
+  AuthenticatedIssuesIndexRoute: typeof AuthenticatedIssuesIndexRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
   AuthenticatedWikiIndexRoute: typeof AuthenticatedWikiIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedEvaluationRoute: AuthenticatedEvaluationRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAskAiConversationIdRoute: AuthenticatedAskAiConversationIdRoute,
   AuthenticatedDocumentsIdRoute: AuthenticatedDocumentsIdRoute,
   AuthenticatedDocumentsCategoriesRoute: AuthenticatedDocumentsCategoriesRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
-  AuthenticatedEvaluationKpiRoute: AuthenticatedEvaluationKpiRoute,
-  AuthenticatedEvaluationTimesheetRoute: AuthenticatedEvaluationTimesheetRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
   AuthenticatedDocumentsIndexRoute: AuthenticatedDocumentsIndexRoute,
   AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
-  AuthenticatedEvaluationIndexRoute: AuthenticatedEvaluationIndexRoute,
+  AuthenticatedIssuesIndexRoute: AuthenticatedIssuesIndexRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
   AuthenticatedWikiIndexRoute: AuthenticatedWikiIndexRoute,
 }

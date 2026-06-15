@@ -181,7 +181,7 @@ export const evaluationTimesheetRouter = {
       return { success: true };
     }),
 
-  updateCell: managerProcedure
+  updateCell: protectedProcedure
     .input(
       z.object({
         day: z.number().int().min(1).max(31),
@@ -195,6 +195,16 @@ export const evaluationTimesheetRouter = {
         throw new ORPCError("FORBIDDEN", {
           message: "Cannot modify timesheet for past months",
         });
+      }
+
+      const { role } = context.session.user;
+      if (role === "EMPLOYEE") {
+        const ownEmployee = await resolvePerformedBy(context.session.user.id);
+        if (!ownEmployee || ownEmployee !== input.employeeId) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "Employees can only update their own timesheet row",
+          });
+        }
       }
 
       const [existing] = await db

@@ -25,6 +25,12 @@ import type { NavigateFn } from "@/hooks/use-table-url-state";
 import type { EvaluationTicket } from "../data/schema";
 import { ticketColumns as columns } from "./ticket-columns";
 
+interface TicketStats {
+  developers: { id: string; fullName: string; count: number }[];
+  projects: { id: string; name: string; count: number }[];
+  categories: { bug: number; feature: number };
+}
+
 interface TicketTableProps {
   data: EvaluationTicket[];
   search: Record<string, unknown>;
@@ -33,6 +39,7 @@ interface TicketTableProps {
   projects: { id: string; name: string }[];
   pageCount: number;
   rowCount: number;
+  stats?: TicketStats;
 }
 
 export function TicketTable({
@@ -43,7 +50,14 @@ export function TicketTable({
   projects,
   pageCount,
   rowCount,
+  stats,
 }: TicketTableProps) {
+  const devCountMap = Object.fromEntries(
+    (stats?.developers ?? []).map((d) => [d.id, d.count])
+  );
+  const projCountMap = Object.fromEntries(
+    (stats?.projects ?? []).map((p) => [p.id, p.count])
+  );
   const {
     columnFilters,
     onColumnFiltersChange,
@@ -101,6 +115,7 @@ export function TicketTable({
           {
             columnId: "fullName",
             options: developers.map((d) => ({
+              count: devCountMap[d.id],
               label: d.fullName,
               value: d.id,
             })),
@@ -108,15 +123,24 @@ export function TicketTable({
           },
           {
             columnId: "projectName",
-            options: projects.map((p) => ({ label: p.name, value: p.id })),
+            options: projects.map((p) => ({
+              count: projCountMap[p.id],
+              label: p.name,
+              value: p.id,
+            })),
             title: "Project",
           },
           {
             columnId: "category",
             options: [
-              { label: "Bug", value: "bug" },
-              { label: "Feature", value: "feature" },
+              { count: stats?.categories.bug, label: "Bug", value: "bug" },
+              {
+                count: stats?.categories.feature,
+                label: "Feature",
+                value: "feature",
+              },
             ],
+            singleSelect: true,
             title: "Category",
           },
         ]}

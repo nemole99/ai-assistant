@@ -57,13 +57,13 @@ export function WikiPageDrawer({ pageId, onClose }: WikiPageDrawerProps) {
                 size={24}
               />
             </div>
-          ) : (page ? (
+          ) : page ? (
             <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-pre:bg-muted prose-pre:text-foreground">
               <Markdown>{page.content}</Markdown>
             </div>
           ) : (
             <p className="text-muted-foreground">Page not found.</p>
-          ))}
+          )}
         </div>
       </DrawerContent>
     </Drawer>

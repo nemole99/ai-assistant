@@ -37,7 +37,7 @@ export function Departments() {
         </div>
         {isLoading ? (
           <Loader />
-        ) : (departments.length === 0 ? (
+        ) : departments.length === 0 ? (
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -59,7 +59,7 @@ export function Departments() {
               <DepartmentCard key={department.id} department={department} />
             ))}
           </div>
-        ))}
+        )}
         <DepartmentsDialogs />
       </DepartmentsProvider>
     </ContentLayout>

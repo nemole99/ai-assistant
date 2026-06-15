@@ -8,7 +8,7 @@ export type TimeGroup = "Today" | "Yesterday" | "Previous 7 Days" | "Older";
 
 export function useChatHistory() {
   const conversations = useLiveQuery(
-    () => db.conversations.orderBy("updatedAt").reverse().toArray(),
+    () => db.conversations.orderBy("updatedAt").toReversed().toArray(),
     []
   );
 

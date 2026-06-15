@@ -290,9 +290,9 @@ export function DocumentUploadDialog({ open, onOpenChange }: Props) {
           </Button>
           <Button type="submit" form="upload-form" disabled={isPending}>
             {isPending
-              ? (isUploading
+              ? isUploading
                 ? `Uploading ${uploadProgress}%…`
-                : "Processing…")
+                : "Processing…"
               : "Upload"}
           </Button>
         </DialogFooter>

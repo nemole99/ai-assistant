@@ -117,7 +117,7 @@ export function Documents() {
 
       {isLoading ? (
         <Loader />
-      ) : (documents.length === 0 ? (
+      ) : documents.length === 0 ? (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -179,7 +179,7 @@ export function Documents() {
             </Link>
           ))}
         </div>
-      ))}
+      )}
     </ContentLayout>
   );
 }

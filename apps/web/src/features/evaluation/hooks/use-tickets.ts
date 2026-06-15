@@ -10,8 +10,8 @@ import { orpc } from "@/lib/orpc";
 
 interface TicketFilters {
   month?: string;
-  employeeId?: string;
-  projectId?: string;
+  employeeIds?: string[];
+  projectIds?: string[];
   category?: "bug" | "feature";
   ticket?: string;
   page?: number;
@@ -96,6 +96,16 @@ export function useDeleteTicket() {
   );
 }
 
+export function useExportTickets() {
+  return useMutation(
+    orpc.evaluation.ticket.exportByMonth.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message || "Failed to export tickets");
+      },
+    })
+  );
+}
+
 export function useImportTickets() {
   const queryClient = useQueryClient();
   return useMutation(
@@ -112,6 +122,15 @@ export function useImportTickets() {
           toast.warning(`${data.errors.length} tickets skipped (duplicates)`);
         }
       },
+    })
+  );
+}
+
+export function useTicketStats(month?: string) {
+  return useQuery(
+    orpc.evaluation.ticket.stats.queryOptions({
+      input: month ? { month } : undefined,
+      placeholderData: keepPreviousData,
     })
   );
 }

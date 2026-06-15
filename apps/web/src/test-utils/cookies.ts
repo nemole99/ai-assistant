@@ -21,9 +21,9 @@ export function clearCookies(filter?: string | RegExp): void {
     const shouldRemove =
       filter === undefined
         ? true
-        : (typeof filter === "string"
+        : typeof filter === "string"
           ? name.startsWith(filter)
-          : filter.test(name));
+          : filter.test(name);
 
     if (shouldRemove) {
       removeCookie(name);

@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { db } from "@workspace/db";
 import { employee, project } from "@workspace/db/schema/auth";
 import { evaluationTicket } from "@workspace/db/schema/evaluation";
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { managerProcedure, protectedProcedure } from "../../index";
@@ -43,14 +43,16 @@ function monthDateRange(month: string): { endDate: string; startDate: string } {
 
 const insertTicketInput = z.object({
   category: z.enum(["bug", "feature"]),
-  codeFixActual: z.number().min(0),
-  codeFixEstimate: z.number().min(0),
-  codeReviewActual: z.number().min(0),
-  codeReviewEstimate: z.number().min(0),
+  // Cleanup pending: remove codeFixActual, codeFixEstimate, codeReviewActual, codeReviewEstimate,
+  // investigateActual, investigateEstimate, reopenStatus from schema and DB columns.
+  codeFixActual: z.number().min(0).default(0),
+  codeFixEstimate: z.number().min(0).default(0),
+  codeReviewActual: z.number().min(0).default(0),
+  codeReviewEstimate: z.number().min(0).default(0),
   comment: z.string().optional(),
-  employeeId: z.string().min(1),
-  investigateActual: z.number().min(0),
-  investigateEstimate: z.number().min(0),
+  employeeId: z.string().min(1).optional(),
+  investigateActual: z.number().min(0).default(0),
+  investigateEstimate: z.number().min(0).default(0),
   processDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   projectId: z.string().min(1),
   reopenStatus: z.number().int().min(0).default(0),
@@ -87,24 +89,33 @@ export const evaluationTicketRouter = {
     .input(insertTicketInput)
     .handler(async ({ context, input }) => {
       const { role, id: userId } = context.session.user;
-      const isManager = role === "ADMIN" || role === "MANAGER";
+      const isAdmin = role === "ADMIN";
 
-      if (!isManager) {
-        const performedBy = await resolvePerformedBy(userId);
-        if (!performedBy || performedBy !== input.employeeId) {
-          throw new ORPCError("FORBIDDEN", {
-            message: "You can only create tickets for yourself",
+      let resolvedEmployeeId: string;
+      if (isAdmin) {
+        if (!input.employeeId) {
+          throw new ORPCError("BAD_REQUEST", {
+            message: "employeeId is required",
           });
         }
+        resolvedEmployeeId = input.employeeId;
+      } else {
+        const empId = await resolvePerformedBy(userId);
+        if (!empId) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "No employee profile linked to your account",
+          });
+        }
+        resolvedEmployeeId = empId;
       }
 
-      await assertEmployeeActive(input.employeeId);
+      await assertEmployeeActive(resolvedEmployeeId);
       await assertTicketUrlUnique(input.ticketUrl);
 
       const id = crypto.randomUUID();
       const [created] = await db
         .insert(evaluationTicket)
-        .values({ id, ...input })
+        .values({ id, ...input, employeeId: resolvedEmployeeId })
         .returning();
       if (!created) {
         throw new ORPCError("INTERNAL_SERVER_ERROR");
@@ -118,14 +129,14 @@ export const evaluationTicketRouter = {
           ticketId: id,
           ticketUrl: input.ticketUrl,
         },
-        employeeId: input.employeeId,
+        employeeId: resolvedEmployeeId,
         performedBy,
       });
 
       return created;
     }),
 
-  delete: managerProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .handler(async ({ context, input }) => {
       const [existing] = await db
@@ -134,6 +145,17 @@ export const evaluationTicketRouter = {
         .where(eq(evaluationTicket.id, input.id));
       if (!existing) {
         throw new ORPCError("NOT_FOUND");
+      }
+
+      const { role, id: userId } = context.session.user;
+      const isManager = role === "ADMIN" || role === "MANAGER";
+      if (!isManager) {
+        const callerEmpId = await resolvePerformedBy(userId);
+        if (!callerEmpId || callerEmpId !== existing.employeeId) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "You can only delete your own tickets",
+          });
+        }
       }
 
       await db
@@ -202,6 +224,35 @@ export const evaluationTicketRouter = {
       return { data, month: input.month };
     }),
 
+  exportByMonth: protectedProcedure
+    .input(z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) }))
+    .handler(async ({ input }) => {
+      const { endDate, startDate } = monthDateRange(input.month);
+
+      const data = await db
+        .select({
+          category: evaluationTicket.category,
+          comment: evaluationTicket.comment,
+          fullName: employee.fullName,
+          processDate: evaluationTicket.processDate,
+          projectName: project.name,
+          ticketUrl: evaluationTicket.ticketUrl,
+          totalEffort: evaluationTicket.totalEffort,
+        })
+        .from(evaluationTicket)
+        .innerJoin(employee, eq(evaluationTicket.employeeId, employee.id))
+        .innerJoin(project, eq(evaluationTicket.projectId, project.id))
+        .where(
+          and(
+            sql`${evaluationTicket.processDate} >= ${startDate}`,
+            sql`${evaluationTicket.processDate} < ${endDate}`
+          )
+        )
+        .orderBy(desc(evaluationTicket.processDate));
+
+      return data;
+    }),
+
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .handler(async ({ input }) => {
@@ -215,20 +266,20 @@ export const evaluationTicketRouter = {
       return row;
     }),
 
-  import: managerProcedure
+  import: protectedProcedure
     .input(
       z.object({
         tickets: z.array(
           z.object({
             category: z.enum(["bug", "feature"]),
-            codeFixActual: z.number().min(0),
-            codeFixEstimate: z.number().min(0),
-            codeReviewActual: z.number().min(0),
-            codeReviewEstimate: z.number().min(0),
+            codeFixActual: z.number().min(0).default(0),
+            codeFixEstimate: z.number().min(0).default(0),
+            codeReviewActual: z.number().min(0).default(0),
+            codeReviewEstimate: z.number().min(0).default(0),
             comment: z.string().optional(),
             employeeId: z.string().min(1),
-            investigateActual: z.number().min(0),
-            investigateEstimate: z.number().min(0),
+            investigateActual: z.number().min(0).default(0),
+            investigateEstimate: z.number().min(0).default(0),
             processDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
             projectId: z.string().min(1),
             reopenStatus: z.number().int().min(0).default(0),
@@ -239,10 +290,26 @@ export const evaluationTicketRouter = {
       })
     )
     .handler(async ({ context, input }) => {
+      const { role, id: userId } = context.session.user;
+      const isManager = role === "ADMIN" || role === "MANAGER";
+
+      const performedBy = await resolvePerformedBy(userId);
+
+      let selfEmployeeId: string | null = null;
+      if (!isManager) {
+        selfEmployeeId = await resolvePerformedBy(userId);
+        if (!selfEmployeeId) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "No employee profile linked to your account",
+          });
+        }
+      }
+
       const results = { errors: [] as string[], imported: 0 };
-      const performedBy = await resolvePerformedBy(context.session.user.id);
 
       for (const ticket of input.tickets) {
+        const resolvedEmployeeId = selfEmployeeId ?? ticket.employeeId;
+
         const [dup] = await db
           .select({ id: evaluationTicket.id })
           .from(evaluationTicket)
@@ -253,12 +320,14 @@ export const evaluationTicketRouter = {
         }
 
         const id = crypto.randomUUID();
-        await db.insert(evaluationTicket).values({ id, ...ticket });
+        await db
+          .insert(evaluationTicket)
+          .values({ id, ...ticket, employeeId: resolvedEmployeeId });
 
         await writeAudit({
           action: "IMPORT_TICKET",
           details: { ticketId: id, ticketUrl: ticket.ticketUrl },
-          employeeId: ticket.employeeId,
+          employeeId: resolvedEmployeeId,
           performedBy,
         });
 
@@ -284,14 +353,14 @@ export const evaluationTicketRouter = {
       z
         .object({
           category: z.enum(["bug", "feature"]).optional(),
-          employeeId: z.string().optional(),
+          employeeIds: z.array(z.string()).optional(),
           limit: z.number().int().min(1).max(100).default(50),
           month: z
             .string()
             .regex(/^\d{4}-\d{2}$/)
             .optional(),
           page: z.number().int().min(1).default(1),
-          projectId: z.string().optional(),
+          projectIds: z.array(z.string()).optional(),
           ticket: z.string().optional(),
         })
         .optional()
@@ -309,12 +378,14 @@ export const evaluationTicketRouter = {
         conditions.push(sql`${evaluationTicket.processDate} < ${endDate}`);
       }
 
-      if (input?.employeeId) {
-        conditions.push(eq(evaluationTicket.employeeId, input.employeeId));
+      if (input?.employeeIds?.length) {
+        conditions.push(
+          inArray(evaluationTicket.employeeId, input.employeeIds)
+        );
       }
 
-      if (input?.projectId) {
-        conditions.push(eq(evaluationTicket.projectId, input.projectId));
+      if (input?.projectIds?.length) {
+        conditions.push(inArray(evaluationTicket.projectId, input.projectIds));
       }
 
       if (input?.category) {
@@ -390,6 +461,70 @@ export const evaluationTicketRouter = {
       .orderBy(project.name);
     return rows;
   }),
+
+  stats: protectedProcedure
+    .input(
+      z
+        .object({
+          month: z
+            .string()
+            .regex(/^\d{4}-\d{2}$/)
+            .optional(),
+        })
+        .optional()
+    )
+    .handler(async ({ input }) => {
+      const monthCondition = input?.month
+        ? (() => {
+            const { endDate, startDate } = monthDateRange(input.month);
+            return and(
+              sql`${evaluationTicket.processDate} >= ${startDate}`,
+              sql`${evaluationTicket.processDate} < ${endDate}`
+            );
+          })()
+        : undefined;
+
+      const [developerRows, projectRows, categoryRows] = await Promise.all([
+        db
+          .select({
+            count: count(),
+            fullName: employee.fullName,
+            id: evaluationTicket.employeeId,
+          })
+          .from(evaluationTicket)
+          .innerJoin(employee, eq(evaluationTicket.employeeId, employee.id))
+          .where(monthCondition)
+          .groupBy(evaluationTicket.employeeId, employee.fullName),
+        db
+          .select({
+            count: count(),
+            id: evaluationTicket.projectId,
+            name: project.name,
+          })
+          .from(evaluationTicket)
+          .innerJoin(project, eq(evaluationTicket.projectId, project.id))
+          .where(monthCondition)
+          .groupBy(evaluationTicket.projectId, project.name),
+        db
+          .select({ category: evaluationTicket.category, count: count() })
+          .from(evaluationTicket)
+          .where(monthCondition)
+          .groupBy(evaluationTicket.category),
+      ]);
+
+      const categories = Object.fromEntries(
+        categoryRows.map((r) => [r.category, r.count])
+      ) as { bug?: number; feature?: number };
+
+      return {
+        categories: {
+          bug: categories.bug ?? 0,
+          feature: categories.feature ?? 0,
+        },
+        developers: developerRows,
+        projects: projectRows,
+      };
+    }),
 
   update: protectedProcedure
     .input(

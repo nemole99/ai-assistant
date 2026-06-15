@@ -117,9 +117,9 @@ function VisuallyHiddenInput<T = InputValue>(
 
     const serializedCurrentValue = isCheckInput
       ? checked
-      : (typeof value === "object" && value !== null
+      : typeof value === "object" && value !== null
         ? JSON.stringify(value)
-        : value);
+        : value;
 
     const descriptor = Object.getOwnPropertyDescriptor(inputProto, propertyKey);
 

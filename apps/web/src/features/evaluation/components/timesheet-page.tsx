@@ -1,7 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { CardTitle } from "@workspace/ui/components/card";
-import { Input } from "@workspace/ui/components/input";
 import {
   Select,
   SelectContent,
@@ -13,8 +13,10 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Plus } from "lucide-react";
 import { useState, useMemo } from "react";
 
-import { ContentLayout } from "@/components/layout/content-layout";
 import { Loader } from "@/components/loader";
+import { MonthPicker } from "@/components/month-picker";
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/lib/orpc";
 
 import { useMonthWithDefault } from "../hooks/use-month";
 import {
@@ -53,6 +55,10 @@ function getCellDisplay(value: string) {
 
 export function EvaluationTimesheet() {
   // Default to the latest month that has data; fall back to the current month.
+  const { data: session } = authClient.useSession();
+  const isEmployee = session?.user?.role === "EMPLOYEE";
+  const { data: selfEmployee } = useQuery(orpc.employee.getSelf.queryOptions());
+
   const { data: latest } = useLatestTimesheetMonth();
   const [month, setMonthOverride] = useMonthWithDefault(latest?.month);
   const [newEmployeeId, setNewEmployeeId] = useState("");
@@ -92,6 +98,9 @@ export function EvaluationTimesheet() {
     if (isPastMonth || weekendDays.has(day) || holidaySet.has(day)) {
       return;
     }
+    if (isEmployee && selfEmployee?.id !== employeeId) {
+      return;
+    }
     const currentValue =
       data?.employees.find((e) => e.employeeId === employeeId)?.days[day] ?? "";
     const newValue = getNextCellState(currentValue);
@@ -107,7 +116,7 @@ export function EvaluationTimesheet() {
   };
 
   const handleToggleHoliday = (day: number) => {
-    if (isPastMonth) {
+    if (isPastMonth || isEmployee) {
       return;
     }
     const current = data?.holidays ?? [];
@@ -128,18 +137,13 @@ export function EvaluationTimesheet() {
   );
 
   return (
-    <ContentLayout>
+    <>
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Timesheet</h2>
           <p className="text-muted-foreground">Monthly attendance tracking.</p>
         </div>
-        <Input
-          type="month"
-          value={month}
-          onChange={(e) => setMonthOverride(e.target.value)}
-          className="w-40"
-        />
+        <MonthPicker value={month} onChange={setMonthOverride} />
       </div>
 
       {isLoading ? (
@@ -150,9 +154,13 @@ export function EvaluationTimesheet() {
             <CardTitle>
               {month} — {data?.employees.length ?? 0} employees
             </CardTitle>
-            {!isPastMonth && (
+            {!isPastMonth && !isEmployee && (
               <div className="flex items-center gap-2">
                 <Select
+                  items={availableEmployees.map((e) => ({
+                    label: e.fullName,
+                    value: e.id,
+                  }))}
                   value={newEmployeeId}
                   onValueChange={(v) => setNewEmployeeId(v ?? "")}
                 >
@@ -227,7 +235,9 @@ export function EvaluationTimesheet() {
                         const value = emp.days[day] ?? "";
                         const isWeekend = weekendDays.has(day);
                         const isHoliday = holidaySet.has(day);
-                        const isDisabled = isWeekend || isHoliday;
+                        const isOtherRow =
+                          isEmployee && selfEmployee?.id !== emp.employeeId;
+                        const isDisabled = isWeekend || isHoliday || isOtherRow;
                         const display = getCellDisplay(value);
                         return (
                           <td
@@ -254,9 +264,9 @@ export function EvaluationTimesheet() {
                             onClick={() => handleCellClick(emp.employeeId, day)}
                             title={
                               isDisabled
-                                ? (isHoliday
+                                ? isHoliday
                                   ? "Nghỉ lễ"
-                                  : "Cuối tuần")
+                                  : "Cuối tuần"
                                 : display.title
                             }
                           >
@@ -302,6 +312,6 @@ export function EvaluationTimesheet() {
           </div>
         </>
       )}
-    </ContentLayout>
+    </>
   );
 }

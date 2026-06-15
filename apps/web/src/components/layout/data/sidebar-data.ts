@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Command,
   Contact,
+  Flag,
   FolderKanban,
   GalleryVerticalEnd,
   KeyRound,
@@ -14,6 +15,7 @@ import {
   Settings,
   UserCog,
   Wrench,
+  LayoutDashboard,
 } from "lucide-react";
 
 import type { SidebarData } from "../types";
@@ -22,15 +24,15 @@ export const sidebarData: SidebarData = {
   navGroups: [
     {
       items: [
-        // {
-        //   title: "Dashboard",
-        //   url: "/",
-        //   icon: LayoutDashboard,
-        // },
         {
           icon: BotMessageSquare,
           title: "Ask AI",
           url: "/ask-ai",
+        },
+        {
+          icon: ClipboardCheck,
+          title: "EVN Tools",
+          url: "/evaluation",
         },
       ],
       title: "General",
@@ -67,27 +69,6 @@ export const sidebarData: SidebarData = {
           title: "Projects",
           url: "/projects",
         },
-        {
-          icon: ClipboardCheck,
-          items: [
-            {
-              icon: ClipboardCheck,
-              title: "Tickets",
-              url: "/evaluation",
-            },
-            {
-              icon: Contact,
-              title: "Timesheet",
-              url: "/evaluation/timesheet",
-            },
-            {
-              icon: FolderKanban,
-              title: "KPI",
-              url: "/evaluation/kpi",
-            },
-          ],
-          title: "Evaluation",
-        },
       ],
       title: "Organization",
     },
@@ -119,6 +100,11 @@ export const sidebarData: SidebarData = {
             },
           ],
           title: "Settings",
+        },
+        {
+          icon: Flag,
+          title: "Issues",
+          url: "/issues",
         },
       ],
       title: "Other",

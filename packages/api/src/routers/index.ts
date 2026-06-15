@@ -6,6 +6,7 @@ import { aiProviderRouter } from "./ai-provider";
 import { documentRouter } from "./document";
 import { documentCategoryRouter } from "./document-category";
 import { evaluationRouter } from "./evaluation";
+import { issueRouter } from "./issue";
 import { departmentRouter, employeeRouter } from "./organization";
 import { projectRouter } from "./project";
 import { systemAiConfigRouter } from "./system-ai-config";
@@ -20,6 +21,7 @@ export const appRouter = {
   employee: employeeRouter,
   evaluation: evaluationRouter,
   healthCheck: publicProcedure.handler(() => "OK"),
+  issue: issueRouter,
   privateData: protectedProcedure.handler(({ context }) => ({
     message: "This is private",
     user: context.session?.user,
