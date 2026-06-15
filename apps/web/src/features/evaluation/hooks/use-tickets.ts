@@ -56,6 +56,15 @@ export function useCreateTicket() {
         queryClient.invalidateQueries({
           queryKey: orpc.evaluation.ticket.list.queryOptions().queryKey,
         });
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.kpi.listSummary.queryOptions().queryKey,
+          refetchType: "all",
+        });
+        queryClient.invalidateQueries({
+          queryKey:
+            orpc.evaluation.kpi.listProductivity.queryOptions().queryKey,
+          refetchType: "all",
+        });
         toast.success("Ticket created successfully");
       },
     })
@@ -73,6 +82,15 @@ export function useUpdateTicket() {
         queryClient.invalidateQueries({
           queryKey: orpc.evaluation.ticket.list.queryOptions().queryKey,
         });
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.kpi.listSummary.queryOptions().queryKey,
+          refetchType: "all",
+        });
+        queryClient.invalidateQueries({
+          queryKey:
+            orpc.evaluation.kpi.listProductivity.queryOptions().queryKey,
+          refetchType: "all",
+        });
         toast.success("Ticket updated successfully");
       },
     })
@@ -89,6 +107,15 @@ export function useDeleteTicket() {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: orpc.evaluation.ticket.list.queryOptions().queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.kpi.listSummary.queryOptions().queryKey,
+          refetchType: "all",
+        });
+        queryClient.invalidateQueries({
+          queryKey:
+            orpc.evaluation.kpi.listProductivity.queryOptions().queryKey,
+          refetchType: "all",
         });
         toast.success("Ticket deleted successfully");
       },
@@ -116,6 +143,15 @@ export function useImportTickets() {
       onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: orpc.evaluation.ticket.list.queryOptions().queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.kpi.listSummary.queryOptions().queryKey,
+          refetchType: "all",
+        });
+        queryClient.invalidateQueries({
+          queryKey:
+            orpc.evaluation.kpi.listProductivity.queryOptions().queryKey,
+          refetchType: "all",
         });
         toast.success(`Imported ${data.imported} tickets`);
         if (data.errors.length > 0) {

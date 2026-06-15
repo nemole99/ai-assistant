@@ -495,7 +495,7 @@ export const evaluationKpiRouter = {
       return updated;
     }),
 
-  updateQualityMonth: managerProcedure
+  updateQualityMonth: protectedProcedure
     .input(monthValueInput)
     .handler(async ({ context, input }) => {
       assertNotPastMonth(input.month);
@@ -506,6 +506,16 @@ export const evaluationKpiRouter = {
         .where(eq(evaluationKpiQuality.id, input.id));
       if (!existing) {
         throw new ORPCError("NOT_FOUND");
+      }
+
+      const { role, id: userId } = context.session.user;
+      if (role === "EMPLOYEE") {
+        const callerEmpId = await resolvePerformedBy(userId);
+        if (!callerEmpId || callerEmpId !== existing.employeeId) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "You can only update your own KPI data",
+          });
+        }
       }
 
       const monthlyValues = {
@@ -571,7 +581,7 @@ export const evaluationKpiRouter = {
       return updated;
     }),
 
-  updateSharingMonth: managerProcedure
+  updateSharingMonth: protectedProcedure
     .input(monthValueInput)
     .handler(async ({ context, input }) => {
       assertNotPastMonth(input.month);
@@ -582,6 +592,16 @@ export const evaluationKpiRouter = {
         .where(eq(evaluationKpiSharing.id, input.id));
       if (!existing) {
         throw new ORPCError("NOT_FOUND");
+      }
+
+      const { role, id: userId } = context.session.user;
+      if (role === "EMPLOYEE") {
+        const callerEmpId = await resolvePerformedBy(userId);
+        if (!callerEmpId || callerEmpId !== existing.employeeId) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "You can only update your own KPI data",
+          });
+        }
       }
 
       const monthlyValues = {

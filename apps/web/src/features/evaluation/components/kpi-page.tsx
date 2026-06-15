@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -24,6 +25,8 @@ import { useState, useMemo, useCallback } from "react";
 
 import { Loader } from "@/components/loader";
 import { MonthPicker } from "@/components/month-picker";
+import { authClient } from "@/lib/auth-client";
+import { orpc } from "@/lib/orpc";
 
 import {
   useKpiProductivity,
@@ -134,6 +137,10 @@ function computeTicketStats(
 
 export function EvaluationKpi() {
   // Default to the latest month that has data; fall back to the current month.
+  const { data: session } = authClient.useSession();
+  const isEmployee = session?.user?.role === "EMPLOYEE";
+  const { data: selfEmployee } = useQuery(orpc.employee.getSelf.queryOptions());
+
   const { data: latest } = useLatestTicketMonth();
   const [month, setMonthOverride] = useMonthWithDefault(latest?.month);
   const [activeTab, setActiveTab] = useState("summary");
@@ -251,153 +258,12 @@ export function EvaluationKpi() {
               </CardContent>
             </Card>
           </div>
-          <CardTitle>Summary KPI — {summary?.length ?? 0} developers</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Tổng hợp Productivity · Quality · Sharing KPI
-          </p>
-          <table className="mt-8 w-full border-collapse text-sm">
-            <thead>
-              <tr>
-                <th
-                  rowSpan={2}
-                  className="border p-2 text-center bg-indigo-900 text-white font-medium w-10"
-                >
-                  #
-                </th>
-                <th
-                  rowSpan={2}
-                  className="border p-2 text-left bg-indigo-900 text-white font-medium"
-                >
-                  Developer
-                </th>
-                <th
-                  rowSpan={2}
-                  className="border p-2 text-left bg-indigo-900 text-white font-medium"
-                >
-                  Project
-                </th>
-                <th
-                  rowSpan={2}
-                  className="border p-2 text-left bg-indigo-900 text-white font-medium"
-                >
-                  Title
-                </th>
-                <th
-                  colSpan={3}
-                  className="border p-2 text-center bg-teal-600 text-white font-medium"
-                >
-                  Target
-                </th>
-                <th
-                  colSpan={3}
-                  className="border p-2 text-center bg-blue-600 text-white font-medium"
-                >
-                  Result
-                </th>
-                <th
-                  rowSpan={2}
-                  className="border p-2 text-left bg-indigo-900 text-white font-medium min-w-40"
-                >
-                  Comment
-                </th>
-              </tr>
-              <tr>
-                <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
-                  Productivity (ticket/day)
-                </th>
-                <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
-                  Re-open (number of bug)
-                </th>
-                <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
-                  Sharing (hours/year)
-                </th>
-                <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
-                  Productivity (ticket/day)
-                </th>
-                <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
-                  Re-open (number of bug)
-                </th>
-                <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
-                  Sharing (hours/year)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(summary ?? []).map((row, idx) => {
-                const prodBelow =
-                  row.resultProductivity !== null &&
-                  row.targetProductivity !== null &&
-                  row.resultProductivity < row.targetProductivity;
-                return (
-                  <tr key={row.id} className="hover:bg-muted/50">
-                    <td className="border p-2 text-center text-muted-foreground">
-                      {idx + 1}
-                    </td>
-                    <td className="border p-2 font-medium">
-                      {row.fullName ?? row.employeeId}
-                    </td>
-                    <td className="border p-2">
-                      {row.projectName ?? row.projectId}
-                    </td>
-                    <td className="border p-2">{row.title ?? "-"}</td>
-                    <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
-                      {row.targetProductivity?.toFixed(2) ?? "-"}
-                    </td>
-                    <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
-                      {row.targetReopen ?? "-"}
-                    </td>
-                    <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
-                      {row.targetSharing?.toFixed(2) ?? "-"}
-                    </td>
-                    <td
-                      className={cn(
-                        "border p-2 text-center bg-blue-50 dark:bg-blue-950/30",
-                        prodBelow &&
-                          "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
-                      )}
-                    >
-                      {row.resultProductivity?.toFixed(2) ?? "-"}
-                    </td>
-                    <td className="border p-2 text-center bg-blue-50 dark:bg-blue-950/30">
-                      {row.resultReopen ?? "-"}
-                    </td>
-                    <td
-                      className={cn(
-                        "border p-2 text-center",
-                        (row.resultSharing ?? 0) > 0
-                          ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400"
-                          : "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
-                      )}
-                    >
-                      {row.resultSharing?.toFixed(2) ?? "0.00"}
-                    </td>
-                    <td className="border p-2 text-sm italic text-muted-foreground">
-                      <EditableTextCell
-                        value={row.comment ?? ""}
-                        onSave={(comment) =>
-                          updateSummaryComment.mutate({
-                            comment,
-                            employeeId: row.employeeId,
-                            projectId: row.projectId,
-                          })
-                        }
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-              {(summary ?? []).length === 0 && (
-                <tr>
-                  <td
-                    colSpan={11}
-                    className="border p-8 text-center text-muted-foreground"
-                  >
-                    No summary KPI data
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <SummaryKpiTable
+            rows={summary ?? []}
+            onSaveComment={(employeeId, projectId, comment) =>
+              updateSummaryComment.mutate({ comment, employeeId, projectId })
+            }
+          />
         </TabsContent>
 
         <TabsContent value="productivity" className="mt-4">
@@ -498,75 +364,23 @@ export function EvaluationKpi() {
         </TabsContent>
 
         <TabsContent value="sharing" className="mt-4">
-          <CardTitle>Sharing KPI</CardTitle>
-          <Table className="mt-8" data-tour="kpi-sharing-cells">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Developer</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Target (h/yr)</TableHead>
-                <TableHead>Result (h)</TableHead>
-                {monthKeys.map((ym) => (
-                  <TableHead
-                    key={ym}
-                    className={monthColClass(
-                      ym,
-                      month,
-                      "text-center capitalize min-w-12"
-                    )}
-                  >
-                    {shortMonthLabel(ym)}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(sharing ?? []).map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-medium">
-                    {row.fullName ?? row.employeeId}
-                  </TableCell>
-                  <TableCell>{row.projectName ?? row.projectId}</TableCell>
-                  <TableCell>{row.target ?? "-"}</TableCell>
-                  <TableCell>{row.result ?? "-"}</TableCell>
-                  {monthKeys.map((ym) => (
-                    <TableCell
-                      key={ym}
-                      className={monthColClass(ym, month, "text-center")}
-                    >
-                      <EditableCell
-                        value={
-                          (row.monthlyValues as Record<string, number>)?.[ym]
-                        }
-                        onSave={(value) =>
-                          updateSharingMonth.mutate({
-                            id: row.id,
-                            month: ym,
-                            value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-              {(sharing ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={4 + monthKeys.length}
-                    className="text-center text-muted-foreground py-8"
-                  >
-                    No sharing KPI data
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <SharingKpiTable
+            activeMonth={month}
+            isEmployee={isEmployee}
+            selfEmployeeId={selfEmployee?.id}
+            monthKeys={monthKeys}
+            onSaveMonth={(id, ym, value) =>
+              updateSharingMonth.mutate({ id, month: ym, value })
+            }
+            rows={sharing ?? []}
+          />
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">
           <QualityKpiTable
             activeMonth={month}
+            isEmployee={isEmployee}
+            selfEmployeeId={selfEmployee?.id}
             monthKeys={monthKeys}
             onSaveMonth={(id, ym, value) =>
               updateQualityMonth.mutate({ id, month: ym, value })
@@ -586,6 +400,284 @@ export function EvaluationKpi() {
 
 // --- Helper components ---
 
+function SummaryKpiTable({
+  rows,
+  onSaveComment,
+}: {
+  rows: {
+    id: string;
+    employeeId: string;
+    projectId: string;
+    fullName: string | null;
+    projectName: string | null;
+    title: string | null;
+    targetProductivity: number | null;
+    targetReopen: number | null;
+    targetSharing: number | null;
+    resultProductivity: number | null;
+    resultReopen: number | null;
+    resultSharing: number | null;
+    comment: string | null;
+  }[];
+  onSaveComment: (
+    employeeId: string,
+    projectId: string,
+    comment: string
+  ) => void;
+}) {
+  return (
+    <>
+      <CardTitle>Summary KPI — {rows.length} developers</CardTitle>
+      <p className="text-sm text-muted-foreground">
+        Tổng hợp Productivity · Quality · Sharing KPI
+      </p>
+      <table className="mt-8 w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            <th
+              rowSpan={2}
+              className="border p-2 text-center bg-indigo-900 text-white font-medium w-10"
+            >
+              #
+            </th>
+            <th
+              rowSpan={2}
+              className="border p-2 text-left bg-indigo-900 text-white font-medium"
+            >
+              Developer
+            </th>
+            <th
+              rowSpan={2}
+              className="border p-2 text-left bg-indigo-900 text-white font-medium"
+            >
+              Project
+            </th>
+            <th
+              rowSpan={2}
+              className="border p-2 text-left bg-indigo-900 text-white font-medium"
+            >
+              Title
+            </th>
+            <th
+              colSpan={3}
+              className="border p-2 text-center bg-teal-600 text-white font-medium"
+            >
+              Target
+            </th>
+            <th
+              colSpan={3}
+              className="border p-2 text-center bg-blue-600 text-white font-medium"
+            >
+              Result
+            </th>
+            <th
+              rowSpan={2}
+              className="border p-2 text-left bg-indigo-900 text-white font-medium min-w-40"
+            >
+              Comment
+            </th>
+          </tr>
+          <tr>
+            <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+              Productivity (ticket/day)
+            </th>
+            <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+              Re-open (number of bug)
+            </th>
+            <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+              Sharing (hours/year)
+            </th>
+            <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+              Productivity (ticket/day)
+            </th>
+            <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+              Re-open (number of bug)
+            </th>
+            <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+              Sharing (hours/year)
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => {
+            const prodBelow =
+              row.resultProductivity !== null &&
+              row.targetProductivity !== null &&
+              row.resultProductivity < row.targetProductivity;
+            return (
+              <tr key={row.id} className="hover:bg-muted/50">
+                <td className="border p-2 text-center text-muted-foreground">
+                  {idx + 1}
+                </td>
+                <td className="border p-2 font-medium">
+                  {row.fullName ?? row.employeeId}
+                </td>
+                <td className="border p-2">
+                  {row.projectName ?? row.projectId}
+                </td>
+                <td className="border p-2">{row.title ?? "-"}</td>
+                <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                  {row.targetProductivity?.toFixed(2) ?? "-"}
+                </td>
+                <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                  {row.targetReopen ?? "-"}
+                </td>
+                <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                  {row.targetSharing?.toFixed(2) ?? "-"}
+                </td>
+                <td
+                  className={cn(
+                    "border p-2 text-center bg-blue-50 dark:bg-blue-950/30",
+                    prodBelow &&
+                      "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
+                  )}
+                >
+                  {row.resultProductivity?.toFixed(2) ?? "-"}
+                </td>
+                <td className="border p-2 text-center bg-blue-50 dark:bg-blue-950/30">
+                  {row.resultReopen ?? "-"}
+                </td>
+                <td
+                  className={cn(
+                    "border p-2 text-center",
+                    (row.resultSharing ?? 0) > 0
+                      ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400"
+                      : "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                  )}
+                >
+                  {row.resultSharing?.toFixed(2) ?? "0.00"}
+                </td>
+                <td className="border p-2 text-sm italic text-muted-foreground">
+                  <EditableTextCell
+                    value={row.comment ?? ""}
+                    onSave={(comment) =>
+                      onSaveComment(row.employeeId, row.projectId, comment)
+                    }
+                  />
+                </td>
+              </tr>
+            );
+          })}
+          {rows.length === 0 && (
+            <tr>
+              <td
+                colSpan={11}
+                className="border p-8 text-center text-muted-foreground"
+              >
+                No summary KPI data
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </>
+  );
+}
+
+interface SharingKpiRow {
+  id: string;
+  employeeId: string;
+  projectId: string;
+  fullName: string | null;
+  projectName: string | null;
+  target: number | null;
+  result: number | null;
+  monthlyValues: unknown;
+}
+
+function SharingKpiTable({
+  activeMonth,
+  isEmployee,
+  selfEmployeeId,
+  monthKeys,
+  onSaveMonth,
+  rows,
+}: {
+  activeMonth: string;
+  isEmployee: boolean;
+  selfEmployeeId: string | undefined;
+  monthKeys: string[];
+  onSaveMonth: (id: string, month: string, value: number) => void;
+  rows: SharingKpiRow[];
+}) {
+  const editableMonth = currentYearMonth();
+  return (
+    <>
+      <CardTitle>Sharing KPI</CardTitle>
+      <p className="text-sm text-muted-foreground">
+        Editable: {shortMonthLabel(editableMonth)}
+      </p>
+      <Table className="mt-8" data-tour="kpi-sharing-cells">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Developer</TableHead>
+            <TableHead>Project</TableHead>
+            <TableHead>Target (h/yr)</TableHead>
+            <TableHead>Result (h)</TableHead>
+            {monthKeys.map((ym) => (
+              <TableHead
+                key={ym}
+                className={monthColClass(
+                  ym,
+                  activeMonth,
+                  "text-center capitalize min-w-12"
+                )}
+              >
+                {shortMonthLabel(ym)}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row) => {
+            const mv = (row.monthlyValues as Record<string, number>) ?? {};
+            const isOtherRow = isEmployee && selfEmployeeId !== row.employeeId;
+            return (
+              <TableRow key={row.id}>
+                <TableCell className="font-medium">
+                  {row.fullName ?? row.employeeId}
+                </TableCell>
+                <TableCell>{row.projectName ?? row.projectId}</TableCell>
+                <TableCell>{row.target ?? "-"}</TableCell>
+                <TableCell>{row.result ?? "-"}</TableCell>
+                {monthKeys.map((ym) => {
+                  const val = mv[ym];
+                  return (
+                    <TableCell
+                      key={ym}
+                      className={monthColClass(ym, activeMonth, "text-center")}
+                    >
+                      {ym === editableMonth ? (
+                        <EditableCell
+                          disabled={isOtherRow}
+                          value={val}
+                          onSave={(value) => onSaveMonth(row.id, ym, value)}
+                        />
+                      ) : (
+                        <span>{val === undefined ? "-" : val}</span>
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+          {rows.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={4 + monthKeys.length}
+                className="text-center text-muted-foreground py-8"
+              >
+                No sharing KPI data
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
+  );
+}
+
 interface QualityKpiRow {
   id: string;
   employeeId: string;
@@ -603,11 +695,15 @@ interface QualityKpiRow {
 /** Quality KPI table — column layout and colors mirror the legacy web app */
 function QualityKpiTable({
   activeMonth,
+  isEmployee,
+  selfEmployeeId,
   monthKeys,
   onSaveMonth,
   rows,
 }: {
   activeMonth: string;
+  isEmployee: boolean;
+  selfEmployeeId: string | undefined;
   monthKeys: string[];
   onSaveMonth: (id: string, month: string, value: number) => void;
   rows: QualityKpiRow[];
@@ -647,6 +743,7 @@ function QualityKpiTable({
         <TableBody>
           {rows.map((row, idx) => {
             const mv = (row.monthlyValues as Record<string, number>) ?? {};
+            const isOtherRow = isEmployee && selfEmployeeId !== row.employeeId;
             return (
               <TableRow key={row.id}>
                 <TableCell className="text-center text-muted-foreground">
@@ -687,6 +784,7 @@ function QualityKpiTable({
                     >
                       {ym === editableMonth ? (
                         <EditableCell
+                          disabled={isOtherRow}
                           value={val}
                           onSave={(value) => onSaveMonth(row.id, ym, value)}
                         />
@@ -716,9 +814,11 @@ function QualityKpiTable({
 }
 
 function EditableCell({
+  disabled,
   value,
   onSave,
 }: {
+  disabled?: boolean;
   value?: number;
   onSave: (v: number) => void;
 }) {
@@ -729,8 +829,17 @@ function EditableCell({
     return (
       <button
         type="button"
-        className="cursor-pointer hover:underline min-w-6 inline-block"
+        className={cn(
+          "min-w-6 inline-block",
+          disabled
+            ? "cursor-not-allowed text-muted-foreground"
+            : "cursor-pointer hover:underline"
+        )}
+        disabled={disabled}
         onClick={() => {
+          if (disabled) {
+            return;
+          }
           setLocalValue(String(value ?? ""));
           setEditing(true);
         }}
