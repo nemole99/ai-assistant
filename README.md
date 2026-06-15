@@ -68,29 +68,17 @@ cp apps/server/.env.example apps/server/.env
 
 Defaults đã match với Docker Compose config — không cần chỉnh cho local dev.
 
-### 3. Start infrastructure (Docker)
+### 3. Set up database
+
+Khởi động PostgreSQL (port `5433`), Redis (port `6379`), MinIO (port `9000`/`9001`), push schema, và seed dữ liệu ban đầu (MinIO bucket, admin account, employees, categories, projects) chỉ với 1 lệnh:
 
 ```bash
-bun run db:start
+bun run db:setup
 ```
 
-Khởi động PostgreSQL (port `5433`), Redis (port `6379`), MinIO (port `9000`/`9001`) via Docker Compose (`packages/db/docker-compose.yml`).
+> Cần chạy riêng từng bước? Dùng `bun run db:start`, `bun run db:push`, `bun run db:seed`.
 
-### 4. Push database schema
-
-```bash
-bun run db:push
-```
-
-### 5. Seed initial data
-
-Tự động tạo MinIO bucket, admin account, sample employees, document categories, và sample projects:
-
-```bash
-bun run db:seed
-```
-
-### 6. Start development
+### 4. Start development
 
 ```bash
 bun run dev
@@ -123,6 +111,7 @@ bun run db:down
 | `bun run dev:server`  | Start server only                         |
 | `bun run build`       | Build all apps for production             |
 | `bun run check-types` | TypeScript type check across all packages |
+| `bun run db:setup`    | Start Docker + push schema + seed data    |
 | `bun run db:start`    | Start Docker infrastructure               |
 | `bun run db:stop`     | Stop Docker containers                    |
 | `bun run db:down`     | Stop + remove volumes                     |

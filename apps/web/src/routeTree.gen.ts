@@ -31,7 +31,6 @@ import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
 import { Route as AuthenticatedEvaluationTimesheetRouteImport } from './routes/_authenticated/evaluation/timesheet'
-import { Route as AuthenticatedEvaluationStatsRouteImport } from './routes/_authenticated/evaluation/stats'
 import { Route as AuthenticatedEvaluationKpiRouteImport } from './routes/_authenticated/evaluation/kpi'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedDocumentsCategoriesRouteImport } from './routes/_authenticated/documents/categories'
@@ -159,12 +158,6 @@ const AuthenticatedEvaluationTimesheetRoute =
     path: '/evaluation/timesheet',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedEvaluationStatsRoute =
-  AuthenticatedEvaluationStatsRouteImport.update({
-    id: '/evaluation/stats',
-    path: '/evaluation/stats',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedEvaluationKpiRoute =
   AuthenticatedEvaluationKpiRouteImport.update({
     id: '/evaluation/kpi',
@@ -210,7 +203,6 @@ export interface FileRoutesByFullPath {
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/evaluation/kpi': typeof AuthenticatedEvaluationKpiRoute
-  '/evaluation/stats': typeof AuthenticatedEvaluationStatsRoute
   '/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
@@ -238,7 +230,6 @@ export interface FileRoutesByTo {
   '/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/evaluation/kpi': typeof AuthenticatedEvaluationKpiRoute
-  '/evaluation/stats': typeof AuthenticatedEvaluationStatsRoute
   '/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
@@ -269,7 +260,6 @@ export interface FileRoutesById {
   '/_authenticated/documents/categories': typeof AuthenticatedDocumentsCategoriesRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/evaluation/kpi': typeof AuthenticatedEvaluationKpiRoute
-  '/_authenticated/evaluation/stats': typeof AuthenticatedEvaluationStatsRoute
   '/_authenticated/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
@@ -300,7 +290,6 @@ export interface FileRouteTypes {
     | '/documents/categories'
     | '/errors/$error'
     | '/evaluation/kpi'
-    | '/evaluation/stats'
     | '/evaluation/timesheet'
     | '/projects/$projectId'
     | '/settings/ai-providers'
@@ -328,7 +317,6 @@ export interface FileRouteTypes {
     | '/documents/categories'
     | '/errors/$error'
     | '/evaluation/kpi'
-    | '/evaluation/stats'
     | '/evaluation/timesheet'
     | '/projects/$projectId'
     | '/settings/ai-providers'
@@ -358,7 +346,6 @@ export interface FileRouteTypes {
     | '/_authenticated/documents/categories'
     | '/_authenticated/errors/$error'
     | '/_authenticated/evaluation/kpi'
-    | '/_authenticated/evaluation/stats'
     | '/_authenticated/evaluation/timesheet'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
@@ -540,13 +527,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEvaluationTimesheetRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/evaluation/stats': {
-      id: '/_authenticated/evaluation/stats'
-      path: '/evaluation/stats'
-      fullPath: '/evaluation/stats'
-      preLoaderRoute: typeof AuthenticatedEvaluationStatsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/evaluation/kpi': {
       id: '/_authenticated/evaluation/kpi'
       path: '/evaluation/kpi'
@@ -614,7 +594,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsCategoriesRoute: typeof AuthenticatedDocumentsCategoriesRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedEvaluationKpiRoute: typeof AuthenticatedEvaluationKpiRoute
-  AuthenticatedEvaluationStatsRoute: typeof AuthenticatedEvaluationStatsRoute
   AuthenticatedEvaluationTimesheetRoute: typeof AuthenticatedEvaluationTimesheetRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedAskAiIndexRoute: typeof AuthenticatedAskAiIndexRoute
@@ -634,7 +613,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsCategoriesRoute: AuthenticatedDocumentsCategoriesRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedEvaluationKpiRoute: AuthenticatedEvaluationKpiRoute,
-  AuthenticatedEvaluationStatsRoute: AuthenticatedEvaluationStatsRoute,
   AuthenticatedEvaluationTimesheetRoute: AuthenticatedEvaluationTimesheetRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedAskAiIndexRoute: AuthenticatedAskAiIndexRoute,

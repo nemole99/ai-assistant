@@ -42,6 +42,7 @@
     "db:generate": "turbo -F @workspace/db db:generate",
     "db:migrate": "turbo -F @workspace/db db:migrate",
     "db:start": "turbo -F @workspace/db db:start",
+    "db:setup": "turbo -F @workspace/db db:setup",
     "db:watch": "turbo -F @workspace/db db:watch",
     "db:stop": "turbo -F @workspace/db db:stop",
     "db:down": "turbo -F @workspace/db db:down",

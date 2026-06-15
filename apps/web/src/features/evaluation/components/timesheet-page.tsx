@@ -1,11 +1,6 @@
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
+import { CardTitle } from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import {
   Select,
@@ -150,8 +145,8 @@ export function EvaluationTimesheet() {
       {isLoading ? (
         <Loader />
       ) : (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+        <>
+          <div className="flex items-center justify-between">
             <CardTitle>
               {month} — {data?.employees.length ?? 0} employees
             </CardTitle>
@@ -181,135 +176,131 @@ export function EvaluationTimesheet() {
                   Add
                 </Button>
               </div>
-            )}
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr>
-                  <th className="border p-1 text-left sticky left-0 bg-background min-w-28">
-                    Name
-                  </th>
-                  {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
-                    (day) => (
-                      <th
-                        key={day}
-                        className={cn(
-                          "border p-1 text-center min-w-7",
-                          !isPastMonth && "cursor-pointer hover:bg-muted",
-                          isPastMonth && "cursor-default",
-                          weekendDays.has(day) &&
-                            "bg-orange-100 dark:bg-orange-950",
-                          holidaySet.has(day) && "bg-red-100 dark:bg-red-950"
-                        )}
-                        onClick={() => handleToggleHoliday(day)}
-                        title={
-                          isPastMonth ? undefined : "Click to toggle holiday"
-                        }
-                      >
-                        {day}
-                      </th>
-                    )
-                  )}
-                  <th className="border p-1 text-center min-w-12">Days</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data?.employees.map((emp) => {
-                  const workingDays = Object.entries(emp.days).filter(
-                    ([, v]) => v === "x"
-                  ).length;
-                  const halfDays = Object.entries(emp.days).filter(
-                    ([, v]) => v === "x/2"
-                  ).length;
-                  const totalDays = workingDays + halfDays * 0.5;
-                  return (
-                    <tr key={emp.employeeId}>
-                      <td className="border p-1 font-medium sticky left-0 bg-background">
-                        {emp.fullName}
-                      </td>
-                      {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
-                        (day) => {
-                          const value = emp.days[day] ?? "";
-                          const isWeekend = weekendDays.has(day);
-                          const isHoliday = holidaySet.has(day);
-                          const isDisabled = isWeekend || isHoliday;
-                          const display = getCellDisplay(value);
-                          return (
-                            <td
-                              key={day}
-                              className={cn(
-                                "border p-1 text-center transition-colors select-none",
-                                isDisabled || isPastMonth
-                                  ? "bg-muted/60 cursor-not-allowed"
-                                  : "cursor-pointer hover:bg-muted/50",
-                                isWeekend &&
-                                  !isHoliday &&
-                                  "bg-orange-50 dark:bg-orange-950/50",
-                                isHoliday && "bg-red-50 dark:bg-red-950/50",
-                                !isDisabled &&
-                                  value === "x" &&
-                                  "bg-green-100 dark:bg-green-950 font-bold text-green-700 dark:text-green-400",
-                                !isDisabled &&
-                                  value === "-" &&
-                                  "bg-blue-100 dark:bg-blue-950 font-bold text-blue-700 dark:text-blue-400",
-                                !isDisabled &&
-                                  value === "x/2" &&
-                                  "bg-yellow-100 dark:bg-yellow-950 font-bold text-yellow-700 dark:text-yellow-400"
-                              )}
-                              onClick={() =>
-                                handleCellClick(emp.employeeId, day)
-                              }
-                              title={
-                                isDisabled
-                                  ? (isHoliday
-                                    ? "Nghỉ lễ"
-                                    : "Cuối tuần")
-                                  : display.title
-                              }
-                            >
-                              {display.label}
-                            </td>
-                          );
-                        }
+            )}{" "}
+          </div>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr>
+                <th className="border p-1 text-left sticky left-0 bg-background min-w-28">
+                  Name
+                </th>
+                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
+                  (day) => (
+                    <th
+                      key={day}
+                      className={cn(
+                        "border p-1 text-center min-w-7",
+                        !isPastMonth && "cursor-pointer hover:bg-muted",
+                        isPastMonth && "cursor-default",
+                        weekendDays.has(day) &&
+                          "bg-orange-100 dark:bg-orange-950",
+                        holidaySet.has(day) && "bg-red-100 dark:bg-red-950"
                       )}
-                      <td className="border p-1 text-center font-bold">
-                        <Badge variant="secondary">{totalDays}</Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {data?.employees.length === 0 && (
-              <p className="text-muted-foreground text-center py-8">
-                No employees yet. Add one above to get started.
-              </p>
-            )}
-            <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-green-100 dark:bg-green-950" />{" "}
-                Đã đi làm (✓)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-yellow-100 dark:bg-yellow-950" />{" "}
-                Nửa ngày (½)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-blue-100 dark:bg-blue-950" />{" "}
-                Nghỉ phép (P)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-orange-50 dark:bg-orange-950/50" />{" "}
-                Cuối tuần
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded border bg-red-50 dark:bg-red-950/50" />{" "}
-                Nghỉ lễ
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+                      onClick={() => handleToggleHoliday(day)}
+                      title={
+                        isPastMonth ? undefined : "Click to toggle holiday"
+                      }
+                    >
+                      {day}
+                    </th>
+                  )
+                )}
+                <th className="border p-1 text-center min-w-12">Days</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.employees.map((emp) => {
+                const workingDays = Object.entries(emp.days).filter(
+                  ([, v]) => v === "x"
+                ).length;
+                const halfDays = Object.entries(emp.days).filter(
+                  ([, v]) => v === "x/2"
+                ).length;
+                const totalDays = workingDays + halfDays * 0.5;
+                return (
+                  <tr key={emp.employeeId}>
+                    <td className="border p-1 font-medium sticky left-0 bg-background">
+                      {emp.fullName}
+                    </td>
+                    {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
+                      (day) => {
+                        const value = emp.days[day] ?? "";
+                        const isWeekend = weekendDays.has(day);
+                        const isHoliday = holidaySet.has(day);
+                        const isDisabled = isWeekend || isHoliday;
+                        const display = getCellDisplay(value);
+                        return (
+                          <td
+                            key={day}
+                            className={cn(
+                              "border p-1 text-center transition-colors select-none",
+                              isDisabled || isPastMonth
+                                ? "bg-muted/60 cursor-not-allowed"
+                                : "cursor-pointer hover:bg-muted/50",
+                              isWeekend &&
+                                !isHoliday &&
+                                "bg-orange-50 dark:bg-orange-950/50",
+                              isHoliday && "bg-red-50 dark:bg-red-950/50",
+                              !isDisabled &&
+                                value === "x" &&
+                                "bg-green-100 dark:bg-green-950 font-bold text-green-700 dark:text-green-400",
+                              !isDisabled &&
+                                value === "-" &&
+                                "bg-blue-100 dark:bg-blue-950 font-bold text-blue-700 dark:text-blue-400",
+                              !isDisabled &&
+                                value === "x/2" &&
+                                "bg-yellow-100 dark:bg-yellow-950 font-bold text-yellow-700 dark:text-yellow-400"
+                            )}
+                            onClick={() => handleCellClick(emp.employeeId, day)}
+                            title={
+                              isDisabled
+                                ? (isHoliday
+                                  ? "Nghỉ lễ"
+                                  : "Cuối tuần")
+                                : display.title
+                            }
+                          >
+                            {display.label}
+                          </td>
+                        );
+                      }
+                    )}
+                    <td className="border p-1 text-center font-bold">
+                      <Badge variant="secondary">{totalDays}</Badge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {data?.employees.length === 0 && (
+            <p className="text-muted-foreground text-center py-8">
+              No employees yet. Add one above to get started.
+            </p>
+          )}
+          <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-4 rounded border bg-green-100 dark:bg-green-950" />{" "}
+              Đã đi làm (✓)
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-4 rounded border bg-yellow-100 dark:bg-yellow-950" />{" "}
+              Nửa ngày (½)
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-4 rounded border bg-blue-100 dark:bg-blue-950" />{" "}
+              Nghỉ phép (P)
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-4 rounded border bg-orange-50 dark:bg-orange-950/50" />{" "}
+              Cuối tuần
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-4 h-4 rounded border bg-red-50 dark:bg-red-950/50" />{" "}
+              Nghỉ lễ
+            </span>
+          </div>
+        </>
       )}
     </ContentLayout>
   );

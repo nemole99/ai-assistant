@@ -250,342 +250,317 @@ export function EvaluationKpi() {
 
         {/* Summary Tab */}
         <TabsContent value="summary" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Summary KPI — {summary?.length ?? 0} developers
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Tổng hợp Productivity · Quality · Sharing KPI
-              </p>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr>
-                    <th
-                      rowSpan={2}
-                      className="border p-2 text-center bg-indigo-900 text-white font-medium w-10"
+          <CardTitle>Summary KPI — {summary?.length ?? 0} developers</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Tổng hợp Productivity · Quality · Sharing KPI
+          </p>
+          <table className="mt-8 w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th
+                  rowSpan={2}
+                  className="border p-2 text-center bg-indigo-900 text-white font-medium w-10"
+                >
+                  #
+                </th>
+                <th
+                  rowSpan={2}
+                  className="border p-2 text-left bg-indigo-900 text-white font-medium"
+                >
+                  Developer
+                </th>
+                <th
+                  rowSpan={2}
+                  className="border p-2 text-left bg-indigo-900 text-white font-medium"
+                >
+                  Project
+                </th>
+                <th
+                  rowSpan={2}
+                  className="border p-2 text-left bg-indigo-900 text-white font-medium"
+                >
+                  Title
+                </th>
+                <th
+                  colSpan={3}
+                  className="border p-2 text-center bg-teal-600 text-white font-medium"
+                >
+                  Target
+                </th>
+                <th
+                  colSpan={3}
+                  className="border p-2 text-center bg-blue-600 text-white font-medium"
+                >
+                  Result
+                </th>
+                <th
+                  rowSpan={2}
+                  className="border p-2 text-left bg-indigo-900 text-white font-medium min-w-40"
+                >
+                  Comment
+                </th>
+              </tr>
+              <tr>
+                <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+                  Productivity (ticket/day)
+                </th>
+                <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+                  Re-open (number of bug)
+                </th>
+                <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+                  Sharing (hours/year)
+                </th>
+                <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+                  Productivity (ticket/day)
+                </th>
+                <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+                  Re-open (number of bug)
+                </th>
+                <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+                  Sharing (hours/year)
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {(summary ?? []).map((row, idx) => {
+                const prodBelow =
+                  row.resultProductivity !== null &&
+                  row.targetProductivity !== null &&
+                  row.resultProductivity < row.targetProductivity;
+                return (
+                  <tr key={row.id} className="hover:bg-muted/50">
+                    <td className="border p-2 text-center text-muted-foreground">
+                      {idx + 1}
+                    </td>
+                    <td className="border p-2 font-medium">
+                      {row.fullName ?? row.employeeId}
+                    </td>
+                    <td className="border p-2">
+                      {row.projectName ?? row.projectId}
+                    </td>
+                    <td className="border p-2">{row.title ?? "-"}</td>
+                    <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                      {row.targetProductivity?.toFixed(2) ?? "-"}
+                    </td>
+                    <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                      {row.targetReopen ?? "-"}
+                    </td>
+                    <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                      {row.targetSharing?.toFixed(2) ?? "-"}
+                    </td>
+                    <td
+                      className={cn(
+                        "border p-2 text-center bg-blue-50 dark:bg-blue-950/30",
+                        prodBelow &&
+                          "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
+                      )}
                     >
-                      #
-                    </th>
-                    <th
-                      rowSpan={2}
-                      className="border p-2 text-left bg-indigo-900 text-white font-medium"
+                      {row.resultProductivity?.toFixed(2) ?? "-"}
+                    </td>
+                    <td className="border p-2 text-center bg-blue-50 dark:bg-blue-950/30">
+                      {row.resultReopen ?? "-"}
+                    </td>
+                    <td
+                      className={cn(
+                        "border p-2 text-center",
+                        (row.resultSharing ?? 0) > 0
+                          ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400"
+                          : "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                      )}
                     >
-                      Developer
-                    </th>
-                    <th
-                      rowSpan={2}
-                      className="border p-2 text-left bg-indigo-900 text-white font-medium"
-                    >
-                      Project
-                    </th>
-                    <th
-                      rowSpan={2}
-                      className="border p-2 text-left bg-indigo-900 text-white font-medium"
-                    >
-                      Title
-                    </th>
-                    <th
-                      colSpan={3}
-                      className="border p-2 text-center bg-teal-600 text-white font-medium"
-                    >
-                      Target
-                    </th>
-                    <th
-                      colSpan={3}
-                      className="border p-2 text-center bg-blue-600 text-white font-medium"
-                    >
-                      Result
-                    </th>
-                    <th
-                      rowSpan={2}
-                      className="border p-2 text-left bg-indigo-900 text-white font-medium min-w-40"
-                    >
-                      Comment
-                    </th>
+                      {row.resultSharing?.toFixed(2) ?? "0.00"}
+                    </td>
+                    <td className="border p-2 text-sm italic text-muted-foreground">
+                      <EditableTextCell
+                        value={row.comment ?? ""}
+                        onSave={(comment) =>
+                          updateSummaryComment.mutate({
+                            comment,
+                            employeeId: row.employeeId,
+                            projectId: row.projectId,
+                          })
+                        }
+                      />
+                    </td>
                   </tr>
-                  <tr>
-                    <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
-                      Productivity (ticket/day)
-                    </th>
-                    <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
-                      Re-open (number of bug)
-                    </th>
-                    <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
-                      Sharing (hours/year)
-                    </th>
-                    <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
-                      Productivity (ticket/day)
-                    </th>
-                    <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
-                      Re-open (number of bug)
-                    </th>
-                    <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
-                      Sharing (hours/year)
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(summary ?? []).map((row, idx) => {
-                    const prodBelow =
-                      row.resultProductivity !== null &&
-                      row.targetProductivity !== null &&
-                      row.resultProductivity < row.targetProductivity;
-                    return (
-                      <tr key={row.id} className="hover:bg-muted/50">
-                        <td className="border p-2 text-center text-muted-foreground">
-                          {idx + 1}
-                        </td>
-                        <td className="border p-2 font-medium">
-                          {row.fullName ?? row.employeeId}
-                        </td>
-                        <td className="border p-2">
-                          {row.projectName ?? row.projectId}
-                        </td>
-                        <td className="border p-2">{row.title ?? "-"}</td>
-                        <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
-                          {row.targetProductivity?.toFixed(2) ?? "-"}
-                        </td>
-                        <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
-                          {row.targetReopen ?? "-"}
-                        </td>
-                        <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
-                          {row.targetSharing?.toFixed(2) ?? "-"}
-                        </td>
-                        <td
-                          className={cn(
-                            "border p-2 text-center bg-blue-50 dark:bg-blue-950/30",
-                            prodBelow &&
-                              "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
-                          )}
-                        >
-                          {row.resultProductivity?.toFixed(2) ?? "-"}
-                        </td>
-                        <td className="border p-2 text-center bg-blue-50 dark:bg-blue-950/30">
-                          {row.resultReopen ?? "-"}
-                        </td>
-                        <td
-                          className={cn(
-                            "border p-2 text-center",
-                            (row.resultSharing ?? 0) > 0
-                              ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400"
-                              : "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
-                          )}
-                        >
-                          {row.resultSharing?.toFixed(2) ?? "0.00"}
-                        </td>
-                        <td className="border p-2 text-sm italic text-muted-foreground">
-                          <EditableTextCell
-                            value={row.comment ?? ""}
-                            onSave={(comment) =>
-                              updateSummaryComment.mutate({
-                                comment,
-                                employeeId: row.employeeId,
-                                projectId: row.projectId,
-                              })
-                            }
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {(summary ?? []).length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={11}
-                        className="border p-8 text-center text-muted-foreground"
-                      >
-                        No summary KPI data
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
+                );
+              })}
+              {(summary ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={11}
+                    className="border p-8 text-center text-muted-foreground"
+                  >
+                    No summary KPI data
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </TabsContent>
 
         <TabsContent value="productivity" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Productivity KPI — {(productivity ?? []).length} developers
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Target: ticket/ngày · Màu: ≥100% xanh lá, ≥80% xanh dương, ≥60%
-                vàng, &lt;60% đỏ
-              </p>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10 text-center">#</TableHead>
-                    <TableHead>Developer</TableHead>
-                    <TableHead>Project</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead className="text-center">Target</TableHead>
-                    {monthKeys.map((ym) => (
-                      <TableHead
-                        key={ym}
-                        className={monthColClass(
-                          ym,
-                          month,
-                          "text-center capitalize min-w-12"
-                        )}
-                      >
-                        {shortMonthLabel(ym)}
-                      </TableHead>
-                    ))}
-                    <TableHead className="text-center min-w-14 font-semibold">
-                      AVG
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(productivity ?? []).map((row, idx) => {
-                    const mv =
-                      (row.monthlyValues as Record<string, number>) ?? {};
-                    const monthValues = monthKeys
-                      .map((k) => mv[k])
-                      .filter((v): v is number => v !== undefined);
-                    const avg =
-                      monthValues.length > 0
-                        ? monthValues.reduce((s, v) => s + v, 0) /
-                          monthValues.length
-                        : null;
-                    return (
-                      <TableRow key={row.id}>
-                        <TableCell className="text-center text-muted-foreground">
-                          {idx + 1}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {row.fullName ?? row.employeeId}
-                        </TableCell>
-                        <TableCell>
-                          {row.projectName ?? row.projectId}
-                        </TableCell>
-                        <TableCell>{row.title ?? "-"}</TableCell>
-                        <TableCell className="text-center">
-                          {row.target?.toFixed(2) ?? "-"}
-                        </TableCell>
-                        {monthKeys.map((ym) => {
-                          const val = mv[ym];
-                          return (
-                            <TableCell
-                              key={ym}
-                              className={monthColClass(
-                                ym,
-                                month,
-                                cn("text-center", kpiCellColor(val, row.target))
-                              )}
-                            >
-                              {val ?? "-"}
-                            </TableCell>
-                          );
-                        })}
+          <CardTitle>
+            Productivity KPI — {(productivity ?? []).length} developers
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Target: ticket/ngày · Màu: ≥100% xanh lá, ≥80% xanh dương, ≥60%
+            vàng, &lt;60% đỏ
+          </p>
+          <Table className="mt-8">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10 text-center">#</TableHead>
+                <TableHead>Developer</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead className="text-center">Target</TableHead>
+                {monthKeys.map((ym) => (
+                  <TableHead
+                    key={ym}
+                    className={monthColClass(
+                      ym,
+                      month,
+                      "text-center capitalize min-w-12"
+                    )}
+                  >
+                    {shortMonthLabel(ym)}
+                  </TableHead>
+                ))}
+                <TableHead className="text-center min-w-14 font-semibold">
+                  AVG
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(productivity ?? []).map((row, idx) => {
+                const mv = (row.monthlyValues as Record<string, number>) ?? {};
+                const monthValues = monthKeys
+                  .map((k) => mv[k])
+                  .filter((v): v is number => v !== undefined);
+                const avg =
+                  monthValues.length > 0
+                    ? monthValues.reduce((s, v) => s + v, 0) /
+                      monthValues.length
+                    : null;
+                return (
+                  <TableRow key={row.id}>
+                    <TableCell className="text-center text-muted-foreground">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {row.fullName ?? row.employeeId}
+                    </TableCell>
+                    <TableCell>{row.projectName ?? row.projectId}</TableCell>
+                    <TableCell>{row.title ?? "-"}</TableCell>
+                    <TableCell className="text-center">
+                      {row.target?.toFixed(2) ?? "-"}
+                    </TableCell>
+                    {monthKeys.map((ym) => {
+                      const val = mv[ym];
+                      return (
                         <TableCell
-                          className={cn(
-                            "text-center font-medium",
-                            kpiCellColor(avg, row.target)
+                          key={ym}
+                          className={monthColClass(
+                            ym,
+                            month,
+                            cn("text-center", kpiCellColor(val, row.target))
                           )}
                         >
-                          {avg === null ? "-" : avg.toFixed(2)}
+                          {val ?? "-"}
                         </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {(productivity ?? []).length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5 + monthKeys.length + 1}
-                        className="text-center text-muted-foreground py-8"
-                      >
-                        No productivity KPI data
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                      );
+                    })}
+                    <TableCell
+                      className={cn(
+                        "text-center font-medium",
+                        kpiCellColor(avg, row.target)
+                      )}
+                    >
+                      {avg === null ? "-" : avg.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {(productivity ?? []).length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={5 + monthKeys.length + 1}
+                    className="text-center text-muted-foreground py-8"
+                  >
+                    No productivity KPI data
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </TabsContent>
 
         <TabsContent value="sharing" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sharing KPI</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Developer</TableHead>
-                    <TableHead>Project</TableHead>
-                    <TableHead>Target (h/yr)</TableHead>
-                    <TableHead>Result (h)</TableHead>
-                    {monthKeys.map((ym) => (
-                      <TableHead
-                        key={ym}
-                        className={monthColClass(
-                          ym,
-                          month,
-                          "text-center capitalize min-w-12"
-                        )}
-                      >
-                        {shortMonthLabel(ym)}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(sharing ?? []).map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell className="font-medium">
-                        {row.fullName ?? row.employeeId}
-                      </TableCell>
-                      <TableCell>{row.projectName ?? row.projectId}</TableCell>
-                      <TableCell>{row.target ?? "-"}</TableCell>
-                      <TableCell>{row.result ?? "-"}</TableCell>
-                      {monthKeys.map((ym) => (
-                        <TableCell
-                          key={ym}
-                          className={monthColClass(ym, month, "text-center")}
-                        >
-                          <EditableCell
-                            value={
-                              (row.monthlyValues as Record<string, number>)?.[
-                                ym
-                              ]
-                            }
-                            onSave={(value) =>
-                              updateSharingMonth.mutate({
-                                id: row.id,
-                                month: ym,
-                                value,
-                              })
-                            }
-                          />
-                        </TableCell>
-                      ))}
-                    </TableRow>
+          <CardTitle>Sharing KPI</CardTitle>
+          <Table className="mt-8">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Developer</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Target (h/yr)</TableHead>
+                <TableHead>Result (h)</TableHead>
+                {monthKeys.map((ym) => (
+                  <TableHead
+                    key={ym}
+                    className={monthColClass(
+                      ym,
+                      month,
+                      "text-center capitalize min-w-12"
+                    )}
+                  >
+                    {shortMonthLabel(ym)}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(sharing ?? []).map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="font-medium">
+                    {row.fullName ?? row.employeeId}
+                  </TableCell>
+                  <TableCell>{row.projectName ?? row.projectId}</TableCell>
+                  <TableCell>{row.target ?? "-"}</TableCell>
+                  <TableCell>{row.result ?? "-"}</TableCell>
+                  {monthKeys.map((ym) => (
+                    <TableCell
+                      key={ym}
+                      className={monthColClass(ym, month, "text-center")}
+                    >
+                      <EditableCell
+                        value={
+                          (row.monthlyValues as Record<string, number>)?.[ym]
+                        }
+                        onSave={(value) =>
+                          updateSharingMonth.mutate({
+                            id: row.id,
+                            month: ym,
+                            value,
+                          })
+                        }
+                      />
+                    </TableCell>
                   ))}
-                  {(sharing ?? []).length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={4 + monthKeys.length}
-                        className="text-center text-muted-foreground py-8"
-                      >
-                        No sharing KPI data
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                </TableRow>
+              ))}
+              {(sharing ?? []).length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={4 + monthKeys.length}
+                    className="text-center text-muted-foreground py-8"
+                  >
+                    No sharing KPI data
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">
@@ -633,114 +608,104 @@ function QualityKpiTable({
 }) {
   const editableMonth = currentYearMonth();
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quality KPI — {rows.length} developers</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Re-open bug counts · Editable: {shortMonthLabel(editableMonth)} · Màu
-          (Re-open number): xanh lá = trong ngân sách, đỏ = vượt quá
-        </p>
-      </CardHeader>
-      <CardContent className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10 text-center">#</TableHead>
-              <TableHead>Developer</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead className="text-center">Re-open (%)</TableHead>
-              <TableHead className="text-center">Re-open (number)</TableHead>
-              <TableHead className="text-center">Result (number)</TableHead>
-              {monthKeys.map((ym) => (
-                <TableHead
-                  key={ym}
-                  className={monthColClass(
-                    ym,
-                    activeMonth,
-                    "text-center capitalize min-w-12"
+    <>
+      <CardTitle>Quality KPI — {rows.length} developers</CardTitle>
+      <p className="text-sm text-muted-foreground">
+        Re-open bug counts · Editable: {shortMonthLabel(editableMonth)} · Màu
+        (Re-open number): xanh lá = trong ngân sách, đỏ = vượt quá
+      </p>
+      <Table className="mt-8">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-10 text-center">#</TableHead>
+            <TableHead>Developer</TableHead>
+            <TableHead>Project</TableHead>
+            <TableHead>Title</TableHead>
+            <TableHead className="text-center">Re-open (%)</TableHead>
+            <TableHead className="text-center">Re-open (number)</TableHead>
+            <TableHead className="text-center">Result (number)</TableHead>
+            {monthKeys.map((ym) => (
+              <TableHead
+                key={ym}
+                className={monthColClass(
+                  ym,
+                  activeMonth,
+                  "text-center capitalize min-w-12"
+                )}
+              >
+                {shortMonthLabel(ym)}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, idx) => {
+            const mv = (row.monthlyValues as Record<string, number>) ?? {};
+            return (
+              <TableRow key={row.id}>
+                <TableCell className="text-center text-muted-foreground">
+                  {idx + 1}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {row.fullName ?? row.employeeId}
+                </TableCell>
+                <TableCell>{row.projectName ?? row.projectId}</TableCell>
+                <TableCell>{row.title ?? "-"}</TableCell>
+                <TableCell className="text-center">
+                  {row.reopenPercent === null
+                    ? "–"
+                    : `${Math.round(row.reopenPercent * 100)}%`}
+                </TableCell>
+                <TableCell
+                  className={cn(
+                    "text-center",
+                    reopenCellColor(
+                      row.reopenNumber,
+                      row.totalByMar,
+                      row.result,
+                      row.reopenPercent
+                    )
                   )}
                 >
-                  {shortMonthLabel(ym)}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row, idx) => {
-              const mv = (row.monthlyValues as Record<string, number>) ?? {};
-              return (
-                <TableRow key={row.id}>
-                  <TableCell className="text-center text-muted-foreground">
-                    {idx + 1}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {row.fullName ?? row.employeeId}
-                  </TableCell>
-                  <TableCell>{row.projectName ?? row.projectId}</TableCell>
-                  <TableCell>{row.title ?? "-"}</TableCell>
-                  <TableCell className="text-center">
-                    {row.reopenPercent === null
-                      ? "–"
-                      : `${Math.round(row.reopenPercent * 100)}%`}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-center",
-                      reopenCellColor(
-                        row.reopenNumber,
-                        row.totalByMar,
-                        row.result,
-                        row.reopenPercent
-                      )
-                    )}
-                  >
-                    {row.reopenNumber ?? "–"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {row.result ?? "–"}
-                  </TableCell>
-                  {monthKeys.map((ym) => {
-                    const val = mv[ym];
-                    return (
-                      <TableCell
-                        key={ym}
-                        className={monthColClass(
-                          ym,
-                          activeMonth,
-                          "text-center"
-                        )}
-                      >
-                        {ym === editableMonth ? (
-                          <EditableCell
-                            value={val}
-                            onSave={(value) => onSaveMonth(row.id, ym, value)}
-                          />
-                        ) : (
-                          <span>
-                            {val === undefined ? "–" : Math.round(val)}
-                          </span>
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-            {rows.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={7 + monthKeys.length}
-                  className="text-center text-muted-foreground py-8"
-                >
-                  No quality KPI data
+                  {row.reopenNumber ?? "–"}
                 </TableCell>
+                <TableCell className="text-center">
+                  {row.result ?? "–"}
+                </TableCell>
+                {monthKeys.map((ym) => {
+                  const val = mv[ym];
+                  return (
+                    <TableCell
+                      key={ym}
+                      className={monthColClass(ym, activeMonth, "text-center")}
+                    >
+                      {ym === editableMonth ? (
+                        <EditableCell
+                          value={val}
+                          onSave={(value) => onSaveMonth(row.id, ym, value)}
+                        />
+                      ) : (
+                        <span>{val === undefined ? "–" : Math.round(val)}</span>
+                      )}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+            );
+          })}
+          {rows.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={7 + monthKeys.length}
+                className="text-center text-muted-foreground py-8"
+              >
+                No quality KPI data
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
   );
 }
 

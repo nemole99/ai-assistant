@@ -15,7 +15,8 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun --env-file ../../apps/server/.env ../../apps/server/src/seed/index.ts",
-    "db:start": "docker compose up -d",
+    "db:start": "docker compose up -d --wait",
+    "db:setup": "docker compose up -d --wait && drizzle-kit push && bun --env-file ../../apps/server/.env ../../apps/server/src/seed/index.ts",
     "db:watch": "docker compose up",
     "db:stop": "docker compose stop",
     "db:down": "docker compose down"

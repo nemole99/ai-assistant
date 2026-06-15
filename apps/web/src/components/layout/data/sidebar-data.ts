@@ -4,7 +4,6 @@ import {
   BookOpen,
   Building2,
   ClipboardCheck,
-  LayoutDashboard,
   Command,
   Contact,
   FolderKanban,
@@ -75,11 +74,6 @@ export const sidebarData: SidebarData = {
               icon: ClipboardCheck,
               title: "Tickets",
               url: "/evaluation",
-            },
-            {
-              icon: LayoutDashboard,
-              title: "Statistics",
-              url: "/evaluation/stats",
             },
             {
               icon: Contact,

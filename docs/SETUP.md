@@ -109,7 +109,7 @@ Open `http://<server-ip>:2103` and log in with the credentials set in `ADMIN_EMA
 
 ### 4. Setup Storage & Seed sample data (optional)
 
-Create the MinIO `documents` bucket, and seed admin account, employees, departments, and projects explicitly:
+Create the MinIO `documents` bucket, and seed admin account, employees, departments, projects, and evaluation data (if `LEGACY_EVALUATION_DATABASE_URL` is set in `.env.docker`):
 
 ```bash
 docker run --rm --network ai-assistant_default --env-file .env.docker ai-assistant-migrate:latest sh -c "cd /app/apps/server && bun src/seed/index.ts"
@@ -134,25 +134,13 @@ Go to **Settings → AI Providers** and connect your GitHub Copilot account via 
 
 ### 1. Infrastructure
 
-Start PostgreSQL with Docker (already configured in `packages/db/docker-compose.yml`):
+Start PostgreSQL, Redis, and MinIO with Docker (already configured in `packages/db/docker-compose.yml`):
 
 ```bash
 bun run db:start
 ```
 
-This starts PostgreSQL on port **5433** (to avoid conflicts with any local Postgres install).
-
-For document processing you also need Redis and MinIO running locally. The quickest way is a one-off `docker run`:
-
-```bash
-# Redis
-docker run -d --name dev-redis -p 6379:6379 redis:7-alpine
-
-# MinIO
-docker run -d --name dev-minio -p 9000:9000 -p 9001:9001 \
-  -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
-  minio/minio server /data --console-address ":9001"
-```
+This starts all three services and waits until they are healthy before returning.
 
 ### 2. Install dependencies
 
@@ -194,19 +182,17 @@ Create `apps/web/.env.local`:
 VITE_SERVER_URL=http://localhost:3000
 ```
 
-### 4. Push database schema
+### 4. Set up the database
+
+Push the schema and seed initial data (MinIO bucket, admin account, employees, categories, projects, and evaluation data) in one command:
 
 ```bash
-bun run db:push
+bun run db:setup
 ```
 
-### 5. Seed initial data (optional)
+> If you only want to push the schema without seeding, run `bun run db:push` instead.
 
-```bash
-bun run db:seed
-```
-
-### 6. Start all services
+### 5. Start all services
 
 ```bash
 bun run dev
