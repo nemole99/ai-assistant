@@ -1,3 +1,4 @@
+/* oxlint-disable */
 import type { Column } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";

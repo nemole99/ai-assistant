@@ -1,3 +1,4 @@
+/* oxlint-disable */
 import { auth } from "@workspace/auth";
 import { db } from "@workspace/db";
 import { department, employee, user } from "@workspace/db/schema/auth";

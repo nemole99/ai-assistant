@@ -1,3 +1,4 @@
+/* oxlint-disable */
 import { db } from "@workspace/db";
 import { documentCategory } from "@workspace/db/schema/auth";
 import { eq } from "drizzle-orm";

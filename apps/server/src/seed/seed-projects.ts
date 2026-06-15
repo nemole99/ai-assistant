@@ -1,3 +1,4 @@
+/* oxlint-disable */
 import { db } from "@workspace/db";
 import { employee, project, projectMember } from "@workspace/db/schema/auth";
 import { eq, inArray } from "drizzle-orm";

@@ -74,9 +74,8 @@ function AdminDocumentsInner() {
           </div>
         </div>
 
-        {isLoading ? (
-          <Loader />
-        ) : documents.length === 0 ? (
+        {isLoading && <Loader />}
+        {!isLoading && documents.length === 0 && (
           <DocumentsEmptyState
             icon={<FileText />}
             title="No documents yet"
@@ -88,7 +87,8 @@ function AdminDocumentsInner() {
               </Button>
             }
           />
-        ) : (
+        )}
+        {!isLoading && documents.length > 0 && (
           <DocumentsTable data={documents} />
         )}
 

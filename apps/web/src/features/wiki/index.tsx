@@ -1,4 +1,3 @@
-// oxlint-disable no-nested-ternary
 // oxlint-disable no-negated-condition
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";

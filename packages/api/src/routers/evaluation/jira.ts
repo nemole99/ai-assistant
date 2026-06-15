@@ -91,7 +91,8 @@ export const evaluationJiraRouter = {
         : 0;
 
       const ticketUrl = `${baseUrl}/browse/${issue.key}`;
-      const prefix = issue.key.match(/^([A-Z][A-Z0-9]+)-/)?.[1];
+      const prefix = issue.key.match(/^(?<prefix>[A-Z][A-Z0-9]+)-/)?.groups
+        ?.prefix;
       const projectName = prefix
         ? (PREFIX_TO_PROJECT[prefix] ?? projectKey)
         : projectKey;
@@ -148,6 +149,7 @@ export const evaluationJiraRouter = {
       const results = { errors: [] as string[], imported: 0, skipped: 0 };
       const performedBy = await resolvePerformedBy(context.session.user.id);
 
+      // oxlint-disable-next-line no-await-in-loop
       for (const ticket of input.tickets) {
         if (!ticket.employeeId) {
           results.skipped++;
@@ -155,6 +157,7 @@ export const evaluationJiraRouter = {
         }
 
         try {
+          // oxlint-disable-next-line no-await-in-loop
           await assertEmployeeActive(ticket.employeeId);
         } catch {
           results.errors.push(
@@ -163,6 +166,7 @@ export const evaluationJiraRouter = {
           continue;
         }
 
+        // oxlint-disable-next-line no-await-in-loop
         const [dup] = await db
           .select({ id: evaluationTicket.id })
           .from(evaluationTicket)
@@ -173,12 +177,14 @@ export const evaluationJiraRouter = {
         }
 
         const id = crypto.randomUUID();
+        // oxlint-disable-next-line no-await-in-loop
         await db.insert(evaluationTicket).values({
           id,
           ...ticket,
           employeeId: ticket.employeeId,
         });
 
+        // oxlint-disable-next-line no-await-in-loop
         await writeAudit({
           action: "IMPORT_TICKET",
           details: {

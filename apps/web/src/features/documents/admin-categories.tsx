@@ -107,9 +107,8 @@ export function AdminDocumentCategories() {
           </div>
         </div>
 
-        {isLoading ? (
-          <Loader />
-        ) : categories.length === 0 ? (
+        {isLoading && <Loader />}
+        {!isLoading && categories.length === 0 && (
           <DocumentsEmptyState
             icon={<Tag />}
             title="No categories yet"
@@ -127,7 +126,8 @@ export function AdminDocumentCategories() {
               </Button>
             }
           />
-        ) : (
+        )}
+        {!isLoading && categories.length > 0 && (
           <Table>
             <TableHeader>
               <TableRow>

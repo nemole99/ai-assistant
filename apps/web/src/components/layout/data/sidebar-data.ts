@@ -15,7 +15,6 @@ import {
   Settings,
   UserCog,
   Wrench,
-  LayoutDashboard,
 } from "lucide-react";
 
 import type { SidebarData } from "../types";

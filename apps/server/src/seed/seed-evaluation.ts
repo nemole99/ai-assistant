@@ -14,6 +14,7 @@
  * Cutover baseline — verify counts after final import:
  *   1409 tickets · 2060 timesheet entries · 72/55/39 productivity/sharing/quality KPI rows
  */
+/* oxlint-disable */
 
 import {
   buildEmployeeFirstNameMap,

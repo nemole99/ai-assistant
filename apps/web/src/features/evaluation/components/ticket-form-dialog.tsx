@@ -34,6 +34,7 @@ interface TicketFormDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// oxlint-disable-next-line complexity
 export function TicketFormDialog({
   currentRow,
   open,
@@ -62,6 +63,7 @@ export function TicketFormDialog({
       totalEffort: currentRow?.totalEffort ?? 16,
     },
     onSubmit: async ({ value }) => {
+      // oxlint-disable-next-line prefer-ternary
       if (isEdit) {
         await updateTicket.mutateAsync({
           data: {
@@ -108,7 +110,7 @@ export function TicketFormDialog({
         totalEffort: currentRow?.totalEffort ?? 16,
       });
     }
-  }, [open, currentRow]);
+  }, [open, currentRow, form]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

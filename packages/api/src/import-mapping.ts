@@ -265,9 +265,10 @@ export function normalizeDate(raw: unknown): string | null {
   }
 
   // MM/DD/YYYY [HH:mm:ss]
-  const mmddyyyy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (mmddyyyy) {
-    return `${mmddyyyy[3]}-${String(mmddyyyy[1]).padStart(2, "0")}-${String(mmddyyyy[2]).padStart(2, "0")}`;
+  const mmddyyyy = str.match(/^(?<m>\d{1,2})\/(?<d>\d{1,2})\/(?<y>\d{4})/);
+  if (mmddyyyy?.groups) {
+    const { d, m, y } = mmddyyyy.groups;
+    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
   }
 
   return null;

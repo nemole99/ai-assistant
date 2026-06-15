@@ -18,6 +18,7 @@ import {
 
 const route = getRouteApi("/_authenticated/evaluation/");
 
+// oxlint-disable-next-line complexity
 export function EvaluationTickets() {
   const search = route.useSearch();
   const navigate = route.useNavigate();

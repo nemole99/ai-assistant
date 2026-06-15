@@ -35,9 +35,8 @@ export function Departments() {
           </div>
           <DepartmentsPrimaryButtons />
         </div>
-        {isLoading ? (
-          <Loader />
-        ) : departments.length === 0 ? (
+        {isLoading && <Loader />}
+        {!isLoading && departments.length === 0 && (
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -53,7 +52,8 @@ export function Departments() {
               <DepartmentsPrimaryButtons />
             </EmptyContent>
           </Empty>
-        ) : (
+        )}
+        {!isLoading && departments.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {departments.map((department) => (
               <DepartmentCard key={department.id} department={department} />

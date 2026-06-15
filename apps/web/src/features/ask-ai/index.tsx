@@ -1,4 +1,3 @@
-// oxlint-disable no-nested-ternary
 import { useChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
 import { env } from "@workspace/env/web";

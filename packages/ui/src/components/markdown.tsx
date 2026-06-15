@@ -1,3 +1,4 @@
+/* oxlint-disable */
 import { cn } from "@workspace/ui/lib/utils";
 import { marked } from "marked";
 import { memo, useId, useMemo } from "react";

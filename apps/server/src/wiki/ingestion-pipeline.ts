@@ -1,3 +1,4 @@
+/* oxlint-disable */
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import {

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { writeFile, unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 
 import { db } from "@workspace/db";
 import { document, systemAiConfig } from "@workspace/db/schema/auth";
@@ -32,7 +32,7 @@ async function processDocument(documentId: string): Promise<void> {
     return;
   }
 
-  const tempPath = join(tmpdir(), `doc-${documentId}.pdf`);
+  const tempPath = path.join(tmpdir(), `doc-${documentId}.pdf`);
 
   try {
     console.log(`[worker] Downloading ${doc.objectKey}...`);

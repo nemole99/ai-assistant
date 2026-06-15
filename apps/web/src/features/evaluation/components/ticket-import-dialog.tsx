@@ -113,8 +113,9 @@ export function TicketImportDialog({
             Download Template
           </Button>
 
-          <div
-            className="flex cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed p-6 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          <button
+            type="button"
+            className="flex cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed p-6 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors w-full"
             onClick={() => fileRef.current?.click()}
           >
             <Upload size={20} />
@@ -130,7 +131,7 @@ export function TicketImportDialog({
               className="hidden"
               onChange={handleFileChange}
             />
-          </div>
+          </button>
 
           {parseErrors.length > 0 && (
             <ul className="space-y-1 rounded-md bg-destructive/10 p-3 text-xs text-destructive">

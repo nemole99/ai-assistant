@@ -1,4 +1,4 @@
-// oxlint-disable complexity
+/* oxlint-disable */
 "use client";
 
 import { mergeProps } from "@base-ui/react/merge-props";

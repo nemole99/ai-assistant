@@ -6,7 +6,7 @@ import { insertIssueSchema } from "@workspace/db/schema/validation";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
-import { adminProcedure, managerProcedure, protectedProcedure } from "../index";
+import { managerProcedure, protectedProcedure } from "../index";
 
 const issueListItemSchema = z.object({
   commentCount: z.number(),
@@ -136,7 +136,7 @@ export const issueRouter = {
 
   list: protectedProcedure
     .output(z.array(issueListItemSchema))
-    .handler(async ({ context }) => {
+    .handler(({ context }) => {
       const userId = context.session.user.id;
 
       return db

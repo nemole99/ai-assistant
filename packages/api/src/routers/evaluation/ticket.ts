@@ -5,7 +5,7 @@ import { evaluationTicket } from "@workspace/db/schema/evaluation";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
-import { managerProcedure, protectedProcedure } from "../../index";
+import { protectedProcedure } from "../../index";
 import {
   assertEmployeeActive,
   resolvePerformedBy,
@@ -310,6 +310,7 @@ export const evaluationTicketRouter = {
       for (const ticket of input.tickets) {
         const resolvedEmployeeId = selfEmployeeId ?? ticket.employeeId;
 
+        // oxlint-disable-next-line no-await-in-loop
         const [dup] = await db
           .select({ id: evaluationTicket.id })
           .from(evaluationTicket)
@@ -320,10 +321,12 @@ export const evaluationTicketRouter = {
         }
 
         const id = crypto.randomUUID();
+        // oxlint-disable-next-line no-await-in-loop
         await db
           .insert(evaluationTicket)
           .values({ id, ...ticket, employeeId: resolvedEmployeeId });
 
+        // oxlint-disable-next-line no-await-in-loop
         await writeAudit({
           action: "IMPORT_TICKET",
           details: { ticketId: id, ticketUrl: ticket.ticketUrl },
@@ -365,6 +368,7 @@ export const evaluationTicketRouter = {
         })
         .optional()
     )
+    // oxlint-disable-next-line complexity
     .handler(async ({ input }) => {
       const page = input?.page ?? 1;
       const limit = input?.limit ?? 50;

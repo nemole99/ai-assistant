@@ -321,6 +321,18 @@ function LayoutConfig() {
   );
 }
 
+const IconDirLtr = (props: SVGProps<SVGSVGElement>) => (
+  <IconDir dir="ltr" {...props} />
+);
+const IconDirRtl = (props: SVGProps<SVGSVGElement>) => (
+  <IconDir dir="rtl" {...props} />
+);
+
+const DIR_OPTIONS = [
+  { icon: IconDirLtr, label: "Left to Right", value: "ltr" },
+  { icon: IconDirRtl, label: "Right to Left", value: "rtl" },
+];
+
 function DirConfig() {
   const { defaultDir, dir, setDir } = useDirection();
   return (
@@ -338,22 +350,7 @@ function DirConfig() {
         aria-label="Select site direction"
         aria-describedby="direction-description"
       >
-        {[
-          {
-            icon: (props: SVGProps<SVGSVGElement>) => (
-              <IconDir dir="ltr" {...props} />
-            ),
-            label: "Left to Right",
-            value: "ltr",
-          },
-          {
-            icon: (props: SVGProps<SVGSVGElement>) => (
-              <IconDir dir="rtl" {...props} />
-            ),
-            label: "Right to Left",
-            value: "rtl",
-          },
-        ].map((item) => (
+        {DIR_OPTIONS.map((item) => (
           <RadioGroupItem key={item.value} item={item} />
         ))}
       </Radio>

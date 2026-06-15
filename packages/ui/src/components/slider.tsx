@@ -1,4 +1,3 @@
-// oxlint-disable no-nested-ternary
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 import { cn } from "@workspace/ui/lib/utils";
 

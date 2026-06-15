@@ -98,9 +98,8 @@ export function Issues() {
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">
-          {isLoading ? (
-            <Loader />
-          ) : filtered.length === 0 ? (
+          {isLoading && <Loader />}
+          {!isLoading && filtered.length === 0 && (
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -114,7 +113,8 @@ export function Issues() {
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
-          ) : (
+          )}
+          {!isLoading && filtered.length > 0 && (
             <div className="border-border divide-border divide-y border">
               {filtered.map((issue) => {
                 const canDelete = isAdmin || issue.reporterId === currentUserId;

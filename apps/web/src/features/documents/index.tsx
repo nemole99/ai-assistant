@@ -115,9 +115,8 @@ export function Documents() {
         ))}
       </div>
 
-      {isLoading ? (
-        <Loader />
-      ) : documents.length === 0 ? (
+      {isLoading && <Loader />}
+      {!isLoading && documents.length === 0 && (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -146,7 +145,8 @@ export function Documents() {
             </EmptyContent>
           )}
         </Empty>
-      ) : (
+      )}
+      {!isLoading && documents.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {documents.map((doc) => (
             <Link
