@@ -436,64 +436,64 @@ function SummaryKpiTable({
           <tr>
             <th
               rowSpan={2}
-              className="border p-2 text-center bg-indigo-900 text-white font-medium w-10"
+              className="border p-2 text-center bg-primary text-primary-foreground font-medium w-10"
             >
               #
             </th>
             <th
               rowSpan={2}
-              className="border p-2 text-left bg-indigo-900 text-white font-medium"
+              className="border p-2 text-left bg-primary text-primary-foreground font-medium"
             >
               Developer
             </th>
             <th
               rowSpan={2}
-              className="border p-2 text-left bg-indigo-900 text-white font-medium"
+              className="border p-2 text-left bg-primary text-primary-foreground font-medium"
             >
               Project
             </th>
             <th
               rowSpan={2}
-              className="border p-2 text-left bg-indigo-900 text-white font-medium"
+              className="border p-2 text-left bg-primary text-primary-foreground font-medium"
             >
               Title
             </th>
             <th
               colSpan={3}
-              className="border p-2 text-center bg-teal-600 text-white font-medium"
+              className="border p-2 text-center bg-chart-2 text-white font-medium"
             >
               Target
             </th>
             <th
               colSpan={3}
-              className="border p-2 text-center bg-blue-600 text-white font-medium"
+              className="border p-2 text-center bg-chart-4 text-white font-medium"
             >
               Result
             </th>
             <th
               rowSpan={2}
-              className="border p-2 text-left bg-indigo-900 text-white font-medium min-w-40"
+              className="border p-2 text-left bg-primary text-primary-foreground font-medium min-w-40"
             >
               Comment
             </th>
           </tr>
           <tr>
-            <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+            <th className="border p-2 text-center bg-chart-2 text-white text-xs font-medium">
               Productivity (ticket/day)
             </th>
-            <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+            <th className="border p-2 text-center bg-chart-2 text-white text-xs font-medium">
               Re-open (number of bug)
             </th>
-            <th className="border p-2 text-center bg-teal-600 text-white text-xs font-medium">
+            <th className="border p-2 text-center bg-chart-2 text-white text-xs font-medium">
               Sharing (hours/year)
             </th>
-            <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+            <th className="border p-2 text-center bg-chart-4 text-white text-xs font-medium">
               Productivity (ticket/day)
             </th>
-            <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+            <th className="border p-2 text-center bg-chart-4 text-white text-xs font-medium">
               Re-open (number of bug)
             </th>
-            <th className="border p-2 text-center bg-blue-600 text-white text-xs font-medium">
+            <th className="border p-2 text-center bg-chart-4 text-white text-xs font-medium">
               Sharing (hours/year)
             </th>
           </tr>
@@ -516,25 +516,25 @@ function SummaryKpiTable({
                   {row.projectName ?? row.projectId}
                 </td>
                 <td className="border p-2">{row.title ?? "-"}</td>
-                <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                <td className="border p-2 text-center bg-chart-2/10">
                   {row.targetProductivity?.toFixed(2) ?? "-"}
                 </td>
-                <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                <td className="border p-2 text-center bg-chart-2/10">
                   {row.targetReopen ?? "-"}
                 </td>
-                <td className="border p-2 text-center bg-green-50 dark:bg-green-950/30">
+                <td className="border p-2 text-center bg-chart-2/10">
                   {row.targetSharing?.toFixed(2) ?? "-"}
                 </td>
                 <td
                   className={cn(
-                    "border p-2 text-center bg-blue-50 dark:bg-blue-950/30",
+                    "border p-2 text-center bg-chart-4/10",
                     prodBelow &&
                       "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
                   )}
                 >
                   {row.resultProductivity?.toFixed(2) ?? "-"}
                 </td>
-                <td className="border p-2 text-center bg-blue-50 dark:bg-blue-950/30">
+                <td className="border p-2 text-center bg-chart-4/10">
                   {row.resultReopen ?? "-"}
                 </td>
                 <td
