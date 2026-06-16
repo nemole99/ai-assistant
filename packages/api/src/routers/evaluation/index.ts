@@ -1,12 +1,12 @@
 import { evaluationAuditRouter } from "./audit";
-import { evaluationJiraRouter } from "./jira";
+import { evaluationJiraSyncRouter } from "./jira-sync";
 import { evaluationKpiRouter } from "./kpi";
 import { evaluationTicketRouter } from "./ticket";
 import { evaluationTimesheetRouter } from "./timesheet";
 
 export const evaluationRouter = {
   audit: evaluationAuditRouter,
-  jira: evaluationJiraRouter,
+  jiraSync: evaluationJiraSyncRouter,
   kpi: evaluationKpiRouter,
   ticket: evaluationTicketRouter,
   timesheet: evaluationTimesheetRouter,

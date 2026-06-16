@@ -13,6 +13,7 @@ import {
   LibraryBig,
   ServerCog,
   Settings,
+  TicketCheck,
   UserCog,
   Wrench,
 } from "lucide-react";
@@ -85,6 +86,11 @@ export const sidebarData: SidebarData = {
               icon: Wrench,
               title: "AI Providers",
               url: "/settings/ai-providers",
+            },
+            {
+              icon: TicketCheck,
+              title: "Jira",
+              url: "/settings/jira",
             },
             {
               icon: KeyRound,

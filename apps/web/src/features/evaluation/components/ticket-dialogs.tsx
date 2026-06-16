@@ -4,12 +4,15 @@ import { useDeleteTicket } from "../hooks/use-tickets";
 import { useTicketsContext } from "./ticket-context";
 import { TicketFormDialog } from "./ticket-form-dialog";
 import { TicketImportDialog } from "./ticket-import-dialog";
+import { TicketSyncDialog } from "./ticket-sync-dialog";
 
 export function TicketDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useTicketsContext();
   const deleteTicket = useDeleteTicket();
 
-  const closeAndClear = (type: "add" | "edit" | "delete" | "import") => {
+  const closeAndClear = (
+    type: "add" | "edit" | "delete" | "import" | "sync"
+  ) => {
     setOpen(type);
     setTimeout(() => setCurrentRow(null), 500);
   };
@@ -35,6 +38,12 @@ export function TicketDialogs() {
         key="ticket-import"
         open={open === "import"}
         onOpenChange={() => closeAndClear("import")}
+      />
+
+      <TicketSyncDialog
+        key="ticket-sync"
+        open={open === "sync"}
+        onOpenChange={() => closeAndClear("sync")}
       />
 
       {currentRow && (

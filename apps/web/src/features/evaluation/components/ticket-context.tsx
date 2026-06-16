@@ -4,7 +4,7 @@ import useDialogState from "@/hooks/use-dialog-state";
 
 import type { EvaluationTicket } from "../data/schema";
 
-type TicketDialogType = "add" | "edit" | "delete" | "import";
+type TicketDialogType = "add" | "edit" | "delete" | "import" | "sync";
 
 interface TicketsContextType {
   open: TicketDialogType | null;

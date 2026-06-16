@@ -1,6 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
 import { Separator } from "@workspace/ui/components/separator";
-import { Bot, KeyRound, ServerCog, UserCog } from "lucide-react";
+import { Bot, KeyRound, ServerCog, TicketCheck, UserCog } from "lucide-react";
 
 import { ContentLayout } from "@/components/layout/content-layout";
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +17,11 @@ const baseNavItems = [
     href: "/settings/ai-providers",
     icon: <Bot size={18} />,
     title: "AI Providers",
+  },
+  {
+    href: "/settings/jira",
+    icon: <TicketCheck size={18} />,
+    title: "Jira",
   },
   {
     href: "/settings/password",

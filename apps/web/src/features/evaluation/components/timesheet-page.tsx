@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { CardTitle } from "@workspace/ui/components/card";
@@ -16,7 +15,6 @@ import { useState, useMemo } from "react";
 import { Loader } from "@/components/loader";
 import { MonthPicker } from "@/components/month-picker";
 import { authClient } from "@/lib/auth-client";
-import { orpc } from "@/lib/orpc";
 
 import { useMonthWithDefault } from "../hooks/use-month";
 import {
@@ -27,8 +25,6 @@ import {
   useTimesheetEmployees,
   useLatestTimesheetMonth,
 } from "../hooks/use-timesheet";
-import { useTour } from "../hooks/use-tour";
-import { TimesheetTour } from "./evaluation-tour";
 
 const CELL_STATES = ["", "x", "x/2", "-"] as const;
 type CellState = (typeof CELL_STATES)[number];
@@ -41,16 +37,16 @@ function getNextCellState(current: string): CellState {
 function getCellDisplay(value: string) {
   switch (value) {
     case "x": {
-      return { label: "✓", title: "Đã đi làm" };
+      return { label: "✓", title: "Present" };
     }
     case "x/2": {
-      return { label: "½", title: "Nửa ngày" };
+      return { label: "½", title: "Half day" };
     }
     case "-": {
-      return { label: "P", title: "Nghỉ phép" };
+      return { label: "P", title: "On leave" };
     }
     default: {
-      return { label: "", title: "Chưa đi làm" };
+      return { label: "", title: "Absent" };
     }
   }
 }
@@ -58,13 +54,11 @@ function getCellDisplay(value: string) {
 export function EvaluationTimesheet() {
   // Default to the latest month that has data; fall back to the current month.
   const { data: session } = authClient.useSession();
-  const isEmployee = session?.user?.role === "EMPLOYEE";
-  const { data: selfEmployee } = useQuery(orpc.employee.getSelf.queryOptions());
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const { data: latest } = useLatestTimesheetMonth();
   const [month, setMonthOverride] = useMonthWithDefault(latest?.month);
   const [newEmployeeId, setNewEmployeeId] = useState("");
-  const { open, setOpen } = useTour("timesheet");
 
   const { data, isLoading } = useTimesheetMonth(month);
   const { data: activeEmployees = [] } = useTimesheetEmployees();
@@ -98,10 +92,12 @@ export function EvaluationTimesheet() {
   }, [month]);
 
   const handleCellClick = (employeeId: string, day: number) => {
-    if (isPastMonth || weekendDays.has(day) || holidaySet.has(day)) {
-      return;
-    }
-    if (isEmployee && selfEmployee?.id !== employeeId) {
+    if (
+      !isAdmin ||
+      isPastMonth ||
+      weekendDays.has(day) ||
+      holidaySet.has(day)
+    ) {
       return;
     }
     const currentValue =
@@ -119,7 +115,7 @@ export function EvaluationTimesheet() {
   };
 
   const handleToggleHoliday = (day: number) => {
-    if (isPastMonth || isEmployee) {
+    if (!isAdmin || isPastMonth) {
       return;
     }
     const current = data?.holidays ?? [];
@@ -159,7 +155,7 @@ export function EvaluationTimesheet() {
             <CardTitle>
               {month} — {data?.employees.length ?? 0} employees
             </CardTitle>
-            {!isPastMonth && !isEmployee && (
+            {!isPastMonth && isAdmin && (
               <div className="flex items-center gap-2">
                 <Select
                   items={availableEmployees.map((e) => ({
@@ -243,38 +239,39 @@ export function EvaluationTimesheet() {
                         const value = emp.days[day] ?? "";
                         const isWeekend = weekendDays.has(day);
                         const isHoliday = holidaySet.has(day);
-                        const isOtherRow =
-                          isEmployee && selfEmployee?.id !== emp.employeeId;
-                        const isDisabled = isWeekend || isHoliday || isOtherRow;
+                        const isStructural = isWeekend || isHoliday;
+                        const canClick =
+                          isAdmin && !isPastMonth && !isStructural;
                         const display = getCellDisplay(value);
                         return (
                           <td
                             key={day}
                             className={cn(
                               "border p-1 text-center transition-colors select-none",
-                              isDisabled || isPastMonth
-                                ? "bg-muted/60 cursor-not-allowed"
-                                : "cursor-pointer hover:bg-muted/50",
+                              canClick
+                                ? "cursor-pointer hover:bg-muted/50"
+                                : "cursor-default",
+                              isStructural && "bg-muted/60",
                               isWeekend &&
                                 !isHoliday &&
                                 "bg-orange-50 dark:bg-orange-950/50",
                               isHoliday && "bg-red-50 dark:bg-red-950/50",
-                              !isDisabled &&
+                              !isStructural &&
                                 value === "x" &&
                                 "bg-green-100 dark:bg-green-950 font-bold text-green-700 dark:text-green-400",
-                              !isDisabled &&
+                              !isStructural &&
                                 value === "-" &&
                                 "bg-blue-100 dark:bg-blue-950 font-bold text-blue-700 dark:text-blue-400",
-                              !isDisabled &&
+                              !isStructural &&
                                 value === "x/2" &&
                                 "bg-yellow-100 dark:bg-yellow-950 font-bold text-yellow-700 dark:text-yellow-400"
                             )}
                             onClick={() => handleCellClick(emp.employeeId, day)}
                             title={
-                              isDisabled
+                              isStructural
                                 ? isHoliday
-                                  ? "Nghỉ lễ"
-                                  : "Cuối tuần"
+                                  ? "Public holiday"
+                                  : "Weekend"
                                 : display.title
                             }
                           >
@@ -299,28 +296,27 @@ export function EvaluationTimesheet() {
           <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <span className="inline-block w-4 h-4 rounded border bg-green-100 dark:bg-green-950" />{" "}
-              Đã đi làm (✓)
+              Present (✓)
             </span>
             <span className="flex items-center gap-1">
               <span className="inline-block w-4 h-4 rounded border bg-yellow-100 dark:bg-yellow-950" />{" "}
-              Nửa ngày (½)
+              Half day (½)
             </span>
             <span className="flex items-center gap-1">
               <span className="inline-block w-4 h-4 rounded border bg-blue-100 dark:bg-blue-950" />{" "}
-              Nghỉ phép (P)
+              On leave (P)
             </span>
             <span className="flex items-center gap-1">
               <span className="inline-block w-4 h-4 rounded border bg-orange-50 dark:bg-orange-950/50" />{" "}
-              Cuối tuần
+              Weekend
             </span>
             <span className="flex items-center gap-1">
               <span className="inline-block w-4 h-4 rounded border bg-red-50 dark:bg-red-950/50" />{" "}
-              Nghỉ lễ
+              Public holiday
             </span>
           </div>
         </>
       )}
-      <TimesheetTour open={open} onOpenChange={setOpen} />
     </>
   );
 }

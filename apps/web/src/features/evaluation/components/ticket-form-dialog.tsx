@@ -116,9 +116,7 @@ export function TicketFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Edit Ticket" : "Nhập dữ liệu mới"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Ticket" : "New Entry"}</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -143,7 +141,7 @@ export function TicketFormDialog({
                       onValueChange={(v) => field.handleChange(v ?? "")}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Chọn developer" />
+                        <SelectValue placeholder="Select developer" />
                       </SelectTrigger>
                       <SelectContent>
                         {developers.map((dev) => (
@@ -170,7 +168,7 @@ export function TicketFormDialog({
                     onValueChange={(v) => field.handleChange(v ?? "")}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Chọn project" />
+                      <SelectValue placeholder="Select project" />
                     </SelectTrigger>
                     <SelectContent>
                       {projects.map((proj) => (
@@ -201,7 +199,7 @@ export function TicketFormDialog({
                   }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="-- Chọn --" />
+                    <SelectValue placeholder="-- Select --" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="bug">Bug</SelectItem>
@@ -269,7 +267,7 @@ export function TicketFormDialog({
                 <Label htmlFor="comment">Comment</Label>
                 <Input
                   id="comment"
-                  placeholder="Ghi chú (tuỳ chọn)"
+                  placeholder="Note (optional)"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
@@ -289,10 +287,10 @@ export function TicketFormDialog({
               {isPending
                 ? isEdit
                   ? "Saving..."
-                  : "Đang tạo..."
+                  : "Creating..."
                 : isEdit
                   ? "Save"
-                  : "Tạo ticket"}
+                  : "Create ticket"}
             </Button>
           </DialogFooter>
         </form>

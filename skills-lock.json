@@ -7,6 +7,12 @@
       "skillPath": "skills/productivity/caveman/SKILL.md",
       "computedHash": "536908fcfcb232600a5875aa85f1fd50fd13305e9d67379bcd95f07c8c916f3f"
     },
+    "color-palette": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/design-assets/skills/color-palette/SKILL.md",
+      "computedHash": "ca6093803bc93cfe329d8121c9ac066a8870c88d0d9ece6a1c3118d86af57943"
+    },
     "diagnose": {
       "source": "mattpocock/skills",
       "sourceType": "github",

@@ -64,7 +64,7 @@ export function EvaluationTickets() {
             <div data-tour="month-picker">
               <MonthPicker value={month} onChange={handleMonthChange} />
             </div>
-            <TicketPrimaryButtons month={month} />
+            <TicketPrimaryButtons />
           </div>
         </div>
         {isLoading ? (

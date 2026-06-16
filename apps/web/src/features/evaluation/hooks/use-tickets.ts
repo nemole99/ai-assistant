@@ -162,6 +162,83 @@ export function useImportTickets() {
   );
 }
 
+export function useJiraConfig() {
+  return useQuery(orpc.evaluation.jiraSync.getConfig.queryOptions());
+}
+
+export function useSaveJiraConfig() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    orpc.evaluation.jiraSync.saveConfig.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message || "Failed to save Jira config");
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.jiraSync.getConfig.queryOptions().queryKey,
+        });
+        toast.success("Jira PAT saved");
+      },
+    })
+  );
+}
+
+export function useDeleteJiraConfig() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    orpc.evaluation.jiraSync.deleteConfig.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message || "Failed to remove Jira config");
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.jiraSync.getConfig.queryOptions().queryKey,
+        });
+        toast.success("Jira PAT removed");
+      },
+    })
+  );
+}
+
+export function useFetchJiraTickets() {
+  return useMutation(
+    orpc.evaluation.jiraSync.fetchTickets.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message || "Failed to fetch Jira tickets");
+      },
+    })
+  );
+}
+
+export function useSubmitJiraTickets() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    orpc.evaluation.jiraSync.submitTickets.mutationOptions({
+      onError: (error) => {
+        toast.error(error.message || "Failed to sync Jira tickets");
+      },
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.ticket.list.queryOptions().queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: orpc.evaluation.kpi.listSummary.queryOptions().queryKey,
+          refetchType: "all",
+        });
+        queryClient.invalidateQueries({
+          queryKey:
+            orpc.evaluation.kpi.listProductivity.queryOptions().queryKey,
+          refetchType: "all",
+        });
+        toast.success(`Synced ${data.imported} tickets`);
+        if (data.skipped > 0) {
+          toast.info(`${data.skipped} already existed and were skipped`);
+        }
+      },
+    })
+  );
+}
+
 export function useTicketStats(month?: string) {
   return useQuery(
     orpc.evaluation.ticket.stats.queryOptions({

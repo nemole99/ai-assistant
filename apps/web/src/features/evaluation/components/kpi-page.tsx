@@ -202,7 +202,7 @@ export function EvaluationKpi() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-                  Tổng Ticket
+                  Total Tickets
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -210,14 +210,14 @@ export function EvaluationKpi() {
                   {stats.totalTickets}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Tháng {month.split("-")[1]}/{month.split("-")[0]}
+                  Month {month.split("-")[1]}/{month.split("-")[0]}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-                  Số Developer
+                  Developers
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -225,14 +225,14 @@ export function EvaluationKpi() {
                   {stats.devCount}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  tham gia trong tháng
+                  active this month
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-                  Nhiều nhất
+                  Top
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -245,7 +245,7 @@ export function EvaluationKpi() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs font-medium uppercase text-muted-foreground">
-                  TB Ticket / Người
+                  Avg Tickets / Dev
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -271,8 +271,8 @@ export function EvaluationKpi() {
             Productivity KPI — {(productivity ?? []).length} developers
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Target: ticket/ngày · Màu: ≥100% xanh lá, ≥80% xanh dương, ≥60%
-            vàng, &lt;60% đỏ
+            Target: ticket/day · Color: ≥100% green, ≥80% blue, ≥60% yellow,
+            &lt;60% red
           </p>
           <Table className="mt-8">
             <TableHeader>
@@ -429,7 +429,7 @@ function SummaryKpiTable({
     <>
       <CardTitle>Summary KPI — {rows.length} developers</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Tổng hợp Productivity · Quality · Sharing KPI
+        Aggregated Productivity · Quality · Sharing KPI
       </p>
       <table className="mt-8 w-full border-collapse text-sm">
         <thead>
@@ -603,13 +603,14 @@ function SharingKpiTable({
   const editableMonth = currentYearMonth();
   return (
     <>
-      <CardTitle>Sharing KPI</CardTitle>
+      <CardTitle>Sharing KPI — {rows.length} developers</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Editable: {shortMonthLabel(editableMonth)}
+        Sharing hours per developer
       </p>
       <Table className="mt-8" data-tour="kpi-sharing-cells">
         <TableHeader>
           <TableRow>
+            <TableHead className="w-10 text-center">#</TableHead>
             <TableHead>Developer</TableHead>
             <TableHead>Project</TableHead>
             <TableHead>Target (h/yr)</TableHead>
@@ -629,11 +630,14 @@ function SharingKpiTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => {
+          {rows.map((row, idx) => {
             const mv = (row.monthlyValues as Record<string, number>) ?? {};
             const isOtherRow = isEmployee && selfEmployeeId !== row.employeeId;
             return (
               <TableRow key={row.id}>
+                <TableCell className="text-center text-muted-foreground">
+                  {idx + 1}
+                </TableCell>
                 <TableCell className="font-medium">
                   {row.fullName ?? row.employeeId}
                 </TableCell>
@@ -665,7 +669,7 @@ function SharingKpiTable({
           {rows.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={4 + monthKeys.length}
+                colSpan={5 + monthKeys.length}
                 className="text-center text-muted-foreground py-8"
               >
                 No sharing KPI data
@@ -713,8 +717,8 @@ function QualityKpiTable({
     <>
       <CardTitle>Quality KPI — {rows.length} developers</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Re-open bug counts · Editable: {shortMonthLabel(editableMonth)} · Màu
-        (Re-open number): xanh lá = trong ngân sách, đỏ = vượt quá
+        Re-open bug counts · Editable: {shortMonthLabel(editableMonth)} · Color
+        (Re-open number): green = within budget, red = exceeded
       </p>
       <Table className="mt-8" data-tour="kpi-quality-cells">
         <TableHeader>

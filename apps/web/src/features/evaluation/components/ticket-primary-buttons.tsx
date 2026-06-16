@@ -1,27 +1,10 @@
 import { Button } from "@workspace/ui/components/button";
-import { Download, Plus, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { Plus, RefreshCw, Upload } from "lucide-react";
 
-import { useExportTickets } from "../hooks/use-tickets";
-import { exportTicketsToExcel } from "../lib/ticket-excel";
 import { useTicketsContext } from "./ticket-context";
 
-interface TicketPrimaryButtonsProps {
-  month: string;
-}
-
-export function TicketPrimaryButtons({ month }: TicketPrimaryButtonsProps) {
+export function TicketPrimaryButtons() {
   const { setOpen } = useTicketsContext();
-  const exportTickets = useExportTickets();
-
-  const handleExport = async () => {
-    const data = await exportTickets.mutateAsync({ month });
-    if (data.length === 0) {
-      toast.info("No tickets to export for this month.");
-      return;
-    }
-    exportTicketsToExcel(data, month);
-  };
 
   return (
     <div className="flex gap-2">
@@ -35,13 +18,13 @@ export function TicketPrimaryButtons({ month }: TicketPrimaryButtonsProps) {
         <span>Import</span>
       </Button>
       <Button
+        data-tour="sync-jira-btn"
         variant="outline"
         className="space-x-1"
-        disabled={exportTickets.isPending}
-        onClick={handleExport}
+        onClick={() => setOpen("sync")}
       >
-        <Download size={18} />
-        <span>Export</span>
+        <RefreshCw size={18} />
+        <span>Sync Jira</span>
       </Button>
       <Button
         data-tour="add-ticket-btn"

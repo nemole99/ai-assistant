@@ -31,6 +31,7 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAskAiIndexRouteImport } from './routes/_authenticated/ask-ai/index'
 import { Route as AuthenticatedSettingsSystemAiRouteImport } from './routes/_authenticated/settings/system-ai'
 import { Route as AuthenticatedSettingsPasswordRouteImport } from './routes/_authenticated/settings/password'
+import { Route as AuthenticatedSettingsJiraRouteImport } from './routes/_authenticated/settings/jira'
 import { Route as AuthenticatedSettingsAiProvidersRouteImport } from './routes/_authenticated/settings/ai-providers'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects/$projectId'
 import { Route as AuthenticatedEvaluationTimesheetRouteImport } from './routes/_authenticated/evaluation/timesheet'
@@ -160,6 +161,12 @@ const AuthenticatedSettingsPasswordRoute =
     path: '/password',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedSettingsJiraRoute =
+  AuthenticatedSettingsJiraRouteImport.update({
+    id: '/jira',
+    path: '/jira',
+    getParentRoute: () => AuthenticatedSettingsRouteRoute,
+  } as any)
 const AuthenticatedSettingsAiProvidersRoute =
   AuthenticatedSettingsAiProvidersRouteImport.update({
     id: '/ai-providers',
@@ -227,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/settings/jira': typeof AuthenticatedSettingsJiraRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/ask-ai/': typeof AuthenticatedAskAiIndexRoute
@@ -256,6 +264,7 @@ export interface FileRoutesByTo {
   '/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/settings/jira': typeof AuthenticatedSettingsJiraRoute
   '/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/ask-ai': typeof AuthenticatedAskAiIndexRoute
@@ -289,6 +298,7 @@ export interface FileRoutesById {
   '/_authenticated/evaluation/timesheet': typeof AuthenticatedEvaluationTimesheetRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/settings/ai-providers': typeof AuthenticatedSettingsAiProvidersRoute
+  '/_authenticated/settings/jira': typeof AuthenticatedSettingsJiraRoute
   '/_authenticated/settings/password': typeof AuthenticatedSettingsPasswordRoute
   '/_authenticated/settings/system-ai': typeof AuthenticatedSettingsSystemAiRoute
   '/_authenticated/ask-ai/': typeof AuthenticatedAskAiIndexRoute
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/evaluation/timesheet'
     | '/projects/$projectId'
     | '/settings/ai-providers'
+    | '/settings/jira'
     | '/settings/password'
     | '/settings/system-ai'
     | '/ask-ai/'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/evaluation/timesheet'
     | '/projects/$projectId'
     | '/settings/ai-providers'
+    | '/settings/jira'
     | '/settings/password'
     | '/settings/system-ai'
     | '/ask-ai'
@@ -383,6 +395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/evaluation/timesheet'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/settings/ai-providers'
+    | '/_authenticated/settings/jira'
     | '/_authenticated/settings/password'
     | '/_authenticated/settings/system-ai'
     | '/_authenticated/ask-ai/'
@@ -563,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsPasswordRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/settings/jira': {
+      id: '/_authenticated/settings/jira'
+      path: '/jira'
+      fullPath: '/settings/jira'
+      preLoaderRoute: typeof AuthenticatedSettingsJiraRouteImport
+      parentRoute: typeof AuthenticatedSettingsRouteRoute
+    }
     '/_authenticated/settings/ai-providers': {
       id: '/_authenticated/settings/ai-providers'
       path: '/ai-providers'
@@ -624,6 +644,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedSettingsRouteRouteChildren {
   AuthenticatedSettingsAiProvidersRoute: typeof AuthenticatedSettingsAiProvidersRoute
+  AuthenticatedSettingsJiraRoute: typeof AuthenticatedSettingsJiraRoute
   AuthenticatedSettingsPasswordRoute: typeof AuthenticatedSettingsPasswordRoute
   AuthenticatedSettingsSystemAiRoute: typeof AuthenticatedSettingsSystemAiRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
@@ -633,6 +654,7 @@ const AuthenticatedSettingsRouteRouteChildren: AuthenticatedSettingsRouteRouteCh
   {
     AuthenticatedSettingsAiProvidersRoute:
       AuthenticatedSettingsAiProvidersRoute,
+    AuthenticatedSettingsJiraRoute: AuthenticatedSettingsJiraRoute,
     AuthenticatedSettingsPasswordRoute: AuthenticatedSettingsPasswordRoute,
     AuthenticatedSettingsSystemAiRoute: AuthenticatedSettingsSystemAiRoute,
     AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,

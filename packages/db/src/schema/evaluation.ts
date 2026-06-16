@@ -12,7 +12,7 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-import { employee, project } from "./auth";
+import { employee, project, user } from "./auth";
 
 // --- Enums ---
 
@@ -31,6 +31,32 @@ export const evaluationAuditActionEnum = pgEnum("evaluation_audit_action", [
   "CREATE_KPI",
   "UPDATE_KPI",
 ]);
+
+// --- Jira Sync Config ---
+
+export const evaluationJiraConfig = pgTable("evaluation_jira_config", {
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  encryptedPat: text("encrypted_pat").notNull(),
+  id: text("id").primaryKey(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const evaluationJiraConfigRelations = relations(
+  evaluationJiraConfig,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [evaluationJiraConfig.userId],
+      references: [user.id],
+    }),
+  })
+);
 
 // --- Effort Ticket ---
 

@@ -1,18 +1,23 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
-export type TourPage = "tickets" | "kpi" | "timesheet";
+export type TourPage = "tickets" | "kpi";
 
 const TOUR_KEY = "evn-tour-seen";
+
+const DEFAULT_SEEN: Record<TourPage, boolean> = {
+  kpi: false,
+  tickets: false,
+};
 
 function getSeenMap(): Record<TourPage, boolean> {
   try {
     const raw = localStorage.getItem(TOUR_KEY);
     if (!raw) {
-      return { kpi: false, tickets: false, timesheet: false };
+      return { ...DEFAULT_SEEN };
     }
-    return { kpi: false, tickets: false, timesheet: false, ...JSON.parse(raw) };
+    return { ...DEFAULT_SEEN, ...JSON.parse(raw) };
   } catch {
-    return { kpi: false, tickets: false, timesheet: false };
+    return { ...DEFAULT_SEEN };
   }
 }
 

@@ -26,19 +26,26 @@ interface TourProps {
 
 const TICKET_STEPS = [
   {
-    description: "Import ticket hàng loạt từ file Excel.",
+    description: "Bulk import tickets from an Excel file.",
     side: "bottom" as const,
     target: "[data-tour='import-btn']",
-    title: "Import ticket",
+    title: "Import tickets",
   },
   {
-    description: "Lọc ticket theo developer, project hoặc category.",
+    description:
+      "Fetch resolved Jira tickets and import them as effort tickets.\nRequires a PAT token — set it up in Settings → Jira first.",
+    side: "bottom" as const,
+    target: "[data-tour='sync-jira-btn']",
+    title: "Sync from Jira",
+  },
+  {
+    description: "Filter tickets by developer, project, or category.",
     side: "bottom" as const,
     target: "[data-tour='ticket-filters']",
-    title: "Bộ lọc",
+    title: "Filters",
   },
   {
-    description: "Tuỳ chỉnh các cột hiển thị trong bảng ticket.",
+    description: "Customize which columns are shown in the ticket table.",
     side: "bottom" as const,
     target: "[data-tour='ticket-view']",
     title: "View",
@@ -58,14 +65,16 @@ export function TicketsTour({ open, onOpenChange }: TourProps) {
               <TourTitle>{s.title}</TourTitle>
               <TourClose />
             </TourHeader>
-            <TourDescription>{s.description}</TourDescription>
+            <TourDescription className="max-w-72">
+              {s.description}
+            </TourDescription>
             <TourFooter>
               <TourStepCounter />
               <div className="flex gap-2">
-                <TourSkip>Bỏ qua</TourSkip>
-                <TourPrev>Trước</TourPrev>
+                <TourSkip>Skip</TourSkip>
+                <TourPrev>Back</TourPrev>
                 <TourNext>
-                  {i === TICKET_STEPS.length - 1 ? "Hoàn thành" : "Tiếp"}
+                  {i === TICKET_STEPS.length - 1 ? "Done" : "Next"}
                 </TourNext>
               </div>
             </TourFooter>
@@ -80,27 +89,28 @@ export function TicketsTour({ open, onOpenChange }: TourProps) {
 
 const KPI_STEPS = [
   {
-    description: "Có 4 view: Summary, Productivity, Sharing và Quality.",
+    description:
+      "There are 4 views: Summary, Productivity, Sharing, and Quality.",
     side: "bottom" as const,
     tab: null,
     target: "[data-tour='kpi-tabs']",
-    title: "Các view KPI",
+    title: "KPI views",
   },
   {
     description:
-      "Click vào tab Sharing để nhập số giờ knowledge sharing của bạn theo từng tháng.",
+      "Click the Sharing tab to enter your knowledge sharing hours for each month.",
     side: "bottom" as const,
     tab: "sharing",
     target: "[data-tour='kpi-sharing-tab']",
-    title: "Nhập giờ Sharing",
+    title: "Enter Sharing hours",
   },
   {
     description:
-      "Click vào tab Quality để nhập số bug re-open của tháng hiện tại.",
+      "Click the Quality tab to enter the number of re-opened bugs for the current month.",
     side: "bottom" as const,
     tab: "quality",
     target: "[data-tour='kpi-quality-tab']",
-    title: "Nhập bug Re-open",
+    title: "Enter Re-open bugs",
   },
 ];
 
@@ -146,53 +156,10 @@ export function KpiTour({ open, onOpenChange, onSwitchTab }: KpiTourProps) {
             <TourFooter>
               <TourStepCounter />
               <div className="flex gap-2">
-                <TourSkip>Bỏ qua</TourSkip>
-                <TourPrev>Trước</TourPrev>
+                <TourSkip>Skip</TourSkip>
+                <TourPrev>Back</TourPrev>
                 <TourNext>
-                  {i === KPI_STEPS.length - 1 ? "Hoàn thành" : "Tiếp"}
-                </TourNext>
-              </div>
-            </TourFooter>
-          </TourStep>
-        ))}
-      </TourPortal>
-    </Tour>
-  );
-}
-
-// --- Timesheet Tour ---
-
-const TIMESHEET_STEPS = [
-  {
-    description:
-      "Click vào ô ngày của bạn để chuyển trạng thái: ✓ đi làm · ½ nửa ngày · P nghỉ phép.",
-    side: "top" as const,
-    target: "[data-tour='timesheet-grid']",
-    title: "Bảng chấm công",
-  },
-];
-
-export function TimesheetTour({ open, onOpenChange }: TourProps) {
-  return (
-    <Tour open={open} onOpenChange={onOpenChange} modal={false}>
-      <TourPortal>
-        <TourSpotlight />
-        <TourSpotlightRing />
-        {TIMESHEET_STEPS.map((s, i) => (
-          <TourStep key={i} target={s.target} side={s.side}>
-            <TourArrow />
-            <TourHeader>
-              <TourTitle>{s.title}</TourTitle>
-              <TourClose />
-            </TourHeader>
-            <TourDescription>{s.description}</TourDescription>
-            <TourFooter>
-              <TourStepCounter />
-              <div className="flex gap-2">
-                <TourSkip>Bỏ qua</TourSkip>
-                <TourPrev>Trước</TourPrev>
-                <TourNext>
-                  {i === TIMESHEET_STEPS.length - 1 ? "Hoàn thành" : "Tiếp"}
+                  {i === KPI_STEPS.length - 1 ? "Done" : "Next"}
                 </TourNext>
               </div>
             </TourFooter>
